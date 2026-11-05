@@ -2,449 +2,305 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>VS Code Gradient 4-Color Gradient VS Code Theme Showcase</title>
+<title>VS Code Gradient Themes — 12 Glacial &amp; Rainbow Themes</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: radial-gradient(circle at 50% 0%, rgba(234,67,53,0.18), transparent 45%),
-                radial-gradient(circle at 0% 50%, rgba(251,188,4,0.15), transparent 45%),
-                radial-gradient(circle at 50% 100%, rgba(52,168,83,0.16), transparent 45%),
-                radial-gradient(circle at 85% 50%, rgba(66,133,244,0.22), transparent 55%),
-                #0B101E;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
-    padding: 24px 28px;
+    width: 1440px; height: 860px;
+    background: radial-gradient(circle at 50% 0%, rgba(234,67,53,0.14), transparent 48%),
+                radial-gradient(circle at 0% 50%, rgba(251,188,4,0.12), transparent 48%),
+                radial-gradient(circle at 50% 100%, rgba(52,168,83,0.14), transparent 48%),
+                radial-gradient(circle at 85% 50%, rgba(66,133,244,0.18), transparent 55%),
+                #0D131F;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    padding: 26px 32px;
     color: #EDF2FA;
-    min-height: 100vh;
+    overflow: hidden;
   }
   .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
   }
   .title-block h1 {
-    font-size: 22px;
-    font-weight: 800;
+    font-size: 22px; font-weight: 800;
     background: linear-gradient(90deg, #FF6B63 0%, #FFD15C 33%, #4BE084 66%, #6BA5FF 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.02em;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
-  .title-block p {
-    font-size: 12.5px;
-    color: #9EB0CC;
-    margin-top: 4px;
-  }
-  .swatches {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .swatch {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    background: rgba(22, 32, 51, 0.85);
-    border: 1px solid rgba(107, 165, 255, 0.3);
-    padding: 5px 11px;
-    border-radius: 999px;
-    font-size: 11px;
+  .title-block p { font-size: 12.5px; color: #9EB0CC; margin-top: 4px; }
+  .pills { display: flex; gap: 8px; }
+  .pill {
+    padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 600;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
     font-family: "SF Mono", Menlo, monospace;
-    color: #EDF2FA;
-    font-weight: 600;
-  }
-  .dot {
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-  }
-  .toggle-btn {
-    cursor: pointer;
-    background: linear-gradient(90deg, #EA4335, #FBBC04, #34A853, #4285F4);
-    border: none;
-    color: #fff;
-    font-weight: 700;
-    font-size: 11.5px;
-    padding: 7px 14px;
-    border-radius: 999px;
-    box-shadow: 0 4px 14px rgba(66, 133, 244, 0.4);
   }
   .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
   }
-  .window {
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.38);
-    border: 1px solid var(--border);
-    background: var(--bg-editor);
-    display: flex;
-    flex-direction: column;
-    position: relative;
+  .win {
+    border-radius: 11px; overflow: hidden;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.35);
+    display: flex; flex-direction: column;
+    height: 365px;
   }
-  body.css-mesh-active .window.dark-win {
-    background-image:
-      radial-gradient(ellipse 65% 42% at 50% 0%, rgba(234, 67, 53, 0.25) 0%, transparent 70%),
-      radial-gradient(ellipse 45% 65% at 0% 50%, rgba(251, 188, 4, 0.20) 0%, transparent 70%),
-      radial-gradient(ellipse 65% 45% at 50% 100%, rgba(52, 168, 83, 0.22) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 65% at 82% 50%, rgba(66, 133, 244, 0.28) 0%, transparent 75%);
+  .w-title {
+    height: 32px; padding: 0 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11.5px; font-weight: 700;
   }
-  body.css-mesh-active .window.light-win {
-    background-image:
-      radial-gradient(ellipse 65% 42% at 50% 0%, rgba(234, 67, 53, 0.16) 0%, transparent 70%),
-      radial-gradient(ellipse 45% 65% at 0% 50%, rgba(251, 188, 4, 0.20) 0%, transparent 70%),
-      radial-gradient(ellipse 65% 45% at 50% 100%, rgba(52, 168, 83, 0.16) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 65% at 82% 50%, rgba(66, 133, 244, 0.20) 0%, transparent 75%);
+  .dots { display: flex; gap: 6px; }
+  .d { width: 10px; height: 10px; border-radius: 50%; }
+  .d.r { background: #FF5F56; } .d.y { background: #FFBD2E; } .d.g { background: #27C93F; }
+  .w-badge { font-size: 9.5px; padding: 2px 7px; border-radius: 99px; font-weight: 700; }
+  .w-body { flex: 1; display: flex; overflow: hidden; }
+  .w-side { width: 128px; padding: 10px 8px; font-size: 11px; display: flex; flex-direction: column; gap: 4px; }
+  .s-hdr { font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .s-item { padding: 4px 6px; border-radius: 4px; font-family: "SF Mono", Menlo, monospace; font-size: 10.5px; }
+  .w-ed { flex: 1; display: flex; flex-direction: column; }
+  .w-tabs { height: 28px; display: flex; font-size: 11px; }
+  .w-tab { padding: 0 12px; display: flex; align-items: center; font-weight: 600; }
+  .w-code {
+    flex: 1; padding: 14px;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 11.8px; line-height: 1.68;
   }
-  .titlebar {
-    background: var(--bg-top);
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border-top);
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--fg);
+  .w-term {
+    height: 36px; padding: 0 14px;
+    display: flex; align-items: center; gap: 8px;
+    font-family: "SF Mono", Menlo, monospace; font-size: 11px;
   }
-  .dots { display: flex; gap: 5px; }
-  .dots span { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-  .d-r { background: #EA4335; }
-  .d-y { background: #FBBC04; }
-  .d-g { background: #34A853; }
-  .badge {
-    font-size: 9px;
-    padding: 2px 8px;
-    border-radius: 99px;
-    background: linear-gradient(90deg, #EA4335, #FBBC04, #34A853, #4285F4);
-    color: #FFFFFF;
-    font-weight: 700;
+  .w-status {
+    height: 24px; padding: 0 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 10.5px; font-family: "SF Mono", Menlo, monospace; font-weight: 600;
   }
-  .workspace {
-    display: grid;
-    grid-template-columns: 30px 118px 1fr;
-    min-height: 215px;
-  }
-  .actbar {
-    background: var(--bg-act);
-    border-right: 1px solid var(--border-left);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 10px;
-    gap: 12px;
-    color: var(--yellow);
-    font-size: 12px;
-  }
-  .sidebar {
-    background: var(--bg-side);
-    border-right: 1px solid var(--border-left);
-    padding: 8px;
-    font-size: 10.5px;
-    color: var(--fg);
-  }
-  .side-hdr {
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    color: var(--yellow);
-    margin-bottom: 6px;
-  }
-  .file {
-    padding: 3px 6px;
-    border-radius: 4px;
-    margin-bottom: 2px;
-    font-family: "SF Mono", Menlo, monospace;
-    font-size: 9.5px;
-  }
-  .file.active {
-    background: var(--list-active);
-    border-left: 2px solid var(--blue);
-    font-weight: 600;
-  }
-  .editor-col {
-    display: flex;
-    flex-direction: column;
-  }
-  .tabs {
-    background: var(--bg-tabs);
-    display: flex;
-    border-bottom: 1px solid var(--border-top);
-    font-size: 10px;
-  }
-  .tab {
-    padding: 5px 10px;
-    color: var(--fg-muted);
-  }
-  .tab.active {
-    background: var(--bg-editor);
-    color: var(--fg);
-    font-weight: 600;
-    border-top: 2px solid var(--red);
-  }
-  body.css-mesh-active .tab.active {
-    border-image: linear-gradient(90deg, #EA4335, #FBBC04, #34A853, #4285F4) 1;
-  }
-  .code {
-    padding: 10px 12px;
-    font-family: "SF Mono", Menlo, monospace;
-    font-size: 10.5px;
-    line-height: 1.55;
-    color: var(--fg);
-    flex: 1;
-  }
-  .terminal {
-    background: var(--bg-bottom);
-    border-top: 1px solid var(--border-bottom);
-    padding: 7px 10px;
-    font-family: "SF Mono", Menlo, monospace;
-    font-size: 9.5px;
-    color: var(--fg);
-  }
-  .statusbar {
-    background: linear-gradient(90deg, var(--red), var(--yellow), var(--green), var(--blue));
-    color: #fff;
-    font-size: 9.5px;
-    font-weight: 700;
-    padding: 3px 10px;
-    display: flex;
-    justify-content: space-between;
-  }
-  .kw { color: var(--red); font-weight: 600; }
-  .cls { color: var(--yellow); }
-  .fn { color: var(--blue); }
-  .str { color: var(--green); }
-  .prm { color: var(--orange); font-style: italic; }
-  .num { color: var(--purple); }
-  .cmt { color: var(--cmt); font-style: italic; }
 </style>
 </head>
-<body class="css-mesh-active">
+<body>
   <div class="header">
     <div class="title-block">
-      <h1>✨ VS Code Gradient 4-Color Star Gradient Theme Suite</h1>
-      <p>Top: Red (#EA4335) · Left: Yellow (#FBBC04) · Bottom: Green (#34A853) · Center/Right: Blue (#4285F4)</p>
+      <h1>VS Code Gradient Themes — Single-Color Glacial Palette Suite</h1>
+      <p>7%–22% Perimeter-to-Canvas Gradients • Monochromatic Syntax Tokens • 13:1–17:1 WCAG AAA Contrast</p>
     </div>
-    <div class="swatches">
-      <div class="swatch"><span class="dot" style="background:#EA4335"></span>#EA4335 Red</div>
-      <div class="swatch"><span class="dot" style="background:#FBBC04"></span>#FBBC04 Yellow</div>
-      <div class="swatch"><span class="dot" style="background:#34A853"></span>#34A853 Green</div>
-      <div class="swatch"><span class="dot" style="background:#4285F4"></span>#4285F4 Blue</div>
-      <button class="toggle-btn" onclick="document.body.classList.toggle('css-mesh-active')">
-        Toggle True CSS Mesh Overlay
-      </button>
+    <div class="pills">
+      <span class="pill">💙 Pure Blue</span>
+      <span class="pill">💚 Pure Green</span>
+      <span class="pill">🩷 Pure Pink</span>
+      <span class="pill">💛 Pure Yellow</span>
+      <span class="pill">💜 Pure Purple</span>
     </div>
   </div>
-
   <div class="grid">
-    <!-- 1. VS Code Gradient Dark -->
-    <div class="window dark-win" style="
-      --bg-editor:#0F172A; --bg-top:#23131B; --bg-tabs:#1D131D; --bg-act:#211A11;
-      --bg-side:#1A1712; --bg-bottom:#0E1E18; --list-active:#212B3E;
-      --border:#22304A; --border-top:#3B202C; --border-left:#332B1A; --border-bottom:#19382B;
-      --fg:#EDF2FA; --fg-muted:#9EB0CC; --cmt:#6D82A3;
-      --red:#FF6B63; --yellow:#FFD15C; --green:#4BE084; --blue:#6BA5FF; --orange:#FFA352; --purple:#C48AFF;">
-      <div class="titlebar">
-        <div class="dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
-        <span>1. VS Code Gradient Dark (4-Color Star)</span>
-        <span class="badge">DEFAULT DARK</span>
+    
+    <div class="win" style="background:#F6FBFF;color:#122238;border:1px solid rgba(15,23,42,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#D8ECFD,#E1F1FE);border-bottom:1px solid rgba(15,23,42,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">1. Pure Blue Glacial (Light)</div>
+        <div class="w-badge" style="background:#2563EB;color:#fff">22% → 7% FROST</div>
       </div>
-      <div class="workspace">
-        <div class="actbar"><span>✦</span><span>⌕</span><span>⎇</span></div>
-        <div class="sidebar">
-          <div class="side-hdr">EXPLORER (GOLD)</div>
-          <div class="file active">✦ gemini_star.py</div>
-          <div class="file">  spectrum.ts</div>
-          <div class="file">  aurora.css</div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#D8ECFD,#E1F1FE,#F6FBFF);border-right:1px solid rgba(15,23,42,0.10)">
+          <div class="s-hdr" style="color:#3B5575">EXPLORER</div>
+          <div class="s-item active" style="color:#122238;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#3B5575">color_harmony.ts</div>
+          <div class="s-item" style="color:#3B5575">renderer.rs</div>
         </div>
-        <div class="editor-col">
-          <div class="tabs"><div class="tab active">gemini_star.py</div><div class="tab">aurora.css</div></div>
-          <div class="code">
-            <div><span class="cmt"># 4-Color Prism Star Spectrum</span></div>
-            <div><span class="kw">class</span> <span class="cls">PrismStar</span>:</div>
-            <div>&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">ignite</span>(<span class="prm">self</span>, <span class="prm">rays</span>=<span class="num">4</span>):</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">"Red · Yellow · Green · Blue"</span></div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#E1F1FE 0%,#F6FBFF 65%)">
+          <div class="w-tabs" style="background:#E1F1FE;border-bottom:1px solid rgba(15,23,42,0.10)">
+            <div class="w-tab active" style="background:#F6FBFF;color:#122238;border-top:2px solid #2563EB">glacial_shader.py</div>
+            <div class="w-tab" style="color:#3B5575">renderer.rs</div>
           </div>
-          <div class="terminal"><span class="str">➜</span> <span class="fn">gemini-prism</span> git:(<span class="kw">main</span>) <span class="cls">✦ Ready</span></div>
-        </div>
-      </div>
-      <div class="statusbar"><span>✦ GEMINI PRISM DARK</span><span>UTF-8 · Python 3.12</span></div>
-    </div>
-
-    <!-- 2. Prism Star Spectrum (Vibrant Dark) -->
-    <div class="window dark-win" style="
-      --bg-editor:#101E38; --bg-top:#331520; --bg-tabs:#291422; --bg-act:#2E230F;
-      --bg-side:#241C10; --bg-bottom:#0F291E; --list-active:#1E335C;
-      --border:#29416B; --border-top:#542333; --border-left:#4A3A19; --border-bottom:#1C4D37;
-      --fg:#EDF2FA; --fg-muted:#9EB0CC; --cmt:#6D82A3;
-      --red:#FF5E57; --yellow:#FFCC33; --green:#3AE87C; --blue:#5CA0FF; --orange:#FFA352; --purple:#C48AFF;">
-      <div class="titlebar">
-        <div class="dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
-        <span>2. Prism Star Spectrum (Vibrant)</span>
-        <span class="badge">VIBRANT 4-COLOR</span>
-      </div>
-      <div class="workspace">
-        <div class="actbar"><span>✦</span><span>⌕</span><span>⎇</span></div>
-        <div class="sidebar">
-          <div class="side-hdr">EXPLORER (AMBER)</div>
-          <div class="file active">✦ gemini_star.py</div>
-          <div class="file">  spectrum.ts</div>
-          <div class="file">  aurora.css</div>
-        </div>
-        <div class="editor-col">
-          <div class="tabs"><div class="tab active">gemini_star.py</div><div class="tab">spectrum.ts</div></div>
-          <div class="code">
-            <div><span class="cmt"># High-Saturation 4-Zone Workbench</span></div>
-            <div><span class="kw">class</span> <span class="cls">StarSpectrum</span>:</div>
-            <div>&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">render_mesh</span>(<span class="prm">self</span>, <span class="prm">alpha</span>=<span class="num">0.95</span>):</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">"Vibrant 4-Point Star"</span></div>
+          <div class="w-code">
+            <div style="color:#7A99B8;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#1D4E8F;font-weight:600">class</span> <span style="color:#265278">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#1D4E8F;font-weight:600">def</span> <span style="color:#185A9E">sample</span>(<span style="color:#3A5E85">self</span>, <span style="color:#3A5E85">stop</span>=<span style="color:#2C5080">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1D4E8F;font-weight:600">return</span> <span style="color:#206678">"#D8ECFD → #F6FBFF"</span></div>
           </div>
-          <div class="terminal"><span class="str">➜</span> <span class="fn">star-spectrum</span> git:(<span class="kw">main</span>) <span class="cls">✦ Vibrant</span></div>
-        </div>
-      </div>
-      <div class="statusbar"><span>🌈 STAR SPECTRUM</span><span>UTF-8 · Python 3.12</span></div>
-    </div>
-
-    <!-- 3. Prism Cosmic OLED -->
-    <div class="window dark-win" style="
-      --bg-editor:#05070C; --bg-top:#13090D; --bg-tabs:#0E080E; --bg-act:#120E07;
-      --bg-side:#0C0A07; --bg-bottom:#060F0B; --list-active:#131F36;
-      --border:#182338; --border-top:#2E151E; --border-left:#292110; --border-bottom:#122B20;
-      --fg:#EDF2FA; --fg-muted:#9EB0CC; --cmt:#6D82A3;
-      --red:#FF5252; --yellow:#FFD740; --green:#40E878; --blue:#549BFF; --orange:#FF9E40; --purple:#C882FF;">
-      <div class="titlebar">
-        <div class="dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
-        <span>3. Prism Cosmic OLED (True Black)</span>
-        <span class="badge">OLED NEON</span>
-      </div>
-      <div class="workspace">
-        <div class="actbar"><span>✦</span><span>⌕</span><span>⎇</span></div>
-        <div class="sidebar">
-          <div class="side-hdr">EXPLORER (OLED)</div>
-          <div class="file active">✦ gemini_star.py</div>
-          <div class="file">  spectrum.ts</div>
-          <div class="file">  aurora.css</div>
-        </div>
-        <div class="editor-col">
-          <div class="tabs"><div class="tab active">gemini_star.py</div><div class="tab">oled.json</div></div>
-          <div class="code">
-            <div><span class="cmt"># Pitch-Black OLED + Neon Star</span></div>
-            <div><span class="kw">class</span> <span class="cls">CosmicOLED</span>:</div>
-            <div>&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">deep_space</span>(<span class="prm">self</span>, <span class="prm">contrast</span>=<span class="num">100</span>):</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">"#05070C True Black"</span></div>
+          <div class="w-term" style="border-top:1px solid rgba(15,23,42,0.10);color:#3B5575">
+            <span style="color:#185A9E;font-weight:600">➜ aurora</span> <span style="color:#206678">✓ WCAG AAA Verified</span>
           </div>
-          <div class="terminal"><span class="str">➜</span> <span class="fn">cosmic-oled</span> git:(<span class="kw">main</span>) <span class="cls">✦ Zero Glare</span></div>
         </div>
       </div>
-      <div class="statusbar"><span>🌌 COSMIC OLED</span><span>UTF-8 · Python 3.12</span></div>
+      <div class="w-status" style="background:linear-gradient(90deg,#D8ECFD,#E1F1FE);border-top:1px solid rgba(15,23,42,0.10);color:#122238">
+        <span>🌿 main*</span>
+        <span>🎲 #D8ECFD → #F6FBFF</span>
+      </div>
     </div>
-
-    <!-- 4. Prism Aurora Flow -->
-    <div class="window dark-win" style="
-      --bg-editor:#11182B; --bg-top:#241421; --bg-tabs:#1C1526; --bg-act:#261822;
-      --bg-side:#1B1524; --bg-bottom:#0E2024; --list-active:#281F38;
-      --border:#22304A; --border-top:#422138; --border-left:#332442; --border-bottom:#173B40;
-      --fg:#EDF2FA; --fg-muted:#9EB0CC; --cmt:#6D82A3;
-      --red:#FF6B63; --yellow:#FFD15C; --green:#4BE084; --blue:#6BA5FF; --orange:#FFA352; --purple:#C48AFF;">
-      <div class="titlebar">
-        <div class="dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
-        <span>4. Prism Aurora Flow (Dusk)</span>
-        <span class="badge">AURORA DUSK</span>
+    
+    <div class="win" style="background:#F6FDF9;color:#102419;border:1px solid rgba(15,23,42,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#D6F3E0,#E0F6E8);border-bottom:1px solid rgba(15,23,42,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">2. Pure Green Matcha (Light)</div>
+        <div class="w-badge" style="background:#16A34A;color:#fff">22% → 7% FROST</div>
       </div>
-      <div class="workspace">
-        <div class="actbar"><span>✦</span><span>⌕</span><span>⎇</span></div>
-        <div class="sidebar">
-          <div class="side-hdr">EXPLORER (DUSK)</div>
-          <div class="file active">✦ gemini_star.py</div>
-          <div class="file">  spectrum.ts</div>
-          <div class="file">  aurora.css</div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#D6F3E0,#E0F6E8,#F6FDF9);border-right:1px solid rgba(15,23,42,0.10)">
+          <div class="s-hdr" style="color:#355944">EXPLORER</div>
+          <div class="s-item active" style="color:#102419;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#355944">color_harmony.ts</div>
+          <div class="s-item" style="color:#355944">renderer.rs</div>
         </div>
-        <div class="editor-col">
-          <div class="tabs"><div class="tab active">gemini_star.py</div><div class="tab">aurora.css</div></div>
-          <div class="code">
-            <div><span class="cmt"># Diagonal Rose -> Violet -> Sapphire</span></div>
-            <div><span class="kw">class</span> <span class="cls">AuroraFlow</span>:</div>
-            <div>&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">stream</span>(<span class="prm">self</span>, <span class="prm">angle</span>=<span class="num">135</span>):</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">"Smooth Dusk Transition"</span></div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#E0F6E8 0%,#F6FDF9 65%)">
+          <div class="w-tabs" style="background:#E0F6E8;border-bottom:1px solid rgba(15,23,42,0.10)">
+            <div class="w-tab active" style="background:#F6FDF9;color:#102419;border-top:2px solid #16A34A">glacial_shader.py</div>
+            <div class="w-tab" style="color:#355944">renderer.rs</div>
           </div>
-          <div class="terminal"><span class="str">➜</span> <span class="fn">aurora-flow</span> git:(<span class="kw">main</span>) <span class="cls">✦ Flowing</span></div>
-        </div>
-      </div>
-      <div class="statusbar"><span>🔮 AURORA FLOW</span><span>UTF-8 · Python 3.12</span></div>
-    </div>
-
-    <!-- 5. VS Code Gradient Light (Pastel 4-Color Star) -->
-    <div class="window light-win" style="
-      --bg-editor:#EDF4FF; --bg-top:#FCE4E1; --bg-tabs:#FBEAE7; --bg-act:#FCEEBE;
-      --bg-side:#FDF5D8; --bg-bottom:#E3F6EB; --list-active:#EDF4FF;
-      --border:#C5D7F2; --border-top:#F2B8B3; --border-left:#E8D18E; --border-bottom:#A8DAB9;
-      --fg:#182233; --fg-muted:#485975; --cmt:#637694;
-      --red:#C92A22; --yellow:#9E6700; --green:#16793B; --blue:#1558D6; --orange:#B84D00; --purple:#7B2CBF;">
-      <div class="titlebar">
-        <div class="dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
-        <span>5. VS Code Gradient Light (Pastel Star)</span>
-        <span class="badge">PASTEL 4-COLOR</span>
-      </div>
-      <div class="workspace">
-        <div class="actbar"><span>✦</span><span>⌕</span><span>⎇</span></div>
-        <div class="sidebar">
-          <div class="side-hdr">EXPLORER (BUTTERCUP)</div>
-          <div class="file active">✦ gemini_star.py</div>
-          <div class="file">  spectrum.ts</div>
-          <div class="file">  aurora.css</div>
-        </div>
-        <div class="editor-col">
-          <div class="tabs"><div class="tab active">gemini_star.py</div><div class="tab">light.css</div></div>
-          <div class="code">
-            <div><span class="cmt"># Pastel Rose · Buttercup · Mint · Sky</span></div>
-            <div><span class="kw">class</span> <span class="cls">PrismLight</span>:</div>
-            <div>&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">daylight</span>(<span class="prm">self</span>, <span class="prm">glare</span>=<span class="num">0</span>):</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">"Crystal Sky Editor #EDF4FF"</span></div>
+          <div class="w-code">
+            <div style="color:#749C84;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#185936;font-weight:600">class</span> <span style="color:#23533D">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#185936;font-weight:600">def</span> <span style="color:#14634C">sample</span>(<span style="color:#38664A">self</span>, <span style="color:#38664A">stop</span>=<span style="color:#1F5C4B">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#185936;font-weight:600">return</span> <span style="color:#1F6642">"#D6F3E0 → #F6FDF9"</span></div>
           </div>
-          <div class="terminal"><span class="str">➜</span> <span class="fn">prism-light</span> git:(<span class="kw">main</span>) <span class="cls">✦ Pastel Star</span></div>
-        </div>
-      </div>
-      <div class="statusbar"><span>☀️ PRISM LIGHT</span><span>UTF-8 · Python 3.12</span></div>
-    </div>
-
-    <!-- 6. Prism Daylight Breeze (Warm Cream & Star) -->
-    <div class="window light-win" style="
-      --bg-editor:#FAF7EE; --bg-top:#FCE8E4; --bg-tabs:#FDF0E1; --bg-act:#D6E6FD;
-      --bg-side:#E4EFFD; --bg-bottom:#E2F5EA; --list-active:#FAF7EE;
-      --border:#C4D6EE; --border-top:#F0C2B8; --border-left:#B8D0F2; --border-bottom:#A6D9B8;
-      --fg:#182233; --fg-muted:#485975; --cmt:#637694;
-      --red:#C92A22; --yellow:#9E6700; --green:#16793B; --blue:#1558D6; --orange:#B84D00; --purple:#7B2CBF;">
-      <div class="titlebar">
-        <div class="dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
-        <span>6. Prism Daylight Breeze (Cream)</span>
-        <span class="badge">EYE-CARE CREAM</span>
-      </div>
-      <div class="workspace">
-        <div class="actbar"><span>✦</span><span>⌕</span><span>⎇</span></div>
-        <div class="sidebar">
-          <div class="side-hdr">EXPLORER (SKY)</div>
-          <div class="file active">✦ gemini_star.py</div>
-          <div class="file">  spectrum.ts</div>
-          <div class="file">  aurora.css</div>
-        </div>
-        <div class="editor-col">
-          <div class="tabs"><div class="tab active">gemini_star.py</div><div class="tab">breeze.py</div></div>
-          <div class="code">
-            <div><span class="cmt"># Warm Ivory Cream + 4-Color Frame</span></div>
-            <div><span class="kw">class</span> <span class="cls">DaylightBreeze</span>:</div>
-            <div>&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">soothe</span>(<span class="prm">self</span>, <span class="prm">hours</span>=<span class="num">12</span>):</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="str">"Warm Alabaster #FAF7EE"</span></div>
+          <div class="w-term" style="border-top:1px solid rgba(15,23,42,0.10);color:#355944">
+            <span style="color:#14634C;font-weight:600">➜ aurora</span> <span style="color:#1F6642">✓ WCAG AAA Verified</span>
           </div>
-          <div class="terminal"><span class="str">➜</span> <span class="fn">daylight-breeze</span> git:(<span class="kw">main</span>) <span class="cls">✦ Eye-Care</span></div>
         </div>
       </div>
-      <div class="statusbar"><span>🌤️ DAYLIGHT BREEZE</span><span>UTF-8 · Python 3.12</span></div>
+      <div class="w-status" style="background:linear-gradient(90deg,#D6F3E0,#E0F6E8);border-top:1px solid rgba(15,23,42,0.10);color:#102419">
+        <span>🌿 main*</span>
+        <span>🎲 #D6F3E0 → #F6FDF9</span>
+      </div>
     </div>
+    
+    <div class="win" style="background:#FFF7FB;color:#26111B;border:1px solid rgba(15,23,42,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#FADCEB,#FBE4F0);border-bottom:1px solid rgba(15,23,42,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">3. Pure Pink Sakura (Light)</div>
+        <div class="w-badge" style="background:#DB2777;color:#fff">22% → 7% FROST</div>
+      </div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#FADCEB,#FBE4F0,#FFF7FB);border-right:1px solid rgba(15,23,42,0.10)">
+          <div class="s-hdr" style="color:#5E384A">EXPLORER</div>
+          <div class="s-item active" style="color:#26111B;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#5E384A">color_harmony.ts</div>
+          <div class="s-item" style="color:#5E384A">renderer.rs</div>
+        </div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#FBE4F0 0%,#FFF7FB 65%)">
+          <div class="w-tabs" style="background:#FBE4F0;border-bottom:1px solid rgba(15,23,42,0.10)">
+            <div class="w-tab active" style="background:#FFF7FB;color:#26111B;border-top:2px solid #DB2777">glacial_shader.py</div>
+            <div class="w-tab" style="color:#5E384A">renderer.rs</div>
+          </div>
+          <div class="w-code">
+            <div style="color:#A37A8E;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#7A244B;font-weight:600">class</span> <span style="color:#752946">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#7A244B;font-weight:600">def</span> <span style="color:#8C2D56">sample</span>(<span style="color:#6B3B52">self</span>, <span style="color:#6B3B52">stop</span>=<span style="color:#823059">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7A244B;font-weight:600">return</span> <span style="color:#6E3550">"#FADCEB → #FFF7FB"</span></div>
+          </div>
+          <div class="w-term" style="border-top:1px solid rgba(15,23,42,0.10);color:#5E384A">
+            <span style="color:#8C2D56;font-weight:600">➜ aurora</span> <span style="color:#6E3550">✓ WCAG AAA Verified</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-status" style="background:linear-gradient(90deg,#FADCEB,#FBE4F0);border-top:1px solid rgba(15,23,42,0.10);color:#26111B">
+        <span>🌿 main*</span>
+        <span>🎲 #FADCEB → #FFF7FB</span>
+      </div>
+    </div>
+    
+    <div class="win" style="background:#FFFCF3;color:#241C0E;border:1px solid rgba(15,23,42,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#FBECC0,#FCF1CF);border-bottom:1px solid rgba(15,23,42,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">4. Pure Yellow Honey (Light)</div>
+        <div class="w-badge" style="background:#D97706;color:#fff">22% → 7% FROST</div>
+      </div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#FBECC0,#FCF1CF,#FFFCF3);border-right:1px solid rgba(15,23,42,0.10)">
+          <div class="s-hdr" style="color:#59482B">EXPLORER</div>
+          <div class="s-item active" style="color:#241C0E;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#59482B">color_harmony.ts</div>
+          <div class="s-item" style="color:#59482B">renderer.rs</div>
+        </div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#FCF1CF 0%,#FFFCF3 65%)">
+          <div class="w-tabs" style="background:#FCF1CF;border-bottom:1px solid rgba(15,23,42,0.10)">
+            <div class="w-tab active" style="background:#FFFCF3;color:#241C0E;border-top:2px solid #D97706">glacial_shader.py</div>
+            <div class="w-tab" style="color:#59482B">renderer.rs</div>
+          </div>
+          <div class="w-code">
+            <div style="color:#9C8865;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#6E470B;font-weight:600">class</span> <span style="color:#754A0E">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#6E470B;font-weight:600">def</span> <span style="color:#7A5211">sample</span>(<span style="color:#664C22">self</span>, <span style="color:#664C22">stop</span>=<span style="color:#7D4E14">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6E470B;font-weight:600">return</span> <span style="color:#5E4B24">"#FBECC0 → #FFFCF3"</span></div>
+          </div>
+          <div class="w-term" style="border-top:1px solid rgba(15,23,42,0.10);color:#59482B">
+            <span style="color:#7A5211;font-weight:600">➜ aurora</span> <span style="color:#5E4B24">✓ WCAG AAA Verified</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-status" style="background:linear-gradient(90deg,#FBECC0,#FCF1CF);border-top:1px solid rgba(15,23,42,0.10);color:#241C0E">
+        <span>🌿 main*</span>
+        <span>🎲 #FBECC0 → #FFFCF3</span>
+      </div>
+    </div>
+    
+    <div class="win" style="background:#201933;color:#EFEBF9;border:1px solid rgba(255,255,255,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#0D0A14,#120E1C);border-bottom:1px solid rgba(255,255,255,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">5. Pure Purple Lavender (Dark)</div>
+        <div class="w-badge" style="background:#7C3AED;color:#fff">POLAR NIGHT</div>
+      </div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#0D0A14,#120E1C,#201933);border-right:1px solid rgba(255,255,255,0.10)">
+          <div class="s-hdr" style="color:#B6A6D9">EXPLORER</div>
+          <div class="s-item active" style="color:#EFEBF9;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#B6A6D9">color_harmony.ts</div>
+          <div class="s-item" style="color:#B6A6D9">renderer.rs</div>
+        </div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#120E1C 0%,#201933 65%)">
+          <div class="w-tabs" style="background:#120E1C;border-bottom:1px solid rgba(255,255,255,0.10)">
+            <div class="w-tab active" style="background:#201933;color:#EFEBF9;border-top:2px solid #7C3AED">glacial_shader.py</div>
+            <div class="w-tab" style="color:#B6A6D9">renderer.rs</div>
+          </div>
+          <div class="w-code">
+            <div style="color:#6E5D94;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#B99EF0;font-weight:600">class</span> <span style="color:#CBB6F8">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#B99EF0;font-weight:600">def</span> <span style="color:#C3ADEF">sample</span>(<span style="color:#B5A0DC">self</span>, <span style="color:#B5A0DC">stop</span>=<span style="color:#B898ED">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#B99EF0;font-weight:600">return</span> <span style="color:#A599E8">"#0D0A14 → #201933"</span></div>
+          </div>
+          <div class="w-term" style="border-top:1px solid rgba(255,255,255,0.10);color:#B6A6D9">
+            <span style="color:#C3ADEF;font-weight:600">➜ aurora</span> <span style="color:#A599E8">✓ WCAG AAA Verified</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-status" style="background:linear-gradient(90deg,#0D0A14,#120E1C);border-top:1px solid rgba(255,255,255,0.10);color:#EFEBF9">
+        <span>🌿 main*</span>
+        <span>🎲 #0D0A14 → #201933</span>
+      </div>
+    </div>
+    
+    <div class="win" style="background:#142134;color:#E2ECF7;border:1px solid rgba(255,255,255,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#090E16,#0C131E);border-bottom:1px solid rgba(255,255,255,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">6. Pure Blue Cobalt (Dark)</div>
+        <div class="w-badge" style="background:#3B82F6;color:#fff">POLAR NIGHT</div>
+      </div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#090E16,#0C131E,#142134);border-right:1px solid rgba(255,255,255,0.10)">
+          <div class="s-hdr" style="color:#94B0CE">EXPLORER</div>
+          <div class="s-item active" style="color:#E2ECF7;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#94B0CE">color_harmony.ts</div>
+          <div class="s-item" style="color:#94B0CE">renderer.rs</div>
+        </div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#0C131E 0%,#142134 65%)">
+          <div class="w-tabs" style="background:#0C131E;border-bottom:1px solid rgba(255,255,255,0.10)">
+            <div class="w-tab active" style="background:#142134;color:#E2ECF7;border-top:2px solid #3B82F6">glacial_shader.py</div>
+            <div class="w-tab" style="color:#94B0CE">renderer.rs</div>
+          </div>
+          <div class="w-code">
+            <div style="color:#4E6A8A;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#7CC0F8;font-weight:600">class</span> <span style="color:#A8C7FA">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#7CC0F8;font-weight:600">def</span> <span style="color:#9CD2FC">sample</span>(<span style="color:#94B8D8">self</span>, <span style="color:#94B8D8">stop</span>=<span style="color:#8CA8E8">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7CC0F8;font-weight:600">return</span> <span style="color:#7AC7D4">"#090E16 → #142134"</span></div>
+          </div>
+          <div class="w-term" style="border-top:1px solid rgba(255,255,255,0.10);color:#94B0CE">
+            <span style="color:#9CD2FC;font-weight:600">➜ aurora</span> <span style="color:#7AC7D4">✓ WCAG AAA Verified</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-status" style="background:linear-gradient(90deg,#090E16,#0C131E);border-top:1px solid rgba(255,255,255,0.10);color:#E2ECF7">
+        <span>🌿 main*</span>
+        <span>🎲 #090E16 → #142134</span>
+      </div>
+    </div>
+    
   </div>
 </body>
 </html>

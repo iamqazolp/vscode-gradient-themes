@@ -2,11 +2,15 @@
 
 12 `7%–22%` gradient color themes (Light & Dark) + a universal translucent 4-color gradient overlay and live Status Bar randomizer (`🎲`) for VS Code, Cursor, Windsurf, and Antigravity IDE.
 
-![4-Color Rainbow Overlay](./media/screenshots/rainbow-overview.jpg)
+![4-Color Rainbow Overlay](./media/screenshots/rainbow-overview.png)
 
-| Live `🎲` Randomizer (Editor & Minimap) | Live `🎲` Randomizer (Dashboard & Terminal) | Pure Blue Glacial Theme |
+| Single-Color Glacial Palette Suite |
+| :---: |
+| ![Single-Color Glacial Palette Suite](./media/screenshots/theme-gallery-grid.png) |
+
+| Live `🎲` Randomizer (Light — Sakura Horizon) | Live `🎲` Randomizer (Dark — Antarctic Borealis) | Pure Blue Glacial Theme |
 | :---: | :---: | :---: |
-| ![Live Randomizer Code](./media/screenshots/live-randomizer-code.jpg) | ![Live Randomizer Hub](./media/screenshots/live-randomizer-hub.jpg) | ![Pure Blue Glacial](./media/screenshots/pure-blue-glacial.jpg) |
+| ![Live Randomizer Light](./media/screenshots/live-randomizer-light.png) | ![Live Randomizer Dark](./media/screenshots/live-randomizer-dark.png) | ![Pure Blue Glacial](./media/screenshots/pure-blue-glacial.png) |
 
 ---
 
