@@ -1,4 +1,4 @@
-# VS Code Gradient Themes
+# <img src="./media/icon.png" width="36" height="36" align="top" alt="VS Code Gradient Themes Logo" /> VS Code Gradient Themes
 
 12 `7%–22%` gradient color themes (Light & Dark) + a universal translucent 4-color gradient overlay and live Status Bar randomizer (`🎲`) for VS Code, Cursor, Windsurf, and Antigravity IDE.
 
