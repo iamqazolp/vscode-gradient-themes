@@ -1,77 +1,101 @@
-# <img src="./media/icon.png" width="36" height="36" align="top" alt="VS Code Gradient Themes Logo" /> VS Code Gradient Themes
+<div align="center">
 
-12 gradient color themes (6 Light & Dark families) + a translucent 4-color gradient overlay and live Status Bar randomizer (`🎲` with 30 curated palettes + procedural HSL harmonies) for VS Code, Cursor, Windsurf, and Antigravity IDE.
+<img src="./media/icon.png" width="88" height="88" alt="VS Code Gradient Themes Logo" />
 
-![4-Color Rainbow Overlay](./media/screenshots/rainbow-overview.png)
+# VS Code Gradient Themes
 
-| Single-Color Glacial Palette Suite |
-| :---: |
-| ![Single-Color Glacial Palette Suite](./media/screenshots/theme-gallery-grid.png) |
+**Full-workbench atmospheric gradient meshes, serene single-hue ombré themes, and a `0ms` Status Bar `🎲` mood roller.**  
+*Designed for VS Code, Cursor, Windsurf, and Antigravity IDE.*
 
-| Live `🎲` Randomizer (Light — Sakura Horizon) | Live `🎲` Randomizer (Dark — Antarctic Borealis) | Pure Blue Glacial Theme |
-| :---: | :---: | :---: |
-| ![Live Randomizer Light](./media/screenshots/live-randomizer-light.png) | ![Live Randomizer Dark](./media/screenshots/live-randomizer-dark.png) | ![Pure Blue Glacial](./media/screenshots/pure-blue-glacial.png) |
+</div>
 
 ---
 
-## How Themes & the `🎲` Randomizer Work Together
+![Prism Rainbow 4-Color Mesh](./media/screenshots/rainbow-overview.png)
 
-The extension has two independent layers that can be used separately or combined:
+![Visual Mood Gallery](./media/screenshots/theme-gallery-grid.png)
 
-1. **Base Color Theme (`Cmd + K, Cmd + T`):**
-   Sets the workbench's base background colors (`var(--vscode-*-background)`) and **monochromatic syntax highlighting** tuned to that color family.
-2. **Live `🎲` Gradient Overlay (`js/gradient-randomizer.js` + `css/rainbow-gradient-light.css`):**
-   Instead of overwriting `background-color`, the CSS overlay applies a translucent `background-image` mesh over your active theme's native surface variables.
-   - **Combining both:** Pick any Light or Dark theme in `Cmd + K, Cmd + T` (for its base tone and syntax colors), then click **`🎲`** in the Status Bar to blend different 4-color gradients on top in real time (`0ms`, no reload).
-   - **Pure single-color theme only:** Right-click **`🎲`** (or press `Alt + Shift + 0`) to cycle between **Prism Classic** and **Theme Native (Overlay Off)** without restarting VS Code.
+| 🌸 Live `🎲` Randomizer — *Sakura Horizon (Light)* | 🌌 Live `🎲` Randomizer — *Antarctic Borealis (Dark)* |
+| :---: | :---: |
+| ![Sakura Horizon Light](./media/screenshots/live-randomizer-light.png) | ![Antarctic Borealis Dark](./media/screenshots/live-randomizer-dark.png) |
 
 ---
 
-## 1. 12 Color Themes (`Cmd + K, Cmd + T`)
+## ✨ Two Layers that Blend Together
 
-| Family | Light Theme (`vs`) | Dark Theme (`vs-dark`) | Light Stops | Dark Stops |
-| :--- | :--- | :--- | :--- | :--- |
-| **Pure Blue** | `Pure Blue Gradient (Sky to Sapphire Light)` | `Pure Blue Gradient (Abyssal Cobalt Dark)` | `#D8ECFD → #FAFDFF` | `#090E16 → #162438` |
-| **Pure Green** | `Pure Green Gradient (Mint to Emerald Light)` | `Pure Green Gradient (Forest Emerald Dark)` | `#D6F3E0 → #FAFEFC` | `#08100C → #152A1F` |
-| **Pure Pink** | `Pure Pink Gradient (Sakura to Rose Light)` | `Pure Pink Gradient (Velvet Berry Dark)` | `#FADCEB → #FFFBFE` | `#11090E → #2B1925` |
-| **Pure Yellow** | `Pure Yellow Gradient (Sunlit Honey Light)` | `Pure Yellow Gradient (Golden Amber Dark)` | `#FBECC0 → #FFFEFA` | `#110E08 → #2A2317` |
-| **Pure Purple** | `Pure Purple Gradient (Lavender to Amethyst Light)` | `Pure Purple Gradient (Cosmic Amethyst Dark)` | `#E4D9FC → #FCFBFF` | `#0D0A14 → #231C38` |
-| **Prism Rainbow** | `Prism Rainbow Gradient (Pastel 4-Color Light)` | `Prism Rainbow Gradient (Aurora 4-Color Dark)` | `#F9F3DF → #FAF0EE` | `#0E131D → #161116` |
+1. **Base Color Theme (`Cmd + K, Cmd + T`)** — Sets your canvas tone (Light or Polar Night Dark) and calm, monochromatic syntax highlighting matched to that color family.
+2. **Live `🎲` Gradient Mesh (Status Bar)** — Layers a translucent 4-corner gradient mesh across the Title Bar, Activity Bar, Sidebar, Editor, Terminal, and Status Bar.
+   - **Mix & Match:** Pick any Light or Dark base theme in `Cmd + K, Cmd + T`, then click **`🎲`** in the Status Bar to roll 30 curated palettes on top in `0ms` (no reload).
+   - **Pure Base Theme Only:** Right-click **`🎲`** (or press `Alt + Shift + 0`) to toggle **`Theme Native` (Overlay Off)** instantly.
 
 ---
 
-## 2. Full-Workbench Rainbow Overlay & `🎲` Randomizer
+## 🎨 12 Core Color Themes (`Cmd + K, Cmd + T`)
 
-### Enable / Disable
-1. Open Command Palette (**`Cmd + Shift + P`** / **`Ctrl + Shift + P`**).
-2. Run **`Gradient Themes: Enable 4-Color Rainbow Gradient & Live Randomizer`**.
-3. Click **`Reload Custom CSS and JS`** → **Restart** (uses [`be5invis.vscode-custom-css`](https://marketplace.visualstudio.com/items?itemName=be5invis.vscode-custom-css)).
+| Palette Family | ☀️ Light Edition | 🌙 Dark Edition | Visual Vibe |
+| :--- | :--- | :--- | :--- |
+| **🌈 Prism Rainbow** | `Prism Rainbow Gradient` | `Prism Rainbow Night` | Pastel 4-color prism mesh / Deep aurora night |
+| **💧 Pure Blue** | `Pure Blue Gradient` | `Pure Blue Night` | Glacial sapphire sky / Abyssal cobalt |
+| **🍵 Matcha** | `Matcha Gradient` | `Matcha Night` | Ceremonial botanical jade / Deep forest emerald |
+| **🌅 Warm Sunset** | `Warm Sunset Gradient` | `Warm Sunset Night` | Golden-hour honey amber / Warm twilight ember |
+| **🔮 Purple Mist** | `Purple Mist Gradient` | `Purple Mist Night` | Wisteria & lavender mist / Cosmic amethyst |
+| **🌸 Pink Blossom** | `Pink Blossom Gradient` | `Pink Blossom Night` | Sakura petal blush / Velvet berry night |
 
-### Status Bar `🎲` Controls (No Reload Needed)
-| Action | Shortcut / Click | Effect |
+![Pure Blue Glacial](./media/screenshots/pure-blue-glacial.png)
+
+---
+
+## 🎲 30 Live Status Bar Palettes
+
+Click **`🎲`** in the bottom-right Status Bar to roll across **30 curated palettes** (plus procedural harmonic variations):
+
+| 🌈 Multi-Color Prism & Horizon (12) | 🌸 Atmospheric Pastels (10) | 💧 Pure Single-Hue Ombré (8) |
 | :--- | :--- | :--- |
-| **Roll Gradient** | **Left-Click `🎲`** or **`Alt + Shift + G`** | Rolls a new 4-color gradient & mesh angle in `0ms` (30 curated palettes + procedural HSL harmonies) |
-| **Reset / Toggle Native** | **Right-Click / `Shift + Click` `🎲`** or **`Alt + Shift + 0`** | Cycles between **Prism Classic** (`#EA4335`, `#FBBC04`, `#34A853`, `#4285F4`) and **Theme Native (Overlay Off)** |
-| **Auto-Roll on Startup** | **`Cmd/Ctrl + Click` `🎲`** | Toggles `• Auto` mode to roll a fresh gradient whenever VS Code opens |
+| **Prism Classic** *(Blue · Red · Gold · Green)* | **Celestial Peach** *(Apricot · Blush · Ice)* | **Pure Lagoon Cyan** *(Teal → Seafoam)* |
+| **Sakura Horizon** *(Rose · Peach · Sky · Mint)* | **Glacier Mint** *(Mint · Aqua · Frost)* | **Pure Apricot Peach** *(Coral → Nectarine)* |
+| **Northern Aurora** *(Teal · Mint · Sky · Lavender)* | **Rosewater Champagne** *(Gold · Rose · Sky)* | **Pure Starlight Indigo** *(Indigo → Periwinkle)* |
+| **Matcha Hinoki** *(Jade · Bamboo · Amber · Cedar)* | **Starlight Indigo** *(Midnight · Violet · Cyan)* | **Pure Camellia Rose** *(Berry → Flamingo)* |
+| **Tokyo Cyber Mist** *(Violet · Magenta · Cyan)* | **Pistachio Cream** *(Pistachio · Vanilla · Coral)* | **Pure Glacier Blue** *(Cobalt → Polar Ice)* |
+| **Amalfi Citrus** *(Lemon · Tangerine · Azure)* | **Electric Sunset** *(Crimson · Amber · Purple)* | **Pure Ceremonial Matcha** *(Uji Jade → Mint)* |
+| **Golden Hour Dusk** *(Coral · Gold · Rose · Violet)* | **Misty Harbor** *(Sea Mist · Sand · Sage)* | **Pure Sunlit Honey** *(Amber → Champagne)* |
+| **Nordic Fjord** *(Glacial Blue · Cyan · Pine)* | **Orchid Breeze** *(Orchid · Lilac · Aqua)* | **Pure Wisteria Violet** *(Amethyst → Lavender)* |
+| **Lavender Matcha** *(Wisteria · Rose · Matcha)* | **Desert Mirage** *(Terracotta · Gold · Teal)* | |
+| **Opaline Dream** *(Pearl Pink · Baby Blue · Gold)* | **Antarctic Borealis** *(Ice · Emerald · Violet)* | |
+| **Kyoto Autumn** *(Maple · Persimmon · Moss)* | | |
+| **Bioluminescent Reef** *(Aqua · Neon Cyan · Violet)* | | |
 
 ---
 
-## 3. Adding Custom Colors ([`COLOR_GUIDE.md`](./COLOR_GUIDE.md))
+## ⚡ Quick Setup & Controls
 
-Use [`add_color.py`](./add_color.py) to generate standardized themes or randomizer palettes from a single hex code:
+### Enable Full-Workbench Mesh & `🎲` Randomizer
+1. Open the Command Palette (**`Cmd + Shift + P`** / **`Ctrl + Shift + P`**).
+2. Run **`Gradient Themes: Enable 4-Color Rainbow Gradient & Live Randomizer`**.
+3. Run **`Reload Custom CSS and JS`** → click **Restart** (powered by [`be5invis.vscode-custom-css`](https://marketplace.visualstudio.com/items?itemName=be5invis.vscode-custom-css)).
+
+### Status Bar `🎲` Shortcuts (`0ms`, No Reload)
+| Action | Click / Shortcut | What It Does |
+| :--- | :--- | :--- |
+| **Roll New Mood** | **Left-Click `🎲`** or **`Alt + Shift + G`** | Instantly blends a new 4-color gradient & mesh angle |
+| **Reset / Toggle Off** | **Right-Click / `Shift + Click` `🎲`** or **`Alt + Shift + 0`** | Cycles between **Prism Classic** and **Theme Native (Overlay Off)** |
+| **Auto-Roll on Startup** | **`Cmd/Ctrl + Click` `🎲`** | Toggles `• Auto` to roll a fresh palette every time VS Code opens |
+
+---
+
+## 🛠️ Create Your Own Palettes ([`COLOR_GUIDE.md`](./COLOR_GUIDE.md))
+
+Generate new themes or add custom 4-color presets to the `🎲` randomizer with [`add_color.py`](./add_color.py):
 
 ```bash
-# 1. Generate a Light + Dark theme pair from one hex color (auto-checks WCAG AAA contrast)
+# Generate a Light + Dark theme pair from a single hex color
 python3 add_color.py theme --name "Pure Cyan" --color "#06B6D4"
 
-# 2. Add a 4-color palette to the Status Bar 🎲 randomizer
+# Add a custom 4-stop palette to the Status Bar 🎲 randomizer
 python3 add_color.py randomizer --name "Cyber Mint" --stops "#06B6D4,#10B981,#3B82F6,#8B5CF6"
 
-# 3. List all active themes and randomizer palettes
+# List all active themes and randomizer presets
 python3 add_color.py list
 ```
-
-See [**`COLOR_GUIDE.md`**](./COLOR_GUIDE.md) for the exact HSL formulas, WCAG contrast targets, and `xterm.js` `#RRGGBB00` terminal transparency rules.
 
 ---
 
