@@ -405,7 +405,8 @@ def cmd_list(_args):
         print(f"  • [{item['type']:5s}] {item['label']:52s} ({stops[0]} -> {stops[-1]}, FG {cr:.1f}:1)")
 
     js_text = RANDOMIZER_JS.read_text(encoding="utf-8")
-    names = re.findall(r'name:\s*"([^"]+)"', js_text)
+    curated_section = js_text.split("function hslToRgb")[0]
+    names = re.findall(r'name:\s*"([^"]+)"', curated_section)
     print(f"\n=== Curated 4-Color Randomizer Palettes ({len(names)} total) ===")
     for n in names:
         print(f"  • 🎲 {n}")

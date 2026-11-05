@@ -166,6 +166,132 @@
         [20, 184, 166], // #14B8A6
       ],
     },
+    {
+      name: "Tokyo Neon Mist",
+      stops: [
+        [244, 63, 94], // #F43F5E
+        [217, 70, 239], // #D946EF
+        [99, 102, 241], // #6366F1
+        [6, 182, 212], // #06B6D4
+      ],
+    },
+    {
+      name: "Amalfi Citrus",
+      stops: [
+        [250, 204, 21], // #FACC15
+        [251, 146, 60], // #FB923C
+        [52, 211, 153], // #34D399
+        [56, 189, 248], // #38BDF8
+      ],
+    },
+    {
+      name: "Lavender Milk Tea",
+      stops: [
+        [192, 132, 252], // #C084FC
+        [244, 114, 182], // #F472B6
+        [251, 191, 36], // #FBBF24
+        [129, 140, 248], // #818CF8
+      ],
+    },
+    {
+      name: "Polaris Emerald",
+      stops: [
+        [16, 185, 129], // #10B981
+        [6, 182, 212], // #06B6D4
+        [59, 130, 246], // #3B82F6
+        [168, 85, 247], // #A855F7
+      ],
+    },
+    {
+      name: "Velvet Sangria",
+      stops: [
+        [225, 29, 72], // #E11D48
+        [219, 39, 119], // #DB2777
+        [147, 51, 234], // #9333EA
+        [245, 158, 11], // #F59E0B
+      ],
+    },
+    {
+      name: "Arctic Sunbeam",
+      stops: [
+        [56, 189, 248], // #38BDF8
+        [45, 212, 191], // #2DD4BF
+        [253, 224, 71], // #FDE047
+        [129, 140, 248], // #818CF8
+      ],
+    },
+    {
+      name: "Pure Lagoon Cyan",
+      stops: [
+        [8, 145, 178], // #0891B2
+        [6, 182, 212], // #06B6D4
+        [34, 211, 238], // #22D3EE
+        [103, 232, 249], // #67E8F9
+      ],
+    },
+    {
+      name: "Pure Apricot Peach",
+      stops: [
+        [234, 88, 12], // #EA580C
+        [249, 115, 22], // #F97316
+        [251, 146, 60], // #FB923C
+        [253, 186, 116], // #FDBA74
+      ],
+    },
+    {
+      name: "Pure Starlight Indigo",
+      stops: [
+        [79, 70, 229], // #4F46E5
+        [99, 102, 241], // #6366F1
+        [129, 140, 248], // #818CF8
+        [165, 180, 252], // #A5B4FC
+      ],
+    },
+    {
+      name: "Pure Camellia Rose",
+      stops: [
+        [225, 29, 72], // #E11D48
+        [244, 63, 94], // #F43F5E
+        [251, 113, 133], // #FB7185
+        [253, 164, 175], // #FDA4AF
+      ],
+    },
+    {
+      name: "Pure Glacier Blue",
+      stops: [
+        [37, 99, 235], // #2563EB
+        [59, 130, 246], // #3B82F6
+        [96, 165, 250], // #60A5FA
+        [147, 197, 253], // #93C5FD
+      ],
+    },
+    {
+      name: "Pure Ceremonial Matcha",
+      stops: [
+        [5, 150, 105], // #059669
+        [16, 185, 129], // #10B981
+        [52, 211, 153], // #34D399
+        [110, 231, 183], // #6EE7B7
+      ],
+    },
+    {
+      name: "Pure Sunlit Honey",
+      stops: [
+        [217, 119, 6], // #D97706
+        [245, 158, 11], // #F59E0B
+        [251, 191, 36], // #FBBF24
+        [253, 224, 71], // #FDE047
+      ],
+    },
+    {
+      name: "Pure Wisteria Violet",
+      stops: [
+        [124, 58, 237], // #7C3AED
+        [139, 92, 246], // #8B5CF6
+        [167, 139, 250], // #A78BFA
+        [196, 181, 253], // #C4B5FD
+      ],
+    },
   ];
 
   function hslToRgb(h, s, l) {
@@ -220,16 +346,26 @@
     };
   }
 
+  const recentNames = [];
+
   function rollRandomPalette(currentName) {
-    // 60% chance curated palette, 40% chance procedural HSL harmony
-    if (Math.random() < 0.6) {
+    // 80% chance curated palette (30 curated presets), 20% chance procedural HSL harmony
+    if (Math.random() < 0.8) {
       const candidates = CURATED_PALETTES.filter(
-        (p) => !p.isDefault && p.name !== currentName
+        (p) => !p.isDefault && p.name !== currentName && !recentNames.includes(p.name)
       );
-      const picked = candidates[randInt(0, candidates.length - 1)];
+      const pool =
+        candidates.length > 0
+          ? candidates
+          : CURATED_PALETTES.filter((p) => !p.isDefault && p.name !== currentName);
+      const picked = pool[randInt(0, pool.length - 1)];
+      recentNames.push(picked.name);
+      if (recentNames.length > 8) {
+        recentNames.shift();
+      }
       // Shuffle stop order occasionally for extra variety
       const stops = [...picked.stops];
-      if (Math.random() < 0.45) {
+      if (Math.random() < 0.4) {
         stops.reverse();
       }
       return {

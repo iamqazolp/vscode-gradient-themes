@@ -109,46 +109,6 @@
         "label": "Prism Rainbow Gradient (Aurora 4-Color Dark)",
         "uiTheme": "vs-dark",
         "path": "./themes/prism-rainbow-dark-color-theme.json"
-      },
-      {
-        "label": "Pure Cyan Gradient (Lagoon to Frost Light)",
-        "uiTheme": "vs",
-        "path": "./themes/pure-cyan-light-color-theme.json"
-      },
-      {
-        "label": "Pure Cyan Gradient (Abyssal Teal Dark)",
-        "uiTheme": "vs-dark",
-        "path": "./themes/pure-cyan-dark-color-theme.json"
-      },
-      {
-        "label": "Pure Peach Gradient (Apricot to Snow Light)",
-        "uiTheme": "vs",
-        "path": "./themes/pure-peach-light-color-theme.json"
-      },
-      {
-        "label": "Pure Peach Gradient (Warm Terracotta Dark)",
-        "uiTheme": "vs-dark",
-        "path": "./themes/pure-peach-dark-color-theme.json"
-      },
-      {
-        "label": "Pure Indigo Gradient (Periwinkle to Ice Light)",
-        "uiTheme": "vs",
-        "path": "./themes/pure-indigo-light-color-theme.json"
-      },
-      {
-        "label": "Pure Indigo Gradient (Midnight Indigo Dark)",
-        "uiTheme": "vs-dark",
-        "path": "./themes/pure-indigo-dark-color-theme.json"
-      },
-      {
-        "label": "Pure Rose Gradient (Camellia Blush Light)",
-        "uiTheme": "vs",
-        "path": "./themes/pure-rose-light-color-theme.json"
-      },
-      {
-        "label": "Pure Rose Gradient (Ruby Velvet Dark)",
-        "uiTheme": "vs-dark",
-        "path": "./themes/pure-rose-dark-color-theme.json"
       }
     ],
     "commands": [
