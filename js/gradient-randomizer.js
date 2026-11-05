@@ -394,7 +394,13 @@
       ["--g-base", "--g-bar", "--g-side", "--g-panel"].forEach((prop) =>
         wb.style.setProperty(prop, "none")
       );
+      wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
+      wb.style.setProperty(
+        "--g-sel-tint",
+        "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
+      );
       wb.style.setProperty("--g-border", "var(--vscode-focusBorder, #3B82F6)");
+      clearDomSelectionOverlay();
       try {
         localStorage.setItem(
           STORAGE_KEY_STATE,
@@ -417,6 +423,8 @@
         "--g-side",
         "--g-panel",
         "--g-border",
+        "--g-selection",
+        "--g-sel-tint",
       ].forEach((prop) => wb.style.removeProperty(prop));
       localStorage.removeItem(STORAGE_KEY_STATE);
       updateStatusBarPill("Prism Classic");
@@ -451,6 +459,16 @@
         0.15
       )} 33%, ${rgba(c3, 0.15)} 66%, ${rgba(c4, 0.22)} 100%)`
     );
+
+    wb.style.setProperty(
+      "--g-selection",
+      `linear-gradient(${angles.bar}deg, ${rgba(c1, 0.30)} 0%, ${rgba(
+        c2,
+        0.25
+      )} 33%, ${rgba(c3, 0.25)} 66%, ${rgba(c4, 0.32)} 100%)`
+    );
+
+    wb.style.setProperty("--g-sel-tint", rgba(c1, 0.28));
 
     wb.style.setProperty(
       "--g-side",
@@ -609,6 +627,103 @@
     }
   }
 
+  // Universal DOM Selection Gradient Overlay (AI Chat, Markdown, Hover Popups, Settings, etc.)
+  function getOrCreateDomSelectionLayer() {
+    let layer = document.getElementById("prism-dom-selection-layer");
+    if (!layer) {
+      const wb = document.querySelector(".monaco-workbench");
+      if (!wb) return null;
+      layer = document.createElement("div");
+      layer.id = "prism-dom-selection-layer";
+      wb.appendChild(layer);
+    }
+    return layer;
+  }
+
+  function clearDomSelectionOverlay() {
+    const wb = document.querySelector(".monaco-workbench");
+    if (wb) wb.classList.remove("prism-dom-sel-active");
+    const layer = document.getElementById("prism-dom-selection-layer");
+    if (layer && layer.firstChild) {
+      layer.textContent = "";
+    }
+  }
+
+  let selRafId = 0;
+  function scheduleDomSelectionUpdate() {
+    if (selRafId) return;
+    selRafId = requestAnimationFrame(() => {
+      selRafId = 0;
+      renderDomSelectionGradient();
+    });
+  }
+
+  function renderDomSelectionGradient() {
+    const saved = getSavedPalette();
+    if (saved && saved.isNativeOff) {
+      clearDomSelectionOverlay();
+      return;
+    }
+
+    const sel = window.getSelection ? window.getSelection() : null;
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
+      clearDomSelectionOverlay();
+      return;
+    }
+
+    const anchorEl =
+      sel.anchorNode && sel.anchorNode.nodeType === 1
+        ? sel.anchorNode
+        : sel.anchorNode && sel.anchorNode.parentElement;
+    if (
+      !anchorEl ||
+      anchorEl.closest(".monaco-editor, .xterm, input, textarea, .monaco-inputbox")
+    ) {
+      clearDomSelectionOverlay();
+      return;
+    }
+
+    const layer = getOrCreateDomSelectionLayer();
+    const wb = document.querySelector(".monaco-workbench");
+    if (!layer || !wb) return;
+
+    const rects = [];
+    for (let i = 0; i < sel.rangeCount; i++) {
+      const range = sel.getRangeAt(i);
+      const clientRects = range.getClientRects();
+      for (let j = 0; j < clientRects.length; j++) {
+        const r = clientRects[j];
+        if (r.width > 1 && r.height > 2) {
+          rects.push(r);
+        }
+      }
+    }
+
+    if (rects.length === 0 || rects.length > 250) {
+      clearDomSelectionOverlay();
+      return;
+    }
+
+    wb.classList.add("prism-dom-sel-active");
+    layer.textContent = "";
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < rects.length; i++) {
+      const r = rects[i];
+      const div = document.createElement("div");
+      div.className = "prism-dom-sel-rect";
+      div.style.left = `${r.left}px`;
+      div.style.top = `${r.top}px`;
+      div.style.width = `${r.width}px`;
+      div.style.height = `${r.height}px`;
+      frag.appendChild(div);
+    }
+    layer.appendChild(frag);
+  }
+
+  document.addEventListener("selectionchange", scheduleDomSelectionUpdate, true);
+  window.addEventListener("scroll", scheduleDomSelectionUpdate, true);
+  window.addEventListener("resize", scheduleDomSelectionUpdate, true);
+
   // Global keyboard shortcuts:
   //   Alt + Shift + G -> Roll new random gradient
   //   Alt + Shift + 0 -> Cycle Prism Classic / Theme Native (Off)
@@ -628,12 +743,35 @@
     true
   );
 
-  // Poll until workbench & statusbar are mounted
-  let attempts = 0;
-  const timer = setInterval(() => {
-    attempts++;
-    if (mountStatusBarPill() || attempts > 60) {
-      clearInterval(timer);
+  // Self-healing mount & palette keeper:
+  // Fast poll during initial workbench boot, then lightweight 1.5s heartbeat
+  // so Status Bar rebuilds or layout resets never lose the 🎲 pill or active gradient.
+  function ensureMountedAndSynced() {
+    const existing = document.getElementById("prism-randomizer-item");
+    if (!existing || !existing.isConnected) {
+      mountStatusBarPill();
+      return;
     }
-  }, 500);
+    const wb = document.querySelector(".monaco-workbench");
+    if (!wb) return;
+    const saved = getSavedPalette();
+    if (saved) {
+      if (saved.isNativeOff && wb.style.getPropertyValue("--g-base") !== "none") {
+        applyPaletteToWorkbench(saved);
+      } else if (!saved.isNativeOff && saved.stops && !wb.style.getPropertyValue("--g-base")) {
+        applyPaletteToWorkbench(saved);
+      }
+    }
+  }
+
+  let fastTicks = 0;
+  const fastTimer = setInterval(() => {
+    fastTicks++;
+    ensureMountedAndSynced();
+    if (fastTicks >= 40) {
+      clearInterval(fastTimer);
+    }
+  }, 350);
+
+  setInterval(ensureMountedAndSynced, 1500);
 })();

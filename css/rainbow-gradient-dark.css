@@ -56,6 +56,16 @@
 
   /* 4-Color Prism Star Accent Border & Cursor */
   --g-border: linear-gradient(90deg, #EA4335 0%, #FBBC04 33%, #34A853 66%, #4285F4 100%);
+
+  /* Universal 4-Color Gradient Text Selection (Editor, Diff, Peek, Terminal, Chat, Hover & DOM) */
+  --g-selection: linear-gradient(
+    90deg,
+    rgba(234, 67, 53, 0.30) 0%,
+    rgba(251, 188, 4, 0.25) 33%,
+    rgba(52, 168, 83, 0.25) 66%,
+    rgba(66, 133, 244, 0.32) 100%
+  );
+  --g-sel-tint: rgba(66, 133, 244, 0.28);
 }
 
 /* --------------------------------------------------------------------------
@@ -219,13 +229,54 @@
   border-radius: 2px !important;
 }
 
-/* Gradient Terminal Text Selection (both selection overlay & selected character spans) */
+/* Universal Gradient Text Selection: Code Editor, Diff, Peek, Notebook, Output, Debug, Terminal & DOM */
+.monaco-workbench .monaco-editor .selected-text,
+.monaco-workbench .monaco-editor .focused .selected-text,
 .monaco-workbench .xterm .xterm-selection div {
-  background: var(--g-bar) !important;
+  background: var(--g-selection, var(--g-bar)) !important;
+  background-color: transparent !important;
+  background-image: var(--g-selection, var(--g-bar)) !important;
   border-radius: 3px !important;
 }
-.monaco-workbench .xterm .xterm-rows span.xterm-decoration-top {
+.monaco-workbench .monaco-editor:not(.focused) .selected-text {
+  opacity: 0.72 !important;
+}
+.monaco-workbench .monaco-editor .selectionHighlight,
+.monaco-workbench .monaco-editor .focused .selectionHighlight {
   background-color: transparent !important;
+  background-image: var(--g-bar) !important;
+  border-radius: 3px !important;
+}
+.monaco-workbench .xterm .xterm-rows span.xterm-decoration-top,
+.monaco-workbench .monaco-editor .view-line span.inline-selected-text {
+  background-color: transparent !important;
+}
+
+/* Native DOM Text Selection Overlay (AI Chat, Markdown, Hover Popups, Settings, Problems, Inputs) */
+.monaco-workbench ::selection {
+  background-color: var(--g-sel-tint, rgba(66, 133, 244, 0.28)) !important;
+}
+.monaco-workbench.prism-dom-sel-active :not(input):not(textarea)::selection {
+  background-color: transparent !important;
+}
+#prism-dom-selection-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none !important;
+  z-index: 99999;
+  overflow: hidden;
+}
+.monaco-workbench:not(.vs-dark):not(.hc-black) #prism-dom-selection-layer {
+  mix-blend-mode: multiply;
+}
+.monaco-workbench.vs-dark #prism-dom-selection-layer {
+  mix-blend-mode: screen;
+}
+#prism-dom-selection-layer .prism-dom-sel-rect {
+  position: fixed;
+  pointer-events: none !important;
+  background-image: var(--g-selection, var(--g-bar)) !important;
+  border-radius: 3px;
 }
 
 /* Sticky Scroll (Editor, Terminal & Explorer Tree): Seamless frosted glass that lets underlying gradient shine through */

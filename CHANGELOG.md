@@ -2,6 +2,23 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
+## [1.2.2] - 2026-11-06
+
+### Added
+- **Universal 4-Color Gradient Text Selection Everywhere (`css/` & `js/gradient-randomizer.js`)**:
+  - Extended the 4-color gradient text selection (`--g-selection`) beyond the Integrated Terminal to cover **all Code Editors, Diff Views, Peek Editors, Notebook Cells, Output & Debug Consoles** (`.monaco-editor .selected-text` and `.selectionHighlight`), as well as a live 60fps DOM selection overlay (`#prism-dom-selection-layer`) for **AI Chat panels, Markdown, Hover Documentation popups, and Settings UI**.
+  - Syncs dynamically with all 30 curated Status Bar (`🎲`) randomizer palettes and respects **Theme Native (Overlay Off)** mode.
+
+## [1.2.1] - 2026-11-06
+
+### Fixed
+- **Crash-Proof Workbench Patching Without External Extensions (`extension.js`)**:
+  - Fixed an unhandled configuration error when `be5invis.vscode-custom-css` is not installed (`vscode_custom_css.imports` is now safely gated behind an extension check and wrapped in `safeConfigUpdate`), ensuring `workbench.html` is always patched first on startup and after VSCode app updates.
+  - Updated `workbench.html` injection placement to right before `</html>` so it never conflicts with VSCode's `<head>` dynamic CSS module loader.
+  - Added a multi-window reload status bar indicator (`✨ Reload for Gradient & 🎲`) whenever a VSCode update resets `workbench.html` and the extension auto-restores the patch on startup.
+- **Self-Healing Status Bar `🎲` Mood Roller (`js/gradient-randomizer.js`)**:
+  - Replaced the one-shot startup mount timer with a continuous self-healing heartbeat (`ensureMountedAndSynced`) that automatically re-mounts the `🎲` Status Bar pill and re-applies the active gradient palette if VSCode ever rebuilds the Status Bar DOM or resets workbench styles.
+
 ## [1.2.0] - 2026-11-05
 
 ### Added

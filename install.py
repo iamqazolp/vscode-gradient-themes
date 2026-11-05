@@ -77,7 +77,10 @@ def patch_local_workbench_html(repo_root: Path) -> list[Path]:
                 html,
                 flags=re.IGNORECASE,
             )
-            html = re.sub(r"(</head>)", lambda m: f"{block}\n{m.group(1)}", html, count=1, flags=re.IGNORECASE)
+            if re.search(r"</html>", html, flags=re.IGNORECASE):
+                html = re.sub(r"(</html>)", lambda m: f"{block}\n{m.group(1)}", html, count=1, flags=re.IGNORECASE)
+            else:
+                html = re.sub(r"(</head>)", lambda m: f"{block}\n{m.group(1)}", html, count=1, flags=re.IGNORECASE)
             html_path.write_text(html, encoding="utf-8")
             patched.append(html_path)
         except Exception as exc:
@@ -87,7 +90,7 @@ def patch_local_workbench_html(repo_root: Path) -> list[Path]:
 
 def install_extension(repo_root: Path) -> list[Path]:
     pkg = json.loads((repo_root / "package.json").read_text(encoding="utf-8"))
-    ext_version = str(pkg.get("version", "1.2.0"))
+    ext_version = str(pkg.get("version", "1.2.2"))
     ext_dir_name = f"{EXT_ID}-{ext_version}"
 
     home = Path.home()
@@ -103,6 +106,14 @@ def install_extension(repo_root: Path) -> list[Path]:
             continue
         root.mkdir(parents=True, exist_ok=True)
         target = root / ext_dir_name
+
+        # Remove older version directories of the same extension
+        for old_dir in root.glob(f"{EXT_ID}-*"):
+            if old_dir.resolve() != target.resolve() and old_dir.resolve() != repo_root.resolve():
+                if old_dir.is_symlink():
+                    old_dir.unlink()
+                elif old_dir.is_dir():
+                    shutil.rmtree(old_dir, ignore_errors=True)
 
         if repo_root.resolve() != target.resolve():
             if target.is_symlink():
@@ -123,6 +134,27 @@ def install_extension(repo_root: Path) -> list[Path]:
                     )
                 else:
                     shutil.copy2(src, dst)
+
+        ext_json = root / "extensions.json"
+        if ext_json.exists():
+            try:
+                ext_list = json.loads(ext_json.read_text(encoding="utf-8"))
+                ext_list = [
+                    e
+                    for e in ext_list
+                    if str(e.get("identifier", {}).get("id", "")).lower() != EXT_ID.lower()
+                ]
+                ext_list.append(
+                    {
+                        "identifier": {"id": EXT_ID},
+                        "version": ext_version,
+                        "location": {"$mid": 1, "path": str(target), "scheme": "file"},
+                        "relativeLocation": ext_dir_name,
+                    }
+                )
+                ext_json.write_text(json.dumps(ext_list, indent=2), encoding="utf-8")
+            except Exception as exc:
+                print(f"[WARN] Could not update {ext_json}: {exc}")
 
         installed_paths.append(target)
 

@@ -2,7 +2,7 @@
   "name": "vscode-gradient-themes",
   "displayName": "VSCode Gradient Themes",
   "description": "Full-workbench atmospheric gradient meshes, single-hue ombr\u00e9 themes, and a 0ms Status Bar (\ud83c\udfb2) mood roller with 30 curated palettes.",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "publisher": "iamqazolp",
   "license": "MIT",
   "icon": "media/icon.png",

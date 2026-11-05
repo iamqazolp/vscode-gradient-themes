@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const https = require("https");
 
 const EXTENSION_ID = "iamqazolp.vscode-gradient-themes";
-const EXTENSION_VERSION = "1.2.0";
+const EXTENSION_VERSION = "1.2.2";
 const GITHUB_REPO_URL = "https://github.com/iamqazolp/vscode-gradient-themes";
 const GITHUB_ISSUES_URL = "https://github.com/iamqazolp/vscode-gradient-themes/issues";
 const MARKETPLACE_URL =
@@ -269,31 +269,40 @@ function stripGradientBlocks(html) {
   return cleaned;
 }
 
+async function safeConfigUpdate(config, key, value) {
+  try {
+    await config.update(key, value, vscode.ConfigurationTarget.Global);
+  } catch (_) {}
+}
+
 async function applyWorkbenchSettings(context, enable = true) {
   const { cssUrl, jsUrl } = getAssetUrls(context);
   const config = vscode.workspace.getConfiguration();
+  const hasCustomCssExt = Boolean(
+    vscode.extensions && vscode.extensions.getExtension("be5invis.vscode-custom-css")
+  );
 
   if (enable) {
-    await config.update("terminal.integrated.gpuAcceleration", "off", vscode.ConfigurationTarget.Global);
-    await config.update("terminal.integrated.enableImages", true, vscode.ConfigurationTarget.Global);
-    await config.update("editor.guides.bracketPairs", false, vscode.ConfigurationTarget.Global);
-    await config.update("editor.bracketPairColorization.enabled", false, vscode.ConfigurationTarget.Global);
-    await config.update("gradientThemes.autoEnableOverlay", true, vscode.ConfigurationTarget.Global);
+    await safeConfigUpdate(config, "terminal.integrated.gpuAcceleration", "off");
+    await safeConfigUpdate(config, "terminal.integrated.enableImages", true);
+    await safeConfigUpdate(config, "editor.guides.bracketPairs", false);
+    await safeConfigUpdate(config, "editor.bracketPairColorization.enabled", false);
+    await safeConfigUpdate(config, "gradientThemes.autoEnableOverlay", true);
 
-    // Keep vscode_custom_css.imports synced for users who also use Custom CSS Loader
-    const existing = config.get("vscode_custom_css.imports") || [];
-    const filtered = Array.isArray(existing) ? existing.filter((u) => !isGradientAssetUrl(u)) : [];
-    await config.update(
-      "vscode_custom_css.imports",
-      [...filtered, cssUrl, jsUrl],
-      vscode.ConfigurationTarget.Global
-    );
+    // Keep vscode_custom_css.imports synced only if Custom CSS Loader is installed
+    if (hasCustomCssExt) {
+      const existing = config.get("vscode_custom_css.imports") || [];
+      const filtered = Array.isArray(existing) ? existing.filter((u) => !isGradientAssetUrl(u)) : [];
+      await safeConfigUpdate(config, "vscode_custom_css.imports", [...filtered, cssUrl, jsUrl]);
+    }
   } else {
-    await config.update("gradientThemes.autoEnableOverlay", false, vscode.ConfigurationTarget.Global);
-    const existing = config.get("vscode_custom_css.imports") || [];
-    if (Array.isArray(existing) && existing.some(isGradientAssetUrl)) {
-      const filtered = existing.filter((u) => !isGradientAssetUrl(u));
-      await config.update("vscode_custom_css.imports", filtered, vscode.ConfigurationTarget.Global);
+    await safeConfigUpdate(config, "gradientThemes.autoEnableOverlay", false);
+    if (hasCustomCssExt) {
+      const existing = config.get("vscode_custom_css.imports") || [];
+      if (Array.isArray(existing) && existing.some(isGradientAssetUrl)) {
+        const filtered = existing.filter((u) => !isGradientAssetUrl(u));
+        await safeConfigUpdate(config, "vscode_custom_css.imports", filtered);
+      }
     }
   }
 }
@@ -303,10 +312,10 @@ async function applyWorkbenchSettings(context, enable = true) {
  */
 async function enableGradientOverlay(context, silent = false) {
   trackEvent("command.enableGradientOverlay", { silent });
-  await applyWorkbenchSettings(context, true);
 
   const loc = locateWorkbenchHtml();
   if (!loc) {
+    await applyWorkbenchSettings(context, true);
     if (!silent) {
       vscode.window.showWarningMessage(
         "VSCode Gradient Themes: Could not locate workbench.html to inject the gradient mesh."
@@ -329,9 +338,14 @@ async function enableGradientOverlay(context, silent = false) {
     html = html.replace(/<meta\s+http-equiv="Content-Security-Policy"[\s\S]*?\/>/i, "");
 
     const { block } = buildInjectionPayload(context);
-    html = html.replace(/(<\/head>)/i, `${block}\n$1`);
+    if (/<\/html>/i.test(html)) {
+      html = html.replace(/(<\/html>)/i, `${block}\n$1`);
+    } else {
+      html = html.replace(/(<\/head>)/i, `${block}\n$1`);
+    }
 
     await fs.promises.writeFile(htmlPath, html, "utf8");
+    await applyWorkbenchSettings(context, true);
 
     if (!silent) {
       const action = await vscode.window.showInformationMessage(
@@ -344,6 +358,11 @@ async function enableGradientOverlay(context, silent = false) {
     }
     return true;
   } catch (err) {
+    if (telemetryOutputChannel) {
+      telemetryOutputChannel.appendLine(
+        `[PatchError] Failed to patch workbench.html: ${err && err.message ? err.message : err}`
+      );
+    }
     if (!silent) {
       vscode.window.showErrorMessage(
         `VSCode Gradient Themes: Permission required to update workbench.html (${err.message}).`
@@ -381,10 +400,21 @@ async function disableGradientOverlay(context) {
   }
 }
 
+function showReloadStatusBarPrompt(context) {
+  const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 10000);
+  item.text = "$(sparkle) Reload for Gradient & 🎲";
+  item.tooltip =
+    "VSCode Gradient Themes re-injected the 4-Color Gradient Mesh & 🎲 Randomizer after a VSCode update or install. Click to Reload Window!";
+  item.command = "workbench.action.reloadWindow";
+  item.backgroundColor = new vscode.ThemeColor("statusBarItem.warningBackground");
+  item.show();
+  context.subscriptions.push(item);
+}
+
 /**
  * Zero-Command Auto-Setup & Auto-Update on Startup:
- * - On fresh install, automatically injects the 4-Color Gradient Mesh & 🎲 Randomizer into workbench.html
- *   and offers a single 1-click "Reload Window" button (no extra extension or commands needed).
+ * - On fresh install or after a VSCode app update wipes workbench.html, automatically re-injects
+ *   the 4-Color Gradient Mesh & 🎲 Randomizer into workbench.html and offers a 1-click "Reload Window".
  * - On extension updates, silently refreshes the inline CSS/JS hash inside workbench.html.
  */
 async function autoSyncWorkbenchOnStartup(context) {
@@ -401,11 +431,17 @@ async function autoSyncWorkbenchOnStartup(context) {
       return;
     }
 
+    const statBefore = await fs.promises.stat(loc.htmlPath);
     const currentHtml = await fs.promises.readFile(loc.htmlPath, "utf8");
     const { hash } = buildInjectionPayload(context);
 
     // Already up-to-date with the exact current CSS + 30-palette JS hash
     if (currentHtml.includes(`<!-- !! VSCODE-GRADIENT-THEMES-START ${hash} !! -->`)) {
+      // If another window in a multi-window startup just patched workbench.html within the last 15s,
+      // this window booted before the patch and also needs a reload prompt.
+      if (Date.now() - statBefore.mtimeMs < 15000) {
+        showReloadStatusBarPrompt(context);
+      }
       return;
     }
 
@@ -415,6 +451,7 @@ async function autoSyncWorkbenchOnStartup(context) {
 
     const ok = await enableGradientOverlay(context, true);
     if (ok && !hadPreviousPatch) {
+      showReloadStatusBarPrompt(context);
       const choice = await vscode.window.showInformationMessage(
         "✨ VSCode Gradient Themes: 4-Color Gradient Mesh & Live 🎲 Randomizer are ready! Click Reload Window to activate.",
         "Reload Window",
@@ -426,7 +463,13 @@ async function autoSyncWorkbenchOnStartup(context) {
         await disableGradientOverlay(context);
       }
     }
-  } catch (_) {}
+  } catch (err) {
+    if (telemetryOutputChannel) {
+      telemetryOutputChannel.appendLine(
+        `[AutoSyncError] ${err && err.message ? err.message : err}`
+      );
+    }
+  }
 }
 
 function getAvailableThemes(context) {

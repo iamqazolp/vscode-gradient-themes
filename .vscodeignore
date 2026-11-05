@@ -1,6 +1,7 @@
 .vscode/**
 .github/**
 .git/**
+.local-notes/**
 .gitignore
 .DS_Store
 __pycache__/**
