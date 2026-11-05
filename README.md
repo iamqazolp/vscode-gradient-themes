@@ -1,6 +1,6 @@
 # <img src="./media/icon.png" width="36" height="36" align="top" alt="VS Code Gradient Themes Logo" /> VS Code Gradient Themes
 
-20 `7%–22%` gradient color themes (10 Light & Dark families) + a universal translucent 4-color gradient overlay and live Status Bar randomizer (`🎲` with 16 curated palettes + procedural HSL harmonies) for VS Code, Cursor, Windsurf, and Antigravity IDE.
+20 gradient color themes (10 Light & Dark families) + a translucent 4-color gradient overlay and live Status Bar randomizer (`🎲` with 16 curated palettes + procedural HSL harmonies) for VS Code, Cursor, Windsurf, and Antigravity IDE.
 
 ![4-Color Rainbow Overlay](./media/screenshots/rainbow-overview.png)
 
@@ -14,11 +14,22 @@
 
 ---
 
+## How Themes & the `🎲` Randomizer Work Together
+
+The extension has two independent layers that can be used separately or combined:
+
+1. **Base Color Theme (`Cmd + K, Cmd + T`):**
+   Sets the workbench's base background colors (`var(--vscode-*-background)`) and **monochromatic syntax highlighting** tuned to that color family.
+2. **Live `🎲` Gradient Overlay (`js/gradient-randomizer.js` + `css/rainbow-gradient-light.css`):**
+   Instead of overwriting `background-color`, the CSS overlay applies a translucent `background-image` mesh over your active theme's native surface variables.
+   - **Combining both:** Pick any Light or Dark theme in `Cmd + K, Cmd + T` (for its base tone and syntax colors), then click **`🎲`** in the Status Bar to blend different 4-color gradients on top in real time (`0ms`, no reload).
+   - **Pure single-color theme only:** Right-click **`🎲`** (or press `Alt + Shift + 0`) to cycle between **Prism Classic** and **Theme Native (Overlay Off)** without restarting VS Code.
+
+---
+
 ## 1. 20 Color Themes (`Cmd + K, Cmd + T`)
 
-Each single-color theme uses a `7%–22%` perimeter-to-canvas gradient with monochromatic syntax tokens (`12:1–17.8:1` AAA foreground contrast):
-
-| Family | Light Theme (`vs`) | Dark Theme (`vs-dark`) | Light Stops (`22% → 7%`) | Dark Stops |
+| Family | Light Theme (`vs`) | Dark Theme (`vs-dark`) | Light Stops | Dark Stops |
 | :--- | :--- | :--- | :--- | :--- |
 | **Pure Blue** | `Pure Blue Gradient (Sky to Sapphire Light)` | `Pure Blue Gradient (Abyssal Cobalt Dark)` | `#D8ECFD → #FAFDFF` | `#090E16 → #162438` |
 | **Pure Cyan** | `Pure Cyan Gradient (Lagoon to Frost Light)` | `Pure Cyan Gradient (Abyssal Teal Dark)` | `#D8F8FD → #FBFEFF` | `#081214 → #153035` |
@@ -35,8 +46,6 @@ Each single-color theme uses a `7%–22%` perimeter-to-canvas gradient with mono
 
 ## 2. Full-Workbench Rainbow Overlay & `🎲` Randomizer
 
-The CSS overlay blends a `7%–22%` translucent 4-color gradient over your active theme's native `var(--vscode-*-background)` variables—covering the Editor, Sidebar, Sticky Scroll, Scrollbar, and Integrated Terminal (`xterm.js`).
-
 ### Enable / Disable
 1. Open Command Palette (**`Cmd + Shift + P`** / **`Ctrl + Shift + P`**).
 2. Run **`Gradient Themes: Enable 4-Color Rainbow Gradient & Live Randomizer`**.
@@ -45,8 +54,8 @@ The CSS overlay blends a `7%–22%` translucent 4-color gradient over your activ
 ### Status Bar `🎲` Controls (No Reload Needed)
 | Action | Shortcut / Click | Effect |
 | :--- | :--- | :--- |
-| **Roll Gradient** | **Left-Click `🎲`** or **`Alt + Shift + G`** | Rolls a new `7%–22%` 4-color gradient & mesh angle in `0ms` (16 curated palettes + procedural HSL harmonies) |
-| **Reset to Classic** | **Right-Click / `Shift + Click` `🎲`** or **`Alt + Shift + 0`** | Resets to the classic 4-Color Rainbow (`#EA4335`, `#FBBC04`, `#34A853`, `#4285F4`) |
+| **Roll Gradient** | **Left-Click `🎲`** or **`Alt + Shift + G`** | Rolls a new 4-color gradient & mesh angle in `0ms` (16 curated palettes + procedural HSL harmonies) |
+| **Reset / Toggle Native** | **Right-Click / `Shift + Click` `🎲`** or **`Alt + Shift + 0`** | Cycles between **Prism Classic** (`#EA4335`, `#FBBC04`, `#34A853`, `#4285F4`) and **Theme Native (Overlay Off)** |
 | **Auto-Roll on Startup** | **`Cmd/Ctrl + Click` `🎲`** | Toggles `• Auto` mode to roll a fresh gradient whenever VS Code opens |
 
 ---

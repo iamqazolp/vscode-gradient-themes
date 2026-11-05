@@ -82,7 +82,7 @@ async function enableGradientOverlay(context, silent = false) {
   }
 
   const action = await vscode.window.showInformationMessage(
-    "7%–22% Rainbow Gradient & Live Randomizer configured! Reload Custom CSS and JS now to apply.",
+    "Rainbow Gradient & Live Randomizer configured! Reload Custom CSS and JS now to apply.",
     "Reload Custom CSS and JS"
   );
   if (action === "Reload Custom CSS and JS") {

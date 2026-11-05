@@ -1083,7 +1083,7 @@ def build_package_json(manifest: list[dict]) -> dict:
     return {
         "name": "vscode-gradient-themes",
         "displayName": "VS Code Gradient Themes",
-        "description": "12 7%–22% Glacial Single-Color & 4-Color Gradient Themes + a Universal Translucent 4-Color Rainbow Overlay & Live Status Bar Randomizer.",
+        "description": "20 Glacial Single-Color & 4-Color Gradient Themes + a Universal Translucent 4-Color Rainbow Overlay & Live Status Bar Randomizer.",
         "version": "1.1.0",
         "publisher": "iamqazolp",
         "license": "MIT",

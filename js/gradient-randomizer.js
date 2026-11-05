@@ -250,6 +250,25 @@
     const wb = document.querySelector(".monaco-workbench");
     if (!wb) return;
 
+    if (palette && palette.isNativeOff) {
+      // Turn off the 4-color overlay so the pure single-color theme shines through natively
+      ["--g-r1", "--g-r2", "--g-r3", "--g-r4"].forEach((prop) =>
+        wb.style.setProperty(prop, "transparent")
+      );
+      ["--g-base", "--g-bar", "--g-side", "--g-panel"].forEach((prop) =>
+        wb.style.setProperty(prop, "none")
+      );
+      wb.style.setProperty("--g-border", "var(--vscode-focusBorder, #3B82F6)");
+      try {
+        localStorage.setItem(
+          STORAGE_KEY_STATE,
+          JSON.stringify({ name: "Theme Native", isNativeOff: true })
+        );
+      } catch (_) {}
+      updateStatusBarPill("Theme Native", null, true);
+      return;
+    }
+
     if (!palette || palette.isDefault) {
       // Clear inline overrides so classic rainbow CSS takes over
       [
@@ -276,7 +295,6 @@
       panel: 105,
     };
 
-    // Strictly maintain the eye-friendly 7%–22% translucent range
     wb.style.setProperty("--g-r1", rgba(c1, 0.18));
     wb.style.setProperty("--g-r2", rgba(c2, 0.18));
     wb.style.setProperty("--g-r3", rgba(c3, 0.18));
@@ -328,7 +346,18 @@
     updateStatusBarPill(palette.name, palette.stops);
   }
 
-  function updateStatusBarPill(name, stops) {
+  function toggleResetOrNative() {
+    const saved = getSavedPalette();
+    if (!saved) {
+      // Currently on Prism Classic -> switch to Theme Native (Overlay Off)
+      applyPaletteToWorkbench({ name: "Theme Native", isNativeOff: true });
+    } else {
+      // Currently on a randomized palette or Theme Native -> reset to Prism Classic
+      applyPaletteToWorkbench(null);
+    }
+  }
+
+  function updateStatusBarPill(name, stops, isNativeOff) {
     const labelEl = document.getElementById("prism-randomizer-label");
     const swatchEl = document.getElementById("prism-randomizer-swatch");
     if (!labelEl) return;
@@ -337,7 +366,9 @@
     labelEl.textContent = `${name}${autoOn ? " • Auto" : ""}`;
 
     if (swatchEl) {
-      if (stops && stops.length === 4) {
+      if (isNativeOff) {
+        swatchEl.style.background = "var(--vscode-focusBorder, #64748B)";
+      } else if (stops && stops.length === 4) {
         const hexes = stops.map(rgbToHex);
         swatchEl.style.background = `linear-gradient(90deg, ${hexes[0]}, ${hexes[1]}, ${hexes[2]}, ${hexes[3]})`;
       } else {
@@ -358,9 +389,9 @@
     item.style.cssText =
       "display:inline-flex;align-items:center;cursor:pointer;user-select:none;padding:0 6px;height:100%;";
     item.title =
-      "🎲 Gradient Themes Randomizer (7%–22%)\n" +
+      "🎲 Gradient Themes Randomizer\n" +
       "• Left-Click (or Alt+Shift+G): Roll random gradient\n" +
-      "• Right-Click / Shift+Click (or Alt+Shift+0): Reset to Classic 4-Color Rainbow\n" +
+      "• Right-Click / Shift+Click (or Alt+Shift+0): Cycle Prism Classic / Theme Native (Off)\n" +
       "• Cmd/Ctrl+Click: Toggle Auto-Randomize on Startup";
 
     const pill = document.createElement("a");
@@ -395,12 +426,13 @@
         const saved = getSavedPalette();
         updateStatusBarPill(
           saved ? saved.name : "Prism Classic",
-          saved ? saved.stops : null
+          saved ? saved.stops : null,
+          saved && saved.isNativeOff
         );
         return;
       }
       if (e.shiftKey) {
-        applyPaletteToWorkbench(null);
+        toggleResetOrNative();
         return;
       }
       const saved = getSavedPalette();
@@ -411,7 +443,7 @@
     item.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      applyPaletteToWorkbench(null);
+      toggleResetOrNative();
     });
 
     rightItems.insertBefore(item, rightItems.firstChild);
@@ -443,7 +475,7 @@
 
   // Global keyboard shortcuts:
   //   Alt + Shift + G -> Roll new random gradient
-  //   Alt + Shift + 0 -> Reset to Classic Gemini 4-Color Rainbow
+  //   Alt + Shift + 0 -> Cycle Prism Classic / Theme Native (Off)
   window.addEventListener(
     "keydown",
     (e) => {
@@ -454,7 +486,7 @@
         applyPaletteToWorkbench(next);
       } else if (e.altKey && e.shiftKey && (e.code === "Digit0" || e.key === ")" || e.key === "0")) {
         e.preventDefault();
-        applyPaletteToWorkbench(null);
+        toggleResetOrNative();
       }
     },
     true
