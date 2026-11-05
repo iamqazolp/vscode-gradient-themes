@@ -87,7 +87,7 @@ def patch_local_workbench_html(repo_root: Path) -> list[Path]:
 
 def install_extension(repo_root: Path) -> list[Path]:
     pkg = json.loads((repo_root / "package.json").read_text(encoding="utf-8"))
-    ext_version = str(pkg.get("version", "1.1.0"))
+    ext_version = str(pkg.get("version", "1.2.0"))
     ext_dir_name = f"{EXT_ID}-{ext_version}"
 
     home = Path.home()

@@ -21,7 +21,7 @@ from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parent
 CUSTOM_THEMES_JSON = REPO_DIR / "palettes" / "custom_themes.json"
-EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.vscode-gradient-themes-1.1.0"))
+EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.vscode-gradient-themes-1.2.0"))
 VSCODE_EXT_JSON = Path(os.path.expanduser("~/.vscode/extensions/extensions.json"))
 VSCODE_SETTINGS_JSON = Path(os.path.expanduser("~/Library/Application Support/Code/User/settings.json"))
 
@@ -1084,7 +1084,7 @@ def build_package_json(manifest: list[dict]) -> dict:
         "name": "vscode-gradient-themes",
         "displayName": "VSCode Gradient Themes",
         "description": "Full-workbench atmospheric gradient meshes, single-hue ombré themes, and a 0ms Status Bar (🎲) mood roller with 30 curated palettes.",
-        "version": "1.1.0",
+        "version": "1.2.0",
         "publisher": "iamqazolp",
         "license": "MIT",
         "icon": "media/icon.png",
@@ -1194,7 +1194,7 @@ def register_extension(ext_id: str, folder_name: str, ext_path: Path):
         ext_list = [e for e in ext_list if e.get("identifier", {}).get("id") != ext_id]
         ext_list.append({
             "identifier": {"id": ext_id},
-            "version": "1.1.0",
+            "version": "1.2.0",
             "location": {
                 "$mid": 1,
                 "path": str(ext_path),
@@ -1227,7 +1227,7 @@ def main():
 
     register_extension(
         "iamqazolp.vscode-gradient-themes",
-        "iamqazolp.vscode-gradient-themes-1.1.0",
+        "iamqazolp.vscode-gradient-themes-1.2.0",
         EXT_DIR,
     )
 

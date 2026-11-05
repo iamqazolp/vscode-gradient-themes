@@ -2,7 +2,7 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
-## [1.1.0] - 2026-11-05
+## [1.2.0] - 2026-11-05
 
 ### Added
 - **Built-In Zero-Dependency Gradient Engine (`extension.js`)**:

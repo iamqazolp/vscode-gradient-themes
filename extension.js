@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const https = require("https");
 
 const EXTENSION_ID = "iamqazolp.vscode-gradient-themes";
-const EXTENSION_VERSION = "1.1.0";
+const EXTENSION_VERSION = "1.2.0";
 const GITHUB_REPO_URL = "https://github.com/iamqazolp/vscode-gradient-themes";
 const GITHUB_ISSUES_URL = "https://github.com/iamqazolp/vscode-gradient-themes/issues";
 const MARKETPLACE_URL =
@@ -662,7 +662,7 @@ async function showTelemetryAndMarketplaceStats() {
     ``,
     `> [!NOTE]`,
     `> **Why does the Publisher Dashboard show ~30–40 Downloads/Acquisitions right after publishing?**`,
-    `> Every time you publish a new version (\`1.0.0\`, \`1.1.0\`), public VSIX mirror registries, open-source archivers, and automated extension security scanners download the \`.vsix\` package (~8–10 automated pulls per version) to index and scan it. Microsoft's Publisher Dashboard adds \`install + downloadCount\` together into "Acquisitions", whereas **In-App Installs (\`install\`)** tracks real human installations from inside the IDE.`,
+    `> Every time you publish a new version (\`1.0.0\`, \`1.2.0\`), public VSIX mirror registries, open-source archivers, and automated extension security scanners download the \`.vsix\` package (~8–10 automated pulls per version) to index and scan it. Microsoft's Publisher Dashboard adds \`install + downloadCount\` together into "Acquisitions", whereas **In-App Installs (\`install\`)** tracks real human installations from inside the IDE.`,
   ];
 
   const channel = vscode.window.createOutputChannel("Gradient Themes Telemetry & Stats", "markdown");
