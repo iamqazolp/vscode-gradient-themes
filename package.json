@@ -1,0 +1,89 @@
+{
+  "name": "gemini-prism-gradient-theme",
+  "displayName": "Gemini Prism & Antarctic Frost Gradient Themes",
+  "description": "Whisper-soft Antarctic & Glacial monochromatic gradient themes built for eye-friendly code reviewing.",
+  "version": "1.0.0",
+  "publisher": "iamqazolp",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "gemini",
+    "gradient",
+    "antarctica",
+    "glacial",
+    "minimal",
+    "dark",
+    "light",
+    "theme"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Pure Blue Gradient (Sky to Sapphire Light)",
+        "uiTheme": "vs",
+        "path": "./themes/pure-blue-light-color-theme.json"
+      },
+      {
+        "label": "Pure Blue Gradient (Abyssal Cobalt Dark)",
+        "uiTheme": "vs-dark",
+        "path": "./themes/pure-blue-dark-color-theme.json"
+      },
+      {
+        "label": "Pure Green Gradient (Mint to Emerald Light)",
+        "uiTheme": "vs",
+        "path": "./themes/pure-green-light-color-theme.json"
+      },
+      {
+        "label": "Pure Green Gradient (Forest Emerald Dark)",
+        "uiTheme": "vs-dark",
+        "path": "./themes/pure-green-dark-color-theme.json"
+      },
+      {
+        "label": "Pure Pink Gradient (Sakura to Rose Light)",
+        "uiTheme": "vs",
+        "path": "./themes/pure-pink-light-color-theme.json"
+      },
+      {
+        "label": "Pure Pink Gradient (Velvet Berry Dark)",
+        "uiTheme": "vs-dark",
+        "path": "./themes/pure-pink-dark-color-theme.json"
+      },
+      {
+        "label": "Pure Yellow Gradient (Sunlit Honey Light)",
+        "uiTheme": "vs",
+        "path": "./themes/pure-yellow-light-color-theme.json"
+      },
+      {
+        "label": "Pure Yellow Gradient (Golden Amber Dark)",
+        "uiTheme": "vs-dark",
+        "path": "./themes/pure-yellow-dark-color-theme.json"
+      },
+      {
+        "label": "Pure Purple Gradient (Lavender to Amethyst Light)",
+        "uiTheme": "vs",
+        "path": "./themes/pure-purple-light-color-theme.json"
+      },
+      {
+        "label": "Pure Purple Gradient (Cosmic Amethyst Dark)",
+        "uiTheme": "vs-dark",
+        "path": "./themes/pure-purple-dark-color-theme.json"
+      },
+      {
+        "label": "Gemini Prism Light (Pastel 4-Color Star)",
+        "uiTheme": "vs",
+        "path": "./themes/gemini-prism-light-color-theme.json"
+      },
+      {
+        "label": "Gemini Prism Dark (4-Color Star)",
+        "uiTheme": "vs-dark",
+        "path": "./themes/gemini-prism-dark-color-theme.json"
+      }
+    ]
+  }
+}

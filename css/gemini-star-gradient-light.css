@@ -1,0 +1,259 @@
+/* ==========================================================================
+ * ✨ GEMINI 4-COLOR RAINBOW BLEND ENGINE (7%–22% Translucent Overlay)
+ *
+ * Combines with ANY selected VS Code theme instead of overwriting it:
+ *   - Preserves the active theme's native `--vscode-*-background` colors as
+ *     the `background-color` base (works with Light, Dark, Pure Blue, Matcha,
+ *     Sea Breeze, Warm Sunset, Monokai, etc.).
+ *   - Layers 100% translucent (7%–22% alpha) Gemini 4-Color Star gradients
+ *     (`#EA4335` Red, `#FBBC04` Yellow, `#34A853` Green, `#4285F4` Blue)
+ *     via `background-image` so the Gemini rainbow blends into every theme!
+ * ========================================================================== */
+
+/* --------------------------------------------------------------------------
+ * 1. TRANSLUCENT GEMINI 4-COLOR VARIABLES (7%–22% Alpha — Zero Opaque Hex!)
+ * -------------------------------------------------------------------------- */
+.monaco-workbench {
+  --g-r1: rgba(234, 67, 53, 0.18);
+  --g-r2: rgba(251, 188, 4, 0.18);
+  --g-r3: rgba(52, 168, 83, 0.18);
+  --g-r4: rgba(66, 133, 244, 0.22);
+
+  /* 100% translucent diagonal 4-color wash (7%–16% alpha) so theme base shows through */
+  --g-base: linear-gradient(
+    135deg,
+    rgba(234, 67, 53, 0.14) 0%,
+    rgba(251, 188, 4, 0.11) 33%,
+    rgba(52, 168, 83, 0.11) 66%,
+    rgba(66, 133, 244, 0.16) 100%
+  );
+
+  /* Translucent 4-color ribbon for Title Bar, Status Bar, Active Tab & Selection (7%–22%) */
+  --g-bar: linear-gradient(
+    90deg,
+    rgba(234, 67, 53, 0.20) 0%,
+    rgba(251, 188, 4, 0.15) 33%,
+    rgba(52, 168, 83, 0.15) 66%,
+    rgba(66, 133, 244, 0.22) 100%
+  );
+
+  /* Translucent 4-color wash for Activity Bar & Sidebars (7%–18%) */
+  --g-side: linear-gradient(
+    165deg,
+    rgba(234, 67, 53, 0.16) 0%,
+    rgba(251, 188, 4, 0.13) 33%,
+    rgba(52, 168, 83, 0.13) 66%,
+    rgba(66, 133, 244, 0.16) 100%
+  );
+
+  /* Translucent 4-color wash for Bottom Terminal Panel (7%–18%) */
+  --g-panel: linear-gradient(
+    105deg,
+    rgba(251, 188, 4, 0.07) 0%,
+    rgba(52, 168, 83, 0.13) 50%,
+    rgba(66, 133, 244, 0.18) 100%
+  );
+
+  /* 4-Color Gemini Star Accent Border & Cursor */
+  --g-border: linear-gradient(90deg, #EA4335 0%, #FBBC04 33%, #34A853 66%, #4285F4 100%);
+}
+
+/* --------------------------------------------------------------------------
+ * 2. BLEND GEMINI RAINBOW OVER THE ACTIVE THEME'S NATIVE BACKGROUND COLORS
+ * -------------------------------------------------------------------------- */
+
+/* Main Workbench & Grid View: Uses active theme's editor background + Gemini mesh */
+.monaco-workbench,
+.monaco-workbench > .monaco-grid-view,
+.monaco-workbench.floating-panels > .monaco-grid-view {
+  background-color: var(--vscode-editor-background) !important;
+  background-image:
+    radial-gradient(ellipse 75% 55% at 15% 15%, var(--g-r1) 0%, transparent 70%),
+    radial-gradient(ellipse 65% 75% at 85% 25%, var(--g-r2) 0%, transparent 72%),
+    radial-gradient(ellipse 75% 60% at 25% 85%, var(--g-r3) 0%, transparent 72%),
+    radial-gradient(ellipse 70% 70% at 85% 85%, var(--g-r4) 0%, transparent 75%),
+    var(--g-base) !important;
+  background-attachment: fixed !important;
+}
+
+/* Make inner editor/list wrappers transparent so the combined theme + Gemini canvas shines through */
+.monaco-workbench .part.editor,
+.monaco-workbench .part.editor > .content,
+.monaco-workbench .editor-group-container,
+.monaco-workbench .editor-container,
+.monaco-workbench .editor-instance,
+.monaco-workbench .editor-group-container > .title,
+.monaco-workbench .editor-group-container > .title.tabs,
+.monaco-workbench .editor-group-container > .title.tabs > .editor-group-header,
+.monaco-workbench .editor-group-container > .title .modern-ui-editor-tab-strip,
+.monaco-workbench .editor-group-container > .title .editor-toolbars,
+.monaco-workbench .editor-group-container > .title .tabs-container,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab:not(.active) > .tab-fill,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab > .tab-connected-edge,
+.monaco-workbench .breadcrumbs-below-tabs,
+.monaco-workbench .monaco-breadcrumbs,
+.monaco-workbench .monaco-editor,
+.monaco-workbench .monaco-editor .overflow-guard,
+.monaco-workbench .monaco-editor .margin,
+.monaco-workbench .monaco-editor .monaco-editor-background,
+.monaco-workbench .monaco-editor .inputarea.ime-input,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-line-numbers,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines-scrollable,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-line-number,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-line-content,
+.monaco-workbench .part.panel :is(.composite.title, .header-or-footer) .monaco-action-bar .action-item,
+.monaco-workbench .part.panel :is(.composite.title, .header-or-footer) .monaco-action-bar .action-item .action-label,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-list .monaco-list-rows,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-tree-sticky-container .monaco-tree-sticky-row,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-pane-view .pane,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-pane-view .pane > .pane-header,
+.monaco-workbench .part.sidebar > .title,
+.monaco-workbench .part.sidebar > .composite.title,
+.monaco-workbench .pane-body.integrated-terminal,
+.monaco-workbench .terminal-outer-container,
+.monaco-workbench .terminal-groups-container,
+.monaco-workbench .terminal-group,
+.monaco-workbench .terminal-split-pane,
+.monaco-workbench .terminal-wrapper,
+.monaco-workbench .terminal-tabs-container,
+.monaco-workbench .xterm,
+.monaco-workbench .xterm .xterm-viewport,
+.monaco-workbench .xterm .xterm-screen,
+.monaco-workbench .xterm .xterm-rows,
+.monaco-workbench .xterm canvas.xterm-link-layer,
+.monaco-workbench .monaco-editor .minimap,
+.monaco-workbench .monaco-editor .minimap-slider,
+.monaco-workbench .notebookOverlay,
+.monaco-workbench .notebook-editor,
+.monaco-workbench .monaco-split-view2 > .monaco-scrollable-element > .split-view-container > .split-view-view {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Blend Minimap HTML5 <canvas> bitmap transparently into the Editor Gradient */
+.monaco-workbench:not(.vs-dark):not(.hc-black) .monaco-editor .minimap {
+  mix-blend-mode: multiply !important;
+  opacity: 0.88 !important;
+}
+.monaco-workbench.vs-dark .monaco-editor .minimap {
+  mix-blend-mode: screen !important;
+  opacity: 0.85 !important;
+}
+
+/* Full Editor Tab Bar Strip: Continuous horizontal Gemini gradient across all tabs & right toolbar */
+.monaco-workbench .editor-group-container > .title > .tabs-and-actions-container {
+  background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background)) !important;
+  background-image: var(--g-bar) !important;
+}
+
+/* Title Bar & Command Center Search Box: Active theme's titleBar background + Gemini horizontal rainbow wash */
+.monaco-workbench .part.titlebar,
+.monaco-workbench .part.titlebar .command-center-center {
+  background-color: var(--vscode-titleBar-activeBackground, var(--vscode-editor-background)) !important;
+  background-image: var(--g-bar) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Status Bar: Active theme's statusBar background + Gemini horizontal rainbow wash */
+.monaco-workbench .part.statusbar {
+  background-color: var(--vscode-statusBar-background, var(--vscode-editor-background)) !important;
+  background-image: var(--g-bar) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Activity Bar & Sidebars: Active theme's sideBar background + Gemini diagonal wash */
+.monaco-workbench .part.activitybar,
+.monaco-workbench .part.sidebar,
+.monaco-workbench.floating-panels .part.sidebar,
+.monaco-workbench.modern-ui.floating-panels .part.sidebar,
+.monaco-workbench .part.auxiliarybar,
+.monaco-workbench.floating-panels .part.auxiliarybar,
+.monaco-workbench.modern-ui.floating-panels .part.auxiliarybar {
+  background-color: var(--vscode-sideBar-background, var(--vscode-editor-background)) !important;
+  background-image: var(--g-side) !important;
+}
+
+/* --------------------------------------------------------------------------
+ * 3. GRADIENT INTEGRATED TERMINAL (Theme Panel Base + Gemini Rainbow Aurora)
+ * -------------------------------------------------------------------------- */
+.monaco-workbench .part.panel,
+.monaco-workbench.floating-panels .part.panel,
+.monaco-workbench .part.editor .editor-instance .terminal-outer-container,
+.monaco-workbench .chat-terminal-output-terminal {
+  background-color: var(--vscode-panel-background, var(--vscode-editor-background)) !important;
+  background-image:
+    radial-gradient(ellipse 65% 85% at 12% 20%, var(--g-r1) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 88% 80%, var(--g-r2) 0%, transparent 70%),
+    radial-gradient(ellipse 55% 65% at 50% 50%, var(--g-r3) 0%, transparent 75%),
+    var(--g-panel) !important;
+}
+
+/* Terminal Panel Header Ribbon */
+.monaco-workbench .part.panel > .composite.title,
+.monaco-workbench .part.panel > .header-or-footer {
+  background-color: var(--vscode-panel-background, var(--vscode-editor-background)) !important;
+  background-image: var(--g-bar) !important;
+}
+
+/* Gradient Terminal Cursor */
+.monaco-workbench .xterm .xterm-cursor,
+.monaco-workbench .xterm .xterm-cursor-block,
+.monaco-workbench .xterm .xterm-cursor-bar,
+.monaco-workbench .xterm .xterm-cursor-underline {
+  background: var(--g-border) !important;
+  border-color: transparent !important;
+  border-radius: 2px !important;
+}
+
+/* Gradient Terminal Text Selection */
+.monaco-workbench .xterm .xterm-selection div {
+  background: var(--g-bar) !important;
+  border-radius: 3px !important;
+}
+
+/* Sticky Scroll (Editor, Terminal & Explorer Tree): Uses active theme's base + Gemini wash */
+.monaco-workbench .monaco-editor .sticky-widget,
+.monaco-workbench .monaco-editor .sticky-widget .monaco-editor-background,
+.monaco-workbench .terminal-sticky-scroll,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar) .monaco-tree-sticky-container {
+  background-color: var(--vscode-editor-background) !important;
+  background-image: var(--g-bar) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* Active Editor Tab Pill & Active Panel Tab Pill (e.g. [Terminal]): Clean rounded pill, zero boxy borders or side-ears */
+.monaco-workbench:not(.modern-ui-tabs) .editor-group-container > .title .tabs-container > .tab.active,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.active > .tab-fill,
+.monaco-workbench .part.panel :is(.composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator,
+.monaco-workbench.modern-ui-tabs .pane-composite-part > :is(.title, .header-or-footer) > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:not(.icon).checked > .active-item-indicator {
+  background-color: var(--vscode-tab-activeBackground, var(--vscode-editor-background)) !important;
+  background-image: var(--g-bar) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Current Editor Line & Selected List Rows */
+.monaco-workbench .monaco-editor .view-overlays .current-line,
+.monaco-workbench .monaco-editor .margin-view-overlays .current-line-margin,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-list .monaco-list-row.selected,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-list .monaco-list-row.focused {
+  background-image: var(--g-bar) !important;
+  border-radius: 6px !important;
+}
+
+/* Floating Popups (Command Palette, Autocomplete, Hover, Menus): Theme widget base + Gemini tint */
+.monaco-workbench :is(.quick-input-widget, .editor-widget.suggest-widget, .monaco-hover, .context-view .monaco-menu, .notifications-toasts .notification-toast) {
+  background-color: var(--vscode-editorWidget-background, var(--vscode-editor-background)) !important;
+  background-image: var(--g-side) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+/* Scrollbar Slider & Editor Cursor */
+.monaco-workbench .monaco-scrollable-element > .scrollbar > .slider,
+.monaco-workbench .monaco-editor .cursors-layer .cursor {
+  background: var(--g-border) !important;
+  border-radius: 99px !important;
+}
