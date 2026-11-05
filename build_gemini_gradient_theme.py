@@ -1067,14 +1067,47 @@ THEMES_MANIFEST = [
 PACKAGE_JSON = {
     "name": "gemini-prism-gradient-theme",
     "displayName": "Gemini Prism & Antarctic Frost Gradient Themes",
-    "description": "Whisper-soft Antarctic & Glacial monochromatic gradient themes built for eye-friendly code reviewing.",
-    "version": "1.0.0",
+    "description": "Whisper-soft 7%–22% Antarctic & Glacial Single-Color Gradient Themes + Universal Translucent Gemini 4-Color Rainbow Overlay & Live Status Bar Randomizer for eye-friendly code reviewing.",
+    "version": "1.1.0",
     "publisher": "iamqazolp",
     "license": "MIT",
     "icon": "media/icon.png",
-    "engines": {"vscode": "^1.70.0"},
+    "galleryBanner": {
+        "color": "#f4f8ff",
+        "theme": "light",
+    },
+    "homepage": "https://github.com/iamqazolp/gemini-prism-gradient-theme#readme",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme.git",
+    },
+    "bugs": {
+        "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme/issues",
+    },
+    "qna": "marketplace",
+    "engines": {"vscode": "^1.75.0"},
     "categories": ["Themes"],
-    "keywords": ["gemini", "gradient", "antarctica", "glacial", "minimal", "dark", "light", "theme"],
+    "keywords": [
+        "gemini",
+        "gradient",
+        "rainbow",
+        "randomizer",
+        "antarctica",
+        "glacial",
+        "pastel",
+        "minimal",
+        "dark",
+        "light",
+        "theme",
+        "antigravity",
+    ],
+    "scripts": {
+        "package": "npx --yes @vscode/vsce package --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
+        "publish": "npx --yes @vscode/vsce publish --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
+        "publish:ovsx": "npx --yes ovsx publish",
+    },
+    "activationEvents": ["onStartupFinished"],
+    "main": "./extension.js",
     "contributes": {
         "themes": [
             {
@@ -1083,7 +1116,25 @@ PACKAGE_JSON = {
                 "path": f"./themes/{item['file']}",
             }
             for item in THEMES_MANIFEST
-        ]
+        ],
+        "commands": [
+            {
+                "command": "geminiPrism.enableGradientOverlay",
+                "title": "Gemini Prism: Enable 4-Color Rainbow Gradient & Live Randomizer",
+            },
+            {
+                "command": "geminiPrism.disableGradientOverlay",
+                "title": "Gemini Prism: Disable 4-Color Rainbow Gradient Overlay",
+            },
+            {
+                "command": "geminiPrism.rollRandomTheme",
+                "title": "Gemini Prism: Roll Random Single-Color Glacial Theme",
+            },
+            {
+                "command": "geminiPrism.openPreview",
+                "title": "Gemini Prism: Open Interactive Theme & Gradient Preview",
+            },
+        ],
     },
 }
 

@@ -1,0 +1,11 @@
+.vscode/**
+.github/**
+.git/**
+.gitignore
+.DS_Store
+__pycache__/**
+*.pyc
+*.vsix
+build_gemini_gradient_theme.py
+install.py
+node_modules/**

@@ -1,33 +1,54 @@
-# ✨ Gemini Prism 4-Color Gradient Theme Family
+# ✨ Gemini Prism & Antarctic Frost Gradient Themes
 
-Inspired by the **4-Point Gemini Star Gradient**:
-- 🔴 **Top Point — Gemini Red / Coral (`#EA4335` / `#FF6B63`)**: Title Bar, Active Tab Top Highlight, Keywords & Tags
-- 🟡 **Left Point — Gemini Golden Yellow (`#FBBC04` / `#FFD15C`)**: Activity Bar, Explorer Sidebar, Classes, Types & Cursor
-- 🟢 **Bottom Point — Gemini Emerald Green (`#34A853` / `#4BE084`)**: Bottom Terminal Panel, Status Bar, Strings & Git Additions
-- 🔵 **Right & Core — Gemini Azure Blue (`#4285F4` / `#6BA5FF`)**: Center Editor Canvas, `agy` Terminal, Functions & Focus Accents
+Whisper-soft **`7%–22%` Antarctic & Glacial Single-Color Gradient Themes** + a **Universal Translucent Gemini 4-Color Rainbow Overlay & Live Status Bar Randomizer (`🎲`)** for **VS Code**, **Cursor**, **Windsurf**, and **Antigravity IDE**.
+
+Designed from the ground up for **effortless, zero-strain code reviewing**—combining calm, high-contrast Polar Slate syntax palettes with translucent multi-lobe gradients across the Editor, Title Bar, Activity Bar, Sidebars, Sticky Scroll, Minimap, and Integrated Terminal (`xterm.js`).
 
 ---
 
-## 🎨 6 Included Variants (`Cmd + K` then `Cmd + T`)
+## 🎨 12 Included Color Themes (Light & Dark)
 
-1. **✨ Gemini Prism Dark (4-Color Star)** — *Default Dark*: Deep sapphire editor (`#0F172A`) framed by a deep crimson-plum top bar (`#23131B`), warm golden-umber sidebar (`#1A1712`), and deep emerald-forest bottom panel (`#0E1E18`).
-2. **🌈 Gemini Star Spectrum (Vibrant Dark)** — *High-Saturation Spatial Gradient*: Bold ruby top bar (`#331520`), marigold-bronze sidebar (`#241C10`), emerald-lagoon bottom terminal (`#0F291E`), and rich cobalt-sapphire editor (`#101E38`).
-3. **🌌 Gemini Cosmic OLED (True Black)** — *Pitch-Black OLED*: Pure `#05070C` OLED canvas with dark-glass star-tinted side panels and neon 4-color syntax.
-4. **🔮 Gemini Aurora Flow (Dusk Gradient)** — *Diagonal Dusk*: Flows smoothly from rose-magenta (`#241421`) and amethyst (`#1B1524`) into deep sapphire (`#11182B`) and aurora teal-emerald (`#0E2024`).
-5. **☀️ Gemini Prism Light (Pastel 4-Color Star)** — *Multi-Zone Pastel Day*: Soft crystal sky-blue editor (`#EDF4FF`) framed by a pastel rose-coral top bar (`#FCE4E1`), sunlit buttercup-cream sidebar (`#FDF5D8`), and mint-emerald bottom panel (`#E3F6EB`).
-6. **🌤️ Gemini Daylight Breeze (Warm Cream & Star)** — *Eye-Care Warm Light*: Warm sunlit ivory-cream editor (`#FAF7EE`) framed by a soft Gemini blue sidebar (`#E4EFFD`), rose-peach top bar (`#FCE8E4`), and ceremonial mint-emerald bottom panel (`#E2F5EA`).
+Open **`Cmd + K, Cmd + T`** (`Preferences: Color Theme`) and choose any of the 12 themes:
+
+| Theme Family | Light Edition (`vs`) | Dark Edition (`vs-dark`) | Atmosphere (`7%–22%` Frost) |
+| :--- | :--- | :--- | :--- |
+| **Pure Blue Gradient** | `Pure Blue Gradient (Sky to Sapphire Light)` | `Pure Blue Gradient (Abyssal Cobalt Dark)` | Ice-cold Antarctic glacier (`#D8ECFD` → `#FAFDFF`) |
+| **Pure Green Gradient** | `Pure Green Gradient (Mint to Emerald Light)` | `Pure Green Gradient (Forest Emerald Dark)` | Ceremonial matcha & alpine mint (`#D6F3E0` → `#FAFEFC`) |
+| **Pure Pink Gradient** | `Pure Pink Gradient (Sakura to Rose Light)` | `Pure Pink Gradient (Velvet Berry Dark)` | Crisp sakura frost (`#FADCEB` → `#FFFBFE`) |
+| **Pure Yellow Gradient** | `Pure Yellow Gradient (Sunlit Honey Light)` | `Pure Yellow Gradient (Golden Amber Dark)` | Warm sunlit honey glaze (`#FBECC0` → `#FFFEFA`) |
+| **Pure Purple Gradient** | `Pure Purple Gradient (Lavender to Amethyst Light)` | `Pure Purple Gradient (Cosmic Amethyst Dark)` | Translucent lavender mist (`#E4D9FC` → `#FCFBFF`) |
+| **Gemini Prism 4-Color** | `Gemini Prism Light (Pastel 4-Color Star)` | `Gemini Prism Dark (4-Color Star)` | Google Gemini 4-Color Star (`#EA4335`, `#FBBC04`, `#34A853`, `#4285F4`) |
 
 ---
 
-## 🌟 Optional: Enable True CSS Mesh Gradients (`radial-gradient` & `linear-gradient`)
+## 🌈 Universal `7%–22%` Translucent Rainbow Overlay & Live `🎲` Randomizer
 
-Because native VS Code JSON themes only accept solid hex colors per surface, this extension also bundles ready-to-use **True CSS Gradient Overlay** stylesheets:
-- **Dark Mesh CSS:** `~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.0.0/css/gemini-star-gradient-dark.css`
-- **Light Mesh CSS:** `~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.0.0/css/gemini-star-gradient-light.css`
+Unlike static theme overrides, the **Gemini Prism CSS & Randomizer Engine** preserves your active theme's native `var(--vscode-*-background)` colors and layers a **`7%–22%` translucent 4-color mesh gradient** on top—so it **combines with ANY selected VS Code theme** (Light, Dark, Pure Blue, Matcha Latte, Monokai, etc.)!
 
-To activate true CSS gradients using **Custom CSS and JS Loader** (`be5invis.vscode-custom-css`), add this to your `settings.json`:
-```json
-"vscode_custom_css.imports": [
-  "file:///Users/iamqazolp/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.0.0/css/gemini-star-gradient-dark.css"
-]
-```
+### 1-Click Activation
+1. Open the Command Palette (**`Cmd + Shift + P`** / **`Ctrl + Shift + P`**).
+2. Run **`Gemini Prism: Enable 4-Color Rainbow Gradient & Live Randomizer`**.
+3. Click **`Reload Custom CSS and JS`** → **Restart** when prompted (requires [`be5invis.vscode-custom-css`](https://marketplace.visualstudio.com/items?itemName=be5invis.vscode-custom-css)).
+
+### 🎲 Live Status Bar Gradient Randomizer (0ms Instant Shift)
+Once enabled, a **`🎲 Gemini Classic`** pill appears in the bottom-right Status Bar:
+- **Left-Click `🎲`** *(or press **`Alt + Shift + G`**)*: Instantly rolls a new `7%–22%` translucent 4-color gradient + randomized mesh angles across the entire workbench without reloading VS Code. Mixes **8 Curated Palettes** (*Gemini Classic*, *Antarctic Borealis*, *Sakura Horizon*, *Matcha Yuzu*, *Cosmic Lavender*, *Sunset Lagoon*, *Nordic Fjord*, *Peach Sorbet*) with a **Procedural HSL Harmony Generator** (`Prism #Hue°`).
+- **Right-Click or `Shift + Click` `🎲`** *(or press **`Alt + Shift + 0`**)*: Resets immediately to the classic **Gemini 4-Color Star** rainbow.
+- **`Cmd/Ctrl + Click` `🎲`**: Toggles **`• Auto`** mode to automatically roll a fresh gradient on startup.
+
+---
+
+## ⚡ Command Palette Commands
+
+| Command | Description |
+| :--- | :--- |
+| `Gemini Prism: Enable 4-Color Rainbow Gradient & Live Randomizer` | Auto-configures `vscode_custom_css.imports` and transparent `xterm.js` terminal settings |
+| `Gemini Prism: Disable 4-Color Rainbow Gradient Overlay` | Removes the Gemini CSS/JS overlay from `vscode_custom_css.imports` |
+| `Gemini Prism: Roll Random Single-Color Glacial Theme` | Switches `workbench.colorTheme` to a random theme from the 12 included themes |
+| `Gemini Prism: Open Interactive Theme & Gradient Preview` | Opens the interactive side-by-side theme preview dashboard |
+
+---
+
+## 📄 License
+
+MIT © [iamqazolp](https://github.com/iamqazolp)
