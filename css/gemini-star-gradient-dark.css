@@ -219,10 +219,13 @@
   border-radius: 2px !important;
 }
 
-/* Gradient Terminal Text Selection */
+/* Gradient Terminal Text Selection (both selection overlay & selected character spans) */
 .monaco-workbench .xterm .xterm-selection div {
   background: var(--g-bar) !important;
   border-radius: 3px !important;
+}
+.monaco-workbench .xterm .xterm-rows span.xterm-decoration-top {
+  background-color: transparent !important;
 }
 
 /* Sticky Scroll (Editor, Terminal & Explorer Tree): Seamless frosted glass that lets underlying gradient shine through */

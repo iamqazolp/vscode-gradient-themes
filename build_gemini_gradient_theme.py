@@ -242,7 +242,7 @@ def make_ombre_theme(name: str, ui_type: str, p: dict) -> dict:
             "panelTitle.inactiveForeground": p["fg_muted"],
 
             # Gradient Integrated Terminal (High-contrast text & clean ANSI colors)
-            "terminal.background": "#00000000",
+            "terminal.background": c_step5,
             "terminal.border": "#00000000",
             "terminal.foreground": p["fg"],
             "terminal.selectionBackground": p["selection"],
