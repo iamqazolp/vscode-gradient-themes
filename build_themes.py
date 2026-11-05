@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Builds and installs the "Gemini Prism & Pure Antarctic Gradient" VS Code Theme Extension
-(`iamqazolp.gemini-prism-gradient-theme-1.0.0`).
+Builds and installs the "VS Code Gradient Themes" Extension
+(`iamqazolp.vscode-gradient-themes`).
 
 Designed for effortless, eye-friendly code reviewing:
 1. ICE-COLD ANTARCTIC / GLACIAL ATMOSPHERE:
@@ -21,8 +21,9 @@ from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parent
 CUSTOM_THEMES_JSON = REPO_DIR / "palettes" / "custom_themes.json"
-EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.0.0"))
-EXT_DIR_110 = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.1.0"))
+EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.vscode-gradient-themes-1.1.0"))
+LEGACY_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.0.0"))
+LEGACY_EXT_DIR_110 = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.1.0"))
 MATCHA_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.matcha-latte-theme-1.0.0"))
 SEA_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.sea-breeze-theme-1.0.0"))
 SUNSET_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.warm-sunset-dusk-theme-1.0.0"))
@@ -904,9 +905,9 @@ PURE_PURPLE_DARK = {
 }
 
 # ===========================================================================
-# GEMINI 4-COLOR STAR THEMES (Dialed down to Soft Pearl & Subtle Aurora Slate)
+# PRISM 4-COLOR RAINBOW THEMES (Dialed down to Soft Pearl & Subtle Aurora Slate)
 # ===========================================================================
-GEMINI_PRISM_DARK = {
+PRISM_RAINBOW_DARK = {
     "gradient_stops": [
         "#0E131D",
         "#0D1618",
@@ -943,7 +944,7 @@ GEMINI_PRISM_DARK = {
     "purple_blend": "#B094E0",
 }
 
-GEMINI_PRISM_LIGHT = {
+PRISM_RAINBOW_LIGHT = {
     "gradient_stops": [
         "#F9F3DF",
         "#EAF7EE",
@@ -1052,17 +1053,17 @@ THEMES_MANIFEST = [
         "type": "dark",
     },
     {
-        "label": "Gemini Prism Light (Pastel 4-Color Star)",
+        "label": "Prism Rainbow Gradient (Pastel 4-Color Light)",
         "uiTheme": "vs",
-        "file": "gemini-prism-light-color-theme.json",
-        "palette": GEMINI_PRISM_LIGHT,
+        "file": "prism-rainbow-light-color-theme.json",
+        "palette": PRISM_RAINBOW_LIGHT,
         "type": "light",
     },
     {
-        "label": "Gemini Prism Dark (4-Color Star)",
+        "label": "Prism Rainbow Gradient (Aurora 4-Color Dark)",
         "uiTheme": "vs-dark",
-        "file": "gemini-prism-dark-color-theme.json",
-        "palette": GEMINI_PRISM_DARK,
+        "file": "prism-rainbow-dark-color-theme.json",
+        "palette": PRISM_RAINBOW_DARK,
         "type": "dark",
     },
 ]
@@ -1085,9 +1086,9 @@ def get_all_themes_manifest() -> list[dict]:
 
 def build_package_json(manifest: list[dict]) -> dict:
     return {
-        "name": "gemini-prism-gradient-theme",
-        "displayName": "Gemini Prism & Antarctic Frost Gradient Themes",
-        "description": "Whisper-soft 7%–22% Antarctic & Glacial Single-Color Gradient Themes + Universal Translucent Gemini 4-Color Rainbow Overlay & Live Status Bar Randomizer for eye-friendly code reviewing.",
+        "name": "vscode-gradient-themes",
+        "displayName": "VS Code Gradient Themes",
+        "description": "12 7%–22% Glacial Single-Color & 4-Color Gradient Themes + a Universal Translucent 4-Color Rainbow Overlay & Live Status Bar Randomizer.",
         "version": "1.1.0",
         "publisher": "iamqazolp",
         "license": "MIT",
@@ -1096,19 +1097,18 @@ def build_package_json(manifest: list[dict]) -> dict:
             "color": "#f4f8ff",
             "theme": "light",
         },
-        "homepage": "https://github.com/iamqazolp/gemini-prism-gradient-theme#readme",
+        "homepage": "https://github.com/iamqazolp/vscode-gradient-themes#readme",
         "repository": {
             "type": "git",
-            "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme.git",
+            "url": "https://github.com/iamqazolp/vscode-gradient-themes.git",
         },
         "bugs": {
-            "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme/issues",
+            "url": "https://github.com/iamqazolp/vscode-gradient-themes/issues",
         },
         "qna": "marketplace",
         "engines": {"vscode": "^1.75.0"},
         "categories": ["Themes"],
         "keywords": [
-            "gemini",
             "gradient",
             "rainbow",
             "randomizer",
@@ -1119,11 +1119,12 @@ def build_package_json(manifest: list[dict]) -> dict:
             "dark",
             "light",
             "theme",
+            "vscode",
             "antigravity",
         ],
         "scripts": {
-            "package": "npx --yes @vscode/vsce package --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
-            "publish": "npx --yes @vscode/vsce publish --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
+            "package": "npx --yes @vscode/vsce package --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main --baseContentUrl https://github.com/iamqazolp/vscode-gradient-themes/blob/main",
+            "publish": "npx --yes @vscode/vsce publish --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main --baseContentUrl https://github.com/iamqazolp/vscode-gradient-themes/blob/main",
             "publish:ovsx": "npx --yes ovsx publish",
         },
         "activationEvents": ["onStartupFinished"],
@@ -1139,20 +1140,20 @@ def build_package_json(manifest: list[dict]) -> dict:
             ],
             "commands": [
                 {
-                    "command": "geminiPrism.enableGradientOverlay",
-                    "title": "Gemini Prism: Enable 4-Color Rainbow Gradient & Live Randomizer",
+                    "command": "gradientThemes.enableGradientOverlay",
+                    "title": "Gradient Themes: Enable 4-Color Rainbow Gradient & Live Randomizer",
                 },
                 {
-                    "command": "geminiPrism.disableGradientOverlay",
-                    "title": "Gemini Prism: Disable 4-Color Rainbow Gradient Overlay",
+                    "command": "gradientThemes.disableGradientOverlay",
+                    "title": "Gradient Themes: Disable 4-Color Rainbow Gradient Overlay",
                 },
                 {
-                    "command": "geminiPrism.rollRandomTheme",
-                    "title": "Gemini Prism: Roll Random Single-Color Glacial Theme",
+                    "command": "gradientThemes.rollRandomTheme",
+                    "title": "Gradient Themes: Roll Random Single-Color Glacial Theme",
                 },
                 {
-                    "command": "geminiPrism.openPreview",
-                    "title": "Gemini Prism: Open Interactive Theme & Gradient Preview",
+                    "command": "gradientThemes.openPreview",
+                    "title": "Gradient Themes: Open Interactive Theme & Gradient Preview",
                 },
             ],
         },
@@ -1190,7 +1191,7 @@ def main():
         built_themes[item["file"]] = theme_obj
 
     # Write to REPO_DIR and installed extension folders
-    for target_root in [REPO_DIR, EXT_DIR, EXT_DIR_110]:
+    for target_root in [REPO_DIR, EXT_DIR, LEGACY_EXT_DIR, LEGACY_EXT_DIR_110]:
         if target_root == REPO_DIR or target_root.exists():
             t_dir = target_root / "themes"
             t_dir.mkdir(parents=True, exist_ok=True)

@@ -1,7 +1,7 @@
 {
-  "name": "gemini-prism-gradient-theme",
-  "displayName": "Gemini Prism & Antarctic Frost Gradient Themes",
-  "description": "Whisper-soft 7%\u201322% Antarctic & Glacial Single-Color Gradient Themes + Universal Translucent Gemini 4-Color Rainbow Overlay & Live Status Bar Randomizer for eye-friendly code reviewing.",
+  "name": "vscode-gradient-themes",
+  "displayName": "VS Code Gradient Themes",
+  "description": "12 7%\u201322% Glacial Single-Color & 4-Color Gradient Themes + a Universal Translucent 4-Color Rainbow Overlay & Live Status Bar Randomizer.",
   "version": "1.1.0",
   "publisher": "iamqazolp",
   "license": "MIT",
@@ -10,13 +10,13 @@
     "color": "#f4f8ff",
     "theme": "light"
   },
-  "homepage": "https://github.com/iamqazolp/gemini-prism-gradient-theme#readme",
+  "homepage": "https://github.com/iamqazolp/vscode-gradient-themes#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme.git"
+    "url": "https://github.com/iamqazolp/vscode-gradient-themes.git"
   },
   "bugs": {
-    "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme/issues"
+    "url": "https://github.com/iamqazolp/vscode-gradient-themes/issues"
   },
   "qna": "marketplace",
   "engines": {
@@ -26,7 +26,6 @@
     "Themes"
   ],
   "keywords": [
-    "gemini",
     "gradient",
     "rainbow",
     "randomizer",
@@ -37,11 +36,12 @@
     "dark",
     "light",
     "theme",
+    "vscode",
     "antigravity"
   ],
   "scripts": {
-    "package": "npx --yes @vscode/vsce package --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
-    "publish": "npx --yes @vscode/vsce publish --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
+    "package": "npx --yes @vscode/vsce package --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main --baseContentUrl https://github.com/iamqazolp/vscode-gradient-themes/blob/main",
+    "publish": "npx --yes @vscode/vsce publish --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main --baseContentUrl https://github.com/iamqazolp/vscode-gradient-themes/blob/main",
     "publish:ovsx": "npx --yes ovsx publish"
   },
   "activationEvents": [
@@ -101,32 +101,32 @@
         "path": "./themes/pure-purple-dark-color-theme.json"
       },
       {
-        "label": "Gemini Prism Light (Pastel 4-Color Star)",
+        "label": "Prism Rainbow Gradient (Pastel 4-Color Light)",
         "uiTheme": "vs",
-        "path": "./themes/gemini-prism-light-color-theme.json"
+        "path": "./themes/prism-rainbow-light-color-theme.json"
       },
       {
-        "label": "Gemini Prism Dark (4-Color Star)",
+        "label": "Prism Rainbow Gradient (Aurora 4-Color Dark)",
         "uiTheme": "vs-dark",
-        "path": "./themes/gemini-prism-dark-color-theme.json"
+        "path": "./themes/prism-rainbow-dark-color-theme.json"
       }
     ],
     "commands": [
       {
-        "command": "geminiPrism.enableGradientOverlay",
-        "title": "Gemini Prism: Enable 4-Color Rainbow Gradient & Live Randomizer"
+        "command": "gradientThemes.enableGradientOverlay",
+        "title": "Gradient Themes: Enable 4-Color Rainbow Gradient & Live Randomizer"
       },
       {
-        "command": "geminiPrism.disableGradientOverlay",
-        "title": "Gemini Prism: Disable 4-Color Rainbow Gradient Overlay"
+        "command": "gradientThemes.disableGradientOverlay",
+        "title": "Gradient Themes: Disable 4-Color Rainbow Gradient Overlay"
       },
       {
-        "command": "geminiPrism.rollRandomTheme",
-        "title": "Gemini Prism: Roll Random Single-Color Glacial Theme"
+        "command": "gradientThemes.rollRandomTheme",
+        "title": "Gradient Themes: Roll Random Single-Color Glacial Theme"
       },
       {
-        "command": "geminiPrism.openPreview",
-        "title": "Gemini Prism: Open Interactive Theme & Gradient Preview"
+        "command": "gradientThemes.openPreview",
+        "title": "Gradient Themes: Open Interactive Theme & Gradient Preview"
       }
     ]
   }

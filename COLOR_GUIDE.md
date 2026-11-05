@@ -20,7 +20,7 @@ python3 add_color.py theme --name "Pure Cyan" --color "#06B6D4" \
 ```
 
 ### Add a 4-Color Status Bar Randomizer Palette (`🎲`)
-Inject a 4-stop palette into [`js/gemini-gradient-randomizer.js`](./js/gemini-gradient-randomizer.js):
+Inject a 4-stop palette into [`js/gradient-randomizer.js`](./js/gradient-randomizer.js):
 
 ```bash
 # Preview 7%–22% translucent rgba() values
@@ -73,9 +73,9 @@ To keep code reviews calm and free of rainbow visual clutter, syntax tokens stay
 ## 3. Critical Workbench Constraints (Do Not Break)
 
 1. **`xterm.js` 8-Digit Terminal Background (`#RRGGBB00`):**
-   - `terminal.background` in [`build_gemini_gradient_theme.py`](./build_gemini_gradient_theme.py) **must** be an 8-digit hex string ending in `00` alpha (`f"{c_step5[:7]}00"`, e.g. `#F3F9FF00`).
+   - `terminal.background` in [`build_themes.py`](./build_themes.py) **must** be an 8-digit hex string ending in `00` alpha (`f"{c_step5[:7]}00"`, e.g. `#F3F9FF00`).
    - **Why not `#00000000`?** `xterm.js` strips the alpha byte and blends `terminal.selectionBackground` over `#000000` (black) on every selected character `<span>`, turning selected text black while whitespace stays gradient.
    - **Why not 6-digit `#F3F9FF`?** Alpha `FF` disables `allowTransparency` in `xterm.js` and paints an opaque box over the terminal gradient.
    - **Why slice `[:7]` first?** `c_step5` already has an `E6` alpha suffix (`#F3F9FFE6`). Appending `00` without slicing produces a 10-digit hex (`#F3F9FFE600`), which VS Code renders as `#FF0000` (debug red).
 2. **`7%–22%` Randomizer Opacity Clamp:**
-   - In [`js/gemini-gradient-randomizer.js`](./js/gemini-gradient-randomizer.js), `--g-r1`..`--g-r4` and `--g-base` / `--g-bar` / `--g-side` / `--g-panel` must keep alpha between **`0.07` and `0.22`** so syntax highlighting remains readable across all themes.
+   - In [`js/gradient-randomizer.js`](./js/gradient-randomizer.js), `--g-r1`..`--g-r4` and `--g-base` / `--g-bar` / `--g-side` / `--g-panel` must keep alpha between **`0.07` and `0.22`** so syntax highlighting remains readable across all themes.

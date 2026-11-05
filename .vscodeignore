@@ -6,6 +6,6 @@
 __pycache__/**
 *.pyc
 *.vsix
-build_gemini_gradient_theme.py
+build_themes.py
 install.py
 node_modules/**

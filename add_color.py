@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Standardized Color & Palette Generator for Gemini Prism & Glacial Gradient Themes.
+Standardized Color & Palette Generator for VS Code Gradient Themes.
 
 Automates the two color workflows in this repository:
   1. Single-Color Glacial Theme Pair (Light + Dark):
@@ -12,7 +12,7 @@ Automates the two color workflows in this repository:
   2. 4-Color Status Bar Randomizer Palette (`🎲`):
      Validates 4 hex stops (`--stops "#06B6D4,#10B981,#3B82F6,#8B5CF6"`), shows their
      `7%–22%` translucent CSS values, and injects the palette into `CURATED_PALETTES`
-     inside `js/gemini-gradient-randomizer.js`.
+     inside `js/gradient-randomizer.js`.
 
 Usage Examples:
   python3 add_color.py list
@@ -32,7 +32,7 @@ from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parent
 CUSTOM_THEMES_JSON = REPO_DIR / "palettes" / "custom_themes.json"
-RANDOMIZER_JS = REPO_DIR / "js" / "gemini-gradient-randomizer.js"
+RANDOMIZER_JS = REPO_DIR / "js" / "gradient-randomizer.js"
 
 
 # ============================================================================
@@ -308,8 +308,8 @@ def cmd_theme(args):
     CUSTOM_THEMES_JSON.write_text(json.dumps(custom_list, indent=2) + "\n", encoding="utf-8")
     print(f"\n[Saved] Updated {CUSTOM_THEMES_JSON.relative_to(REPO_DIR)}")
 
-    import build_gemini_gradient_theme
-    build_gemini_gradient_theme.main()
+    import build_themes
+    build_themes.main()
 
 
 def cmd_randomizer(args):
@@ -327,7 +327,7 @@ def cmd_randomizer(args):
         print(f"  Stop {i} (--g-r{i}): {hx}  ->  rgba({rgb[0]}, {rgb[1]}, {rgb[2]}, {alpha:.2f})")
 
     if args.dry_run:
-        print("\n[Dry Run] No files written. Omit --dry-run to inject into js/gemini-gradient-randomizer.js.")
+        print("\n[Dry Run] No files written. Omit --dry-run to inject into js/gradient-randomizer.js.")
         return
 
     js_text = RANDOMIZER_JS.read_text(encoding="utf-8")
@@ -354,7 +354,7 @@ def cmd_randomizer(args):
     else:
         marker = "  ];\n\n  function hslToRgb"
         if marker not in js_text:
-            sys.exit("Error: Could not locate CURATED_PALETTES closing marker in js/gemini-gradient-randomizer.js")
+            sys.exit("Error: Could not locate CURATED_PALETTES closing marker in js/gradient-randomizer.js")
         js_text = js_text.replace(marker, f"{entry_block}\n  ];\n\n  function hslToRgb", 1)
 
     RANDOMIZER_JS.write_text(js_text, encoding="utf-8")
@@ -374,8 +374,8 @@ def cmd_remove_theme(args):
         p = REPO_DIR / "themes" / t
         if p.exists():
             p.unlink()
-    import build_gemini_gradient_theme
-    build_gemini_gradient_theme.main()
+    import build_themes
+    build_themes.main()
     print(f"[Removed] Removed custom theme '{args.name}'.")
 
 
@@ -395,8 +395,8 @@ def cmd_remove_randomizer(args):
 
 
 def cmd_list(_args):
-    import build_gemini_gradient_theme
-    manifest = build_gemini_gradient_theme.get_all_themes_manifest()
+    import build_themes
+    manifest = build_themes.get_all_themes_manifest()
     print(f"=== Color Themes ({len(manifest)} total) ===")
     for item in manifest:
         stops = item["palette"]["gradient_stops"]
@@ -413,7 +413,7 @@ def cmd_list(_args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Standardized Color & Palette Generator for Gemini Prism & Glacial Themes"
+        description="Standardized Color & Palette Generator for VS Code Gradient Themes"
     )
     sub = parser.add_subparsers(dest="cmd", required=True)
 

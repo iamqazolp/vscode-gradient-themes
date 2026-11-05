@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install or update the Gemini Prism & Antarctic Frost Gradient Themes (`iamqazolp.gemini-prism-gradient-theme`) VS Code extension."""
+"""Install or update the VS Code Gradient Themes (`iamqazolp.vscode-gradient-themes`) extension."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import json
 import shutil
 from pathlib import Path
 
-EXT_ID = "iamqazolp.gemini-prism-gradient-theme"
+EXT_ID = "iamqazolp.vscode-gradient-themes"
 COPY_ITEMS = (
     "extension.js",
     "package.json",

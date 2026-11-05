@@ -15,8 +15,8 @@ const THEMES = [
   "Pure Yellow Gradient (Golden Amber Dark)",
   "Pure Purple Gradient (Lavender to Amethyst Light)",
   "Pure Purple Gradient (Cosmic Amethyst Dark)",
-  "Gemini Prism Light (Pastel 4-Color Star)",
-  "Gemini Prism Dark (4-Color Star)",
+  "Prism Rainbow Gradient (Pastel 4-Color Light)",
+  "Prism Rainbow Gradient (Aurora 4-Color Dark)",
 ];
 
 function toFileUrl(fsPath) {
@@ -28,18 +28,21 @@ function toFileUrl(fsPath) {
 }
 
 function getAssetUrls(context) {
-  const cssPath = path.join(context.extensionPath, "css", "gemini-star-gradient-light.css");
-  const jsPath = path.join(context.extensionPath, "js", "gemini-gradient-randomizer.js");
+  const cssPath = path.join(context.extensionPath, "css", "rainbow-gradient-light.css");
+  const jsPath = path.join(context.extensionPath, "js", "gradient-randomizer.js");
   return {
     cssUrl: toFileUrl(cssPath),
     jsUrl: toFileUrl(jsPath),
   };
 }
 
-function isGeminiAssetUrl(url) {
+function isGradientAssetUrl(url) {
   return (
     typeof url === "string" &&
-    (url.includes("gemini-star-gradient-") || url.includes("gemini-gradient-randomizer.js"))
+    (url.includes("rainbow-gradient-") ||
+      url.includes("gradient-randomizer.js") ||
+      url.includes("gemini-star-gradient-") ||
+      url.includes("gemini-gradient-randomizer.js"))
   );
 }
 
@@ -49,7 +52,7 @@ async function enableGradientOverlay(context, silent = false) {
 
   const existing = config.get("vscode_custom_css.imports") || [];
   const filtered = Array.isArray(existing)
-    ? existing.filter((u) => !isGeminiAssetUrl(u))
+    ? existing.filter((u) => !isGradientAssetUrl(u))
     : [];
   const updated = [...filtered, cssUrl, jsUrl];
 
@@ -66,7 +69,7 @@ async function enableGradientOverlay(context, silent = false) {
   const customCssExt = vscode.extensions.getExtension("be5invis.vscode-custom-css");
   if (!customCssExt) {
     const choice = await vscode.window.showInformationMessage(
-      "Gemini Prism CSS & Randomizer paths configured! Install 'Custom CSS and JS Loader' (be5invis.vscode-custom-css) to activate the full-window gradient overlay.",
+      "Gradient Themes CSS & Randomizer paths configured! Install 'Custom CSS and JS Loader' (be5invis.vscode-custom-css) to activate the full-window gradient overlay.",
       "Install Custom CSS Loader"
     );
     if (choice === "Install Custom CSS Loader") {
@@ -79,7 +82,7 @@ async function enableGradientOverlay(context, silent = false) {
   }
 
   const action = await vscode.window.showInformationMessage(
-    "Gemini Prism 7%–22% Rainbow Gradient & Live Randomizer configured! Reload Custom CSS and JS now to apply.",
+    "7%–22% Rainbow Gradient & Live Randomizer configured! Reload Custom CSS and JS now to apply.",
     "Reload Custom CSS and JS"
   );
   if (action === "Reload Custom CSS and JS") {
@@ -91,13 +94,13 @@ async function disableGradientOverlay() {
   const config = vscode.workspace.getConfiguration();
   const existing = config.get("vscode_custom_css.imports") || [];
   const filtered = Array.isArray(existing)
-    ? existing.filter((u) => !isGeminiAssetUrl(u))
+    ? existing.filter((u) => !isGradientAssetUrl(u))
     : [];
 
   await config.update("vscode_custom_css.imports", filtered, vscode.ConfigurationTarget.Global);
 
   const action = await vscode.window.showInformationMessage(
-    "Removed Gemini Prism overlay from vscode_custom_css.imports.",
+    "Removed Rainbow Gradient overlay from vscode_custom_css.imports.",
     "Reload Custom CSS and JS"
   );
   if (action === "Reload Custom CSS and JS") {
@@ -129,8 +132,8 @@ async function rollRandomTheme(context) {
 
 function openPreviewPanel(context) {
   const panel = vscode.window.createWebviewPanel(
-    "geminiPrismPreview",
-    "Gemini Prism & Glacial Themes Preview",
+    "gradientThemesPreview",
+    "VS Code Gradient Themes Preview",
     vscode.ViewColumn.One,
     { enableScripts: true }
   );
@@ -138,7 +141,7 @@ function openPreviewPanel(context) {
   if (fs.existsSync(htmlPath)) {
     panel.webview.html = fs.readFileSync(htmlPath, "utf8");
   } else {
-    panel.webview.html = "<html><body><h2>Gemini Prism & Antarctic Frost Gradient Themes</h2></body></html>";
+    panel.webview.html = "<html><body><h2>VS Code Gradient Themes</h2></body></html>";
   }
 }
 
@@ -146,12 +149,12 @@ async function autoSyncExistingImportsOnStartup(context) {
   try {
     const config = vscode.workspace.getConfiguration();
     const existing = config.get("vscode_custom_css.imports");
-    if (!Array.isArray(existing) || !existing.some(isGeminiAssetUrl)) {
+    if (!Array.isArray(existing) || !existing.some(isGradientAssetUrl)) {
       return;
     }
     const { cssUrl, jsUrl } = getAssetUrls(context);
     if (!existing.includes(cssUrl) || !existing.includes(jsUrl)) {
-      const filtered = existing.filter((u) => !isGeminiAssetUrl(u));
+      const filtered = existing.filter((u) => !isGradientAssetUrl(u));
       await config.update(
         "vscode_custom_css.imports",
         [...filtered, cssUrl, jsUrl],
@@ -165,16 +168,16 @@ function activate(context) {
   autoSyncExistingImportsOnStartup(context);
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("geminiPrism.enableGradientOverlay", () =>
+    vscode.commands.registerCommand("gradientThemes.enableGradientOverlay", () =>
       enableGradientOverlay(context, false)
     ),
-    vscode.commands.registerCommand("geminiPrism.disableGradientOverlay", () =>
+    vscode.commands.registerCommand("gradientThemes.disableGradientOverlay", () =>
       disableGradientOverlay()
     ),
-    vscode.commands.registerCommand("geminiPrism.rollRandomTheme", () =>
+    vscode.commands.registerCommand("gradientThemes.rollRandomTheme", () =>
       rollRandomTheme(context)
     ),
-    vscode.commands.registerCommand("geminiPrism.openPreview", () =>
+    vscode.commands.registerCommand("gradientThemes.openPreview", () =>
       openPreviewPanel(context)
     )
   );

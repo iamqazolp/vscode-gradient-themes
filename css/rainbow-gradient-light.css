@@ -1,17 +1,17 @@
 /* ==========================================================================
- * ✨ GEMINI 4-COLOR RAINBOW BLEND ENGINE (7%–22% Translucent Overlay)
+ * ✨ PRISM 4-COLOR RAINBOW BLEND ENGINE (7%–22% Translucent Overlay)
  *
  * Combines with ANY selected VS Code theme instead of overwriting it:
  *   - Preserves the active theme's native `--vscode-*-background` colors as
  *     the `background-color` base (works with Light, Dark, Pure Blue, Matcha,
  *     Sea Breeze, Warm Sunset, Monokai, etc.).
- *   - Layers 100% translucent (7%–22% alpha) Gemini 4-Color Star gradients
+ *   - Layers 100% translucent (7%–22% alpha) Prism 4-Color gradients
  *     (`#EA4335` Red, `#FBBC04` Yellow, `#34A853` Green, `#4285F4` Blue)
- *     via `background-image` so the Gemini rainbow blends into every theme!
+ *     via `background-image` so the Prism rainbow blends into every theme!
  * ========================================================================== */
 
 /* --------------------------------------------------------------------------
- * 1. TRANSLUCENT GEMINI 4-COLOR VARIABLES (7%–22% Alpha — Zero Opaque Hex!)
+ * 1. TRANSLUCENT PRISM 4-COLOR VARIABLES (7%–22% Alpha — Zero Opaque Hex!)
  * -------------------------------------------------------------------------- */
 .monaco-workbench {
   --g-r1: rgba(234, 67, 53, 0.18);
@@ -54,7 +54,7 @@
     rgba(66, 133, 244, 0.18) 100%
   );
 
-  /* 4-Color Gemini Star Accent Border & Cursor */
+  /* 4-Color Prism Star Accent Border & Cursor */
   --g-border: linear-gradient(90deg, #EA4335 0%, #FBBC04 33%, #34A853 66%, #4285F4 100%);
 }
 
@@ -62,7 +62,7 @@
  * 2. BLEND GEMINI RAINBOW OVER THE ACTIVE THEME'S NATIVE BACKGROUND COLORS
  * -------------------------------------------------------------------------- */
 
-/* Main Workbench & Grid View: Uses active theme's editor background + Gemini mesh */
+/* Main Workbench & Grid View: Uses active theme's editor background + Prism mesh */
 .monaco-workbench,
 .monaco-workbench > .monaco-grid-view,
 .monaco-workbench.floating-panels > .monaco-grid-view {
@@ -76,7 +76,7 @@
   background-attachment: fixed !important;
 }
 
-/* Make inner editor/list wrappers transparent so the combined theme + Gemini canvas shines through */
+/* Make inner editor/list wrappers transparent so the combined theme + Prism canvas shines through */
 .monaco-workbench .part.editor,
 .monaco-workbench .part.editor > .content,
 .monaco-workbench .editor-group-container,
@@ -154,13 +154,13 @@
   opacity: 0.85 !important;
 }
 
-/* Full Editor Tab Bar Strip: Continuous horizontal Gemini gradient across all tabs & right toolbar */
+/* Full Editor Tab Bar Strip: Continuous horizontal Prism gradient across all tabs & right toolbar */
 .monaco-workbench .editor-group-container > .title > .tabs-and-actions-container {
   background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background)) !important;
   background-image: var(--g-bar) !important;
 }
 
-/* Title Bar & Command Center Search Box: Active theme's titleBar background + Gemini horizontal rainbow wash */
+/* Title Bar & Command Center Search Box: Active theme's titleBar background + Prism horizontal rainbow wash */
 .monaco-workbench .part.titlebar,
 .monaco-workbench .part.titlebar .command-center-center {
   background-color: var(--vscode-titleBar-activeBackground, var(--vscode-editor-background)) !important;
@@ -168,14 +168,14 @@
   backdrop-filter: blur(12px) !important;
 }
 
-/* Status Bar: Active theme's statusBar background + Gemini horizontal rainbow wash */
+/* Status Bar: Active theme's statusBar background + Prism horizontal rainbow wash */
 .monaco-workbench .part.statusbar {
   background-color: var(--vscode-statusBar-background, var(--vscode-editor-background)) !important;
   background-image: var(--g-bar) !important;
   backdrop-filter: blur(12px) !important;
 }
 
-/* Activity Bar & Sidebars: Active theme's sideBar background + Gemini diagonal wash */
+/* Activity Bar & Sidebars: Active theme's sideBar background + Prism diagonal wash */
 .monaco-workbench .part.activitybar,
 .monaco-workbench .part.sidebar,
 .monaco-workbench.floating-panels .part.sidebar,
@@ -188,7 +188,7 @@
 }
 
 /* --------------------------------------------------------------------------
- * 3. GRADIENT INTEGRATED TERMINAL (Theme Panel Base + Gemini Rainbow Aurora)
+ * 3. GRADIENT INTEGRATED TERMINAL (Theme Panel Base + Prism Rainbow Aurora)
  * -------------------------------------------------------------------------- */
 .monaco-workbench .part.panel,
 .monaco-workbench.floating-panels .part.panel,
@@ -265,7 +265,7 @@
   border-radius: 6px !important;
 }
 
-/* Floating Popups (Command Palette, Autocomplete, Hover, Menus): Theme widget base + Gemini tint */
+/* Floating Popups (Command Palette, Autocomplete, Hover, Menus): Theme widget base + Prism tint */
 .monaco-workbench :is(.quick-input-widget, .editor-widget.suggest-widget, .monaco-hover, .context-view .monaco-menu, .notifications-toasts .notification-toast) {
   background-color: var(--vscode-editorWidget-background, var(--vscode-editor-background)) !important;
   background-image: var(--g-side) !important;

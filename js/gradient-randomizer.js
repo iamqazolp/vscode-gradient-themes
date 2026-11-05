@@ -1,14 +1,14 @@
 /**
  * ============================================================================
- * 🎲 GEMINI PRISM — LIVE GRADIENT RANDOMIZER ENGINE (7%–22% Translucent)
+ * 🎲 VS CODE GRADIENT THEMES — LIVE GRADIENT RANDOMIZER ENGINE (7%–22%)
  * ============================================================================
- * Injected via `vscode_custom_css.imports` alongside `gemini-star-gradient-light.css`.
+ * Injected via `vscode_custom_css.imports` alongside `rainbow-gradient-light.css`.
  *
  * Controls (Zero Window Reload Required!):
  *   • Left-Click `🎲 Prism` in Status Bar (or press `Alt + Shift + G`):
  *       Rolls a new 7%–22% translucent 4-color gradient + angles live!
  *   • Right-Click or Shift-Click `🎲 Prism` (or press `Alt + Shift + 0`):
- *       Resets immediately to the Classic Gemini 4-Color Star rainbow.
+ *       Resets immediately to the Classic 4-Color Rainbow.
  *   • Cmd+Click (Mac) / Ctrl+Click (Win/Linux) `🎲 Prism`:
  *       Toggles "Randomize Gradient on Startup" on/off.
  * ============================================================================
@@ -16,13 +16,13 @@
 (function () {
   "use strict";
 
-  const STORAGE_KEY_STATE = "geminiPrism.randomizer.state.v1";
-  const STORAGE_KEY_AUTO = "geminiPrism.randomizer.autoOnStartup.v1";
+  const STORAGE_KEY_STATE = "gradientThemes.randomizer.state.v1";
+  const STORAGE_KEY_AUTO = "gradientThemes.randomizer.autoOnStartup.v1";
 
   // Curated 4-stop palettes (RGB tuples; alpha is strictly clamped to 7%–22%)
   const CURATED_PALETTES = [
     {
-      name: "Gemini Classic",
+      name: "Prism Classic",
       isDefault: true,
       stops: [
         [234, 67, 53],   // #EA4335 Red
@@ -179,7 +179,7 @@
     if (!wb) return;
 
     if (!palette || palette.isDefault) {
-      // Clear inline overrides so classic Gemini CSS takes over
+      // Clear inline overrides so classic rainbow CSS takes over
       [
         "--g-r1",
         "--g-r2",
@@ -192,7 +192,7 @@
         "--g-border",
       ].forEach((prop) => wb.style.removeProperty(prop));
       localStorage.removeItem(STORAGE_KEY_STATE);
-      updateStatusBarPill("Gemini Classic");
+      updateStatusBarPill("Prism Classic");
       return;
     }
 
@@ -257,8 +257,8 @@
   }
 
   function updateStatusBarPill(name, stops) {
-    const labelEl = document.getElementById("gemini-prism-randomizer-label");
-    const swatchEl = document.getElementById("gemini-prism-randomizer-swatch");
+    const labelEl = document.getElementById("prism-randomizer-label");
+    const swatchEl = document.getElementById("prism-randomizer-swatch");
     if (!labelEl) return;
 
     const autoOn = localStorage.getItem(STORAGE_KEY_AUTO) === "true";
@@ -276,19 +276,19 @@
   }
 
   function mountStatusBarPill() {
-    if (document.getElementById("gemini-prism-randomizer-item")) return true;
+    if (document.getElementById("prism-randomizer-item")) return true;
     const rightItems = document.querySelector(".part.statusbar .right-items");
     if (!rightItems) return false;
 
     const item = document.createElement("div");
-    item.id = "gemini-prism-randomizer-item";
+    item.id = "prism-randomizer-item";
     item.className = "statusbar-item right";
     item.style.cssText =
       "display:inline-flex;align-items:center;cursor:pointer;user-select:none;padding:0 6px;height:100%;";
     item.title =
-      "🎲 Gemini Prism Gradient Randomizer (7%–22%)\n" +
+      "🎲 Gradient Themes Randomizer (7%–22%)\n" +
       "• Left-Click (or Alt+Shift+G): Roll random gradient\n" +
-      "• Right-Click / Shift+Click (or Alt+Shift+0): Reset to Classic Gemini Rainbow\n" +
+      "• Right-Click / Shift+Click (or Alt+Shift+0): Reset to Classic 4-Color Rainbow\n" +
       "• Cmd/Ctrl+Click: Toggle Auto-Randomize on Startup";
 
     const pill = document.createElement("a");
@@ -301,13 +301,13 @@
     icon.style.fontSize = "12px";
 
     const swatch = document.createElement("span");
-    swatch.id = "gemini-prism-randomizer-swatch";
+    swatch.id = "prism-randomizer-swatch";
     swatch.style.cssText =
       "display:inline-block;width:18px;height:6px;border-radius:99px;background:linear-gradient(90deg,#EA4335,#FBBC04,#34A853,#4285F4);";
 
     const label = document.createElement("span");
-    label.id = "gemini-prism-randomizer-label";
-    label.textContent = "Gemini Classic";
+    label.id = "prism-randomizer-label";
+    label.textContent = "Prism Classic";
 
     pill.appendChild(icon);
     pill.appendChild(swatch);
@@ -322,7 +322,7 @@
         localStorage.setItem(STORAGE_KEY_AUTO, String(nextAuto));
         const saved = getSavedPalette();
         updateStatusBarPill(
-          saved ? saved.name : "Gemini Classic",
+          saved ? saved.name : "Prism Classic",
           saved ? saved.stops : null
         );
         return;
@@ -354,7 +354,7 @@
       if (saved) {
         applyPaletteToWorkbench(saved);
       } else {
-        updateStatusBarPill("Gemini Classic", null);
+        updateStatusBarPill("Prism Classic", null);
       }
     }
     return true;
