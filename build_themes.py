@@ -22,11 +22,6 @@ from pathlib import Path
 REPO_DIR = Path(__file__).resolve().parent
 CUSTOM_THEMES_JSON = REPO_DIR / "palettes" / "custom_themes.json"
 EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.vscode-gradient-themes-1.1.0"))
-LEGACY_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.0.0"))
-LEGACY_EXT_DIR_110 = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.1.0"))
-MATCHA_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.matcha-latte-theme-1.0.0"))
-SEA_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.sea-breeze-theme-1.0.0"))
-SUNSET_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.warm-sunset-dusk-theme-1.0.0"))
 VSCODE_EXT_JSON = Path(os.path.expanduser("~/.vscode/extensions/extensions.json"))
 VSCODE_SETTINGS_JSON = Path(os.path.expanduser("~/Library/Application Support/Code/User/settings.json"))
 
@@ -1190,8 +1185,8 @@ def main():
         theme_obj = make_ombre_theme(item["label"], item["type"], item["palette"])
         built_themes[item["file"]] = theme_obj
 
-    # Write to REPO_DIR and installed extension folders
-    for target_root in [REPO_DIR, EXT_DIR, LEGACY_EXT_DIR, LEGACY_EXT_DIR_110]:
+    # Write to REPO_DIR and installed extension folder
+    for target_root in [REPO_DIR, EXT_DIR]:
         if target_root == REPO_DIR or target_root.exists():
             t_dir = target_root / "themes"
             t_dir.mkdir(parents=True, exist_ok=True)
@@ -1199,14 +1194,13 @@ def main():
             for filename, theme_obj in built_themes.items():
                 (t_dir / filename).write_text(json.dumps(theme_obj, indent=2) + "\n", encoding="utf-8")
 
-    for target_dir in [MATCHA_EXT_DIR, SEA_EXT_DIR, SUNSET_EXT_DIR]:
-        if target_dir.exists() and (target_dir / "package.json").exists():
-            t_dir = target_dir / "themes"
-            t_dir.mkdir(parents=True, exist_ok=True)
-            for filename, theme_obj in built_themes.items():
-                (t_dir / filename).write_text(json.dumps(theme_obj, indent=2) + "\n", encoding="utf-8")
+    register_extension(
+        "iamqazolp.vscode-gradient-themes",
+        "iamqazolp.vscode-gradient-themes-1.1.0",
+        EXT_DIR,
+    )
 
-    print(f"[OK] Built {len(built_themes)} themes across {REPO_DIR.name} and installed extensions.")
+    print(f"[OK] Built {len(built_themes)} themes across {REPO_DIR.name} and {EXT_DIR.name}.")
 
 
 if __name__ == "__main__":
