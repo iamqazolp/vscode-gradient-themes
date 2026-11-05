@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Builds and installs the "VS Code Gradient Themes" Extension
+Builds and installs the "VSCode Gradient Themes" Extension
 (`iamqazolp.vscode-gradient-themes`).
 
 Designed for effortless, eye-friendly code reviewing:
@@ -98,7 +98,7 @@ def make_ombre_theme(name: str, ui_type: str, p: dict) -> dict:
             "icon.foreground": p["fg_muted"],
             "sash.hoverBorder": p["blue_star"],
 
-            # VS Code 2026 Modern UI / Floating Panels tokens
+            # VSCode 2026 Modern UI / Floating Panels tokens
             "surface.background": c_step1,
             "surface.border": "#00000000",
             "modernUI.shellBackground": c_step0,
@@ -1082,7 +1082,7 @@ def get_all_themes_manifest() -> list[dict]:
 def build_package_json(manifest: list[dict]) -> dict:
     return {
         "name": "vscode-gradient-themes",
-        "displayName": "VS Code Gradient Themes",
+        "displayName": "VSCode Gradient Themes",
         "description": "Full-workbench atmospheric gradient meshes, single-hue ombré themes, and a 0ms Status Bar (🎲) mood roller with 30 curated palettes.",
         "version": "1.1.0",
         "publisher": "iamqazolp",
@@ -1168,13 +1168,18 @@ def build_package_json(manifest: list[dict]) -> dict:
                 },
             ],
             "configuration": {
-                "title": "VS Code Gradient Themes",
+                "title": "VSCode Gradient Themes",
                 "properties": {
+                    "gradientThemes.autoEnableOverlay": {
+                        "type": "boolean",
+                        "default": True,
+                        "description": "Automatically inject and keep the 4-Color Gradient Mesh & Status Bar (🎲) Randomizer updated without requiring external extensions.",
+                    },
                     "gradientThemes.telemetry": {
                         "type": "boolean",
                         "default": True,
-                        "description": "Enable anonymous extension usage and error telemetry (automatically disabled for the extension author and when VS Code telemetry is off).",
-                    }
+                        "description": "Enable anonymous extension usage and error telemetry (automatically disabled for the extension author and when VSCode telemetry is off).",
+                    },
                 },
             },
         },

@@ -38,14 +38,14 @@ jobs:
           files: "*.vsix"
           generate_release_notes: true
 
-      - name: Publish to VS Code Marketplace (if VSCE_PAT secret is set)
+      - name: Publish to VSCode Marketplace (if VSCE_PAT secret is set)
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
           if [ -n "$VSCE_PAT" ]; then
             npx --yes @vscode/vsce publish --packagePath *.vsix -p "$VSCE_PAT"
           else
-            echo "Skipping VS Code Marketplace publish (VSCE_PAT secret not configured)."
+            echo "Skipping VSCode Marketplace publish (VSCE_PAT secret not configured)."
           fi
 
       - name: Publish to Open VSX Registry (if OVSX_PAT secret is set)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Standardized Color & Palette Generator for VS Code Gradient Themes.
+Standardized Color & Palette Generator for VSCode Gradient Themes.
 
 Automates the two color workflows in this repository:
   1. Single-Color Glacial Theme Pair (Light + Dark):
@@ -197,7 +197,7 @@ def validate_palette(palette: dict, mode: str) -> list[str]:
             if len(raw) not in (6, 8):
                 raise ValueError(
                     f"[{mode}] Key '{k}' produced invalid {len(raw)}-digit hex '{hex_str}' "
-                    "(must be 6-digit #RRGGBB or 8-digit #RRGGBBAA; 10-digit triggers VS Code #FF0000 debug red!)"
+                    "(must be 6-digit #RRGGBB or 8-digit #RRGGBBAA; 10-digit triggers VSCode #FF0000 debug red!)"
                 )
 
     editor_bg = palette["gradient_stops"][-1]
@@ -414,7 +414,7 @@ def cmd_list(_args):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Standardized Color & Palette Generator for VS Code Gradient Themes"
+        description="Standardized Color & Palette Generator for VSCode Gradient Themes"
     )
     sub = parser.add_subparsers(dest="cmd", required=True)
 

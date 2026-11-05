@@ -1,7 +1,7 @@
 {
   "name": "vscode-gradient-themes",
-  "displayName": "VS Code Gradient Themes",
-  "description": "Full-workbench atmospheric gradient meshes, single-hue ombré themes, and a 0ms Status Bar (🎲) mood roller with 30 curated palettes.",
+  "displayName": "VSCode Gradient Themes",
+  "description": "Full-workbench atmospheric gradient meshes, single-hue ombr\u00e9 themes, and a 0ms Status Bar (\ud83c\udfb2) mood roller with 30 curated palettes.",
   "version": "1.1.0",
   "publisher": "iamqazolp",
   "license": "MIT",
@@ -146,12 +146,17 @@
       }
     ],
     "configuration": {
-      "title": "VS Code Gradient Themes",
+      "title": "VSCode Gradient Themes",
       "properties": {
+        "gradientThemes.autoEnableOverlay": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically inject and keep the 4-Color Gradient Mesh & Status Bar (\ud83c\udfb2) Randomizer updated without requiring external extensions."
+        },
         "gradientThemes.telemetry": {
           "type": "boolean",
           "default": true,
-          "description": "Enable anonymous extension usage and error telemetry (automatically disabled for the extension author and when VS Code telemetry is off)."
+          "description": "Enable anonymous extension usage and error telemetry (automatically disabled for the extension author and when VSCode telemetry is off)."
         }
       }
     }
