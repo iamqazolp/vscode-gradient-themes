@@ -19,7 +19,10 @@ import os
 import time
 from pathlib import Path
 
+REPO_DIR = Path(__file__).resolve().parent
+CUSTOM_THEMES_JSON = REPO_DIR / "palettes" / "custom_themes.json"
 EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.0.0"))
+EXT_DIR_110 = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.gemini-prism-gradient-theme-1.1.0"))
 MATCHA_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.matcha-latte-theme-1.0.0"))
 SEA_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.sea-breeze-theme-1.0.0"))
 SUNSET_EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.warm-sunset-dusk-theme-1.0.0"))
@@ -1064,79 +1067,96 @@ THEMES_MANIFEST = [
     },
 ]
 
-PACKAGE_JSON = {
-    "name": "gemini-prism-gradient-theme",
-    "displayName": "Gemini Prism & Antarctic Frost Gradient Themes",
-    "description": "Whisper-soft 7%–22% Antarctic & Glacial Single-Color Gradient Themes + Universal Translucent Gemini 4-Color Rainbow Overlay & Live Status Bar Randomizer for eye-friendly code reviewing.",
-    "version": "1.1.0",
-    "publisher": "iamqazolp",
-    "license": "MIT",
-    "icon": "media/icon.png",
-    "galleryBanner": {
-        "color": "#f4f8ff",
-        "theme": "light",
-    },
-    "homepage": "https://github.com/iamqazolp/gemini-prism-gradient-theme#readme",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme.git",
-    },
-    "bugs": {
-        "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme/issues",
-    },
-    "qna": "marketplace",
-    "engines": {"vscode": "^1.75.0"},
-    "categories": ["Themes"],
-    "keywords": [
-        "gemini",
-        "gradient",
-        "rainbow",
-        "randomizer",
-        "antarctica",
-        "glacial",
-        "pastel",
-        "minimal",
-        "dark",
-        "light",
-        "theme",
-        "antigravity",
-    ],
-    "scripts": {
-        "package": "npx --yes @vscode/vsce package --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
-        "publish": "npx --yes @vscode/vsce publish --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
-        "publish:ovsx": "npx --yes ovsx publish",
-    },
-    "activationEvents": ["onStartupFinished"],
-    "main": "./extension.js",
-    "contributes": {
-        "themes": [
-            {
-                "label": item["label"],
-                "uiTheme": item["uiTheme"],
-                "path": f"./themes/{item['file']}",
-            }
-            for item in THEMES_MANIFEST
+def get_all_themes_manifest() -> list[dict]:
+    manifest = list(THEMES_MANIFEST)
+    if CUSTOM_THEMES_JSON.exists():
+        try:
+            custom_items = json.loads(CUSTOM_THEMES_JSON.read_text(encoding="utf-8"))
+            existing_files = {m["file"] for m in manifest}
+            for item in custom_items:
+                if item["file"] in existing_files:
+                    manifest = [m if m["file"] != item["file"] else item for m in manifest]
+                else:
+                    manifest.append(item)
+        except Exception as exc:
+            print(f"[WARN] Could not load {CUSTOM_THEMES_JSON}: {exc}")
+    return manifest
+
+
+def build_package_json(manifest: list[dict]) -> dict:
+    return {
+        "name": "gemini-prism-gradient-theme",
+        "displayName": "Gemini Prism & Antarctic Frost Gradient Themes",
+        "description": "Whisper-soft 7%–22% Antarctic & Glacial Single-Color Gradient Themes + Universal Translucent Gemini 4-Color Rainbow Overlay & Live Status Bar Randomizer for eye-friendly code reviewing.",
+        "version": "1.1.0",
+        "publisher": "iamqazolp",
+        "license": "MIT",
+        "icon": "media/icon.png",
+        "galleryBanner": {
+            "color": "#f4f8ff",
+            "theme": "light",
+        },
+        "homepage": "https://github.com/iamqazolp/gemini-prism-gradient-theme#readme",
+        "repository": {
+            "type": "git",
+            "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme.git",
+        },
+        "bugs": {
+            "url": "https://github.com/iamqazolp/gemini-prism-gradient-theme/issues",
+        },
+        "qna": "marketplace",
+        "engines": {"vscode": "^1.75.0"},
+        "categories": ["Themes"],
+        "keywords": [
+            "gemini",
+            "gradient",
+            "rainbow",
+            "randomizer",
+            "antarctica",
+            "glacial",
+            "pastel",
+            "minimal",
+            "dark",
+            "light",
+            "theme",
+            "antigravity",
         ],
-        "commands": [
-            {
-                "command": "geminiPrism.enableGradientOverlay",
-                "title": "Gemini Prism: Enable 4-Color Rainbow Gradient & Live Randomizer",
-            },
-            {
-                "command": "geminiPrism.disableGradientOverlay",
-                "title": "Gemini Prism: Disable 4-Color Rainbow Gradient Overlay",
-            },
-            {
-                "command": "geminiPrism.rollRandomTheme",
-                "title": "Gemini Prism: Roll Random Single-Color Glacial Theme",
-            },
-            {
-                "command": "geminiPrism.openPreview",
-                "title": "Gemini Prism: Open Interactive Theme & Gradient Preview",
-            },
-        ],
-    },
-}
+        "scripts": {
+            "package": "npx --yes @vscode/vsce package --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
+            "publish": "npx --yes @vscode/vsce publish --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/gemini-prism-gradient-theme/main --baseContentUrl https://github.com/iamqazolp/gemini-prism-gradient-theme/blob/main",
+            "publish:ovsx": "npx --yes ovsx publish",
+        },
+        "activationEvents": ["onStartupFinished"],
+        "main": "./extension.js",
+        "contributes": {
+            "themes": [
+                {
+                    "label": item["label"],
+                    "uiTheme": item["uiTheme"],
+                    "path": f"./themes/{item['file']}",
+                }
+                for item in manifest
+            ],
+            "commands": [
+                {
+                    "command": "geminiPrism.enableGradientOverlay",
+                    "title": "Gemini Prism: Enable 4-Color Rainbow Gradient & Live Randomizer",
+                },
+                {
+                    "command": "geminiPrism.disableGradientOverlay",
+                    "title": "Gemini Prism: Disable 4-Color Rainbow Gradient Overlay",
+                },
+                {
+                    "command": "geminiPrism.rollRandomTheme",
+                    "title": "Gemini Prism: Roll Random Single-Color Glacial Theme",
+                },
+                {
+                    "command": "geminiPrism.openPreview",
+                    "title": "Gemini Prism: Open Interactive Theme & Gradient Preview",
+                },
+            ],
+        },
+    }
 
 
 def register_extension(ext_id: str, folder_name: str, ext_path: Path):
@@ -1147,7 +1167,7 @@ def register_extension(ext_id: str, folder_name: str, ext_path: Path):
         ext_list = [e for e in ext_list if e.get("identifier", {}).get("id") != ext_id]
         ext_list.append({
             "identifier": {"id": ext_id},
-            "version": "1.0.0",
+            "version": "1.1.0",
             "location": {
                 "$mid": 1,
                 "path": str(ext_path),
@@ -1161,47 +1181,31 @@ def register_extension(ext_id: str, folder_name: str, ext_path: Path):
 
 
 def main():
-    themes_dir = EXT_DIR / "themes"
-    themes_dir.mkdir(parents=True, exist_ok=True)
-
-    (EXT_DIR / "package.json").write_text(json.dumps(PACKAGE_JSON, indent=2), encoding="utf-8")
+    manifest = get_all_themes_manifest()
+    pkg_json = build_package_json(manifest)
 
     built_themes = {}
-    for item in THEMES_MANIFEST:
+    for item in manifest:
         theme_obj = make_ombre_theme(item["label"], item["type"], item["palette"])
         built_themes[item["file"]] = theme_obj
-        (themes_dir / item["file"]).write_text(json.dumps(theme_obj, indent=2), encoding="utf-8")
 
-    register_extension(
-        "iamqazolp.gemini-prism-gradient-theme",
-        "iamqazolp.gemini-prism-gradient-theme-1.0.0",
-        EXT_DIR,
-    )
+    # Write to REPO_DIR and installed extension folders
+    for target_root in [REPO_DIR, EXT_DIR, EXT_DIR_110]:
+        if target_root == REPO_DIR or target_root.exists():
+            t_dir = target_root / "themes"
+            t_dir.mkdir(parents=True, exist_ok=True)
+            (target_root / "package.json").write_text(json.dumps(pkg_json, indent=2) + "\n", encoding="utf-8")
+            for filename, theme_obj in built_themes.items():
+                (t_dir / filename).write_text(json.dumps(theme_obj, indent=2) + "\n", encoding="utf-8")
 
     for target_dir in [MATCHA_EXT_DIR, SEA_EXT_DIR, SUNSET_EXT_DIR]:
         if target_dir.exists() and (target_dir / "package.json").exists():
             t_dir = target_dir / "themes"
             t_dir.mkdir(parents=True, exist_ok=True)
             for filename, theme_obj in built_themes.items():
-                (t_dir / filename).write_text(json.dumps(theme_obj, indent=2), encoding="utf-8")
+                (t_dir / filename).write_text(json.dumps(theme_obj, indent=2) + "\n", encoding="utf-8")
 
-    if VSCODE_SETTINGS_JSON.exists():
-        try:
-            settings = json.loads(VSCODE_SETTINGS_JSON.read_text(encoding="utf-8"))
-            # Turn off rainbow bracket guides so code reviews stay clean and uncluttered
-            settings["editor.guides.bracketPairs"] = False
-            settings["editor.guides.indentation"] = True
-            settings["editor.bracketPairColorization.enabled"] = False
-            settings["terminal.integrated.gpuAcceleration"] = "off"
-            settings["terminal.integrated.enableImages"] = True
-            settings["workbench.colorTheme"] = "Pure Green Gradient (Mint to Emerald Light)"
-            VSCODE_SETTINGS_JSON.write_text(json.dumps(settings, indent=4) + "\n", encoding="utf-8")
-            time.sleep(0.35)
-            settings["workbench.colorTheme"] = "Pure Blue Gradient (Sky to Sapphire Light)"
-            VSCODE_SETTINGS_JSON.write_text(json.dumps(settings, indent=4) + "\n", encoding="utf-8")
-            print("[OK] Built & activated Antarctic Frost edition of 'Pure Blue Gradient (Sky to Sapphire Light)'")
-        except Exception as exc:
-            print(f"[WARN] Could not update settings.json: {exc}")
+    print(f"[OK] Built {len(built_themes)} themes across {REPO_DIR.name} and installed extensions.")
 
 
 if __name__ == "__main__":

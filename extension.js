@@ -105,10 +105,23 @@ async function disableGradientOverlay() {
   }
 }
 
-async function rollRandomTheme() {
+function getAvailableThemes(context) {
+  try {
+    const pkgPath = path.join(context.extensionPath, "package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+    const themes = (pkg.contributes && pkg.contributes.themes) || [];
+    if (themes.length > 0) {
+      return themes.map((t) => t.label);
+    }
+  } catch (_) {}
+  return THEMES;
+}
+
+async function rollRandomTheme(context) {
   const config = vscode.workspace.getConfiguration();
   const current = config.get("workbench.colorTheme");
-  const candidates = THEMES.filter((t) => t !== current);
+  const allThemes = getAvailableThemes(context);
+  const candidates = allThemes.filter((t) => t !== current);
   const picked = candidates[Math.floor(Math.random() * candidates.length)];
   await config.update("workbench.colorTheme", picked, vscode.ConfigurationTarget.Global);
   vscode.window.setStatusBarMessage(`🎨 Theme: ${picked}`, 4000);
@@ -159,7 +172,7 @@ function activate(context) {
       disableGradientOverlay()
     ),
     vscode.commands.registerCommand("geminiPrism.rollRandomTheme", () =>
-      rollRandomTheme()
+      rollRandomTheme(context)
     ),
     vscode.commands.registerCommand("geminiPrism.openPreview", () =>
       openPreviewPanel(context)
