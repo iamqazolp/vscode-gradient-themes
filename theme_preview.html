@@ -2,91 +2,95 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>VS Code Gradient Themes — 12 Glacial &amp; Rainbow Themes</title>
+<title>VS Code Gradient Themes — 20 Glacial &amp; Rainbow Themes</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    width: 1440px; height: 860px;
+    width: 1440px; height: 1080px;
     background: radial-gradient(circle at 50% 0%, rgba(234,67,53,0.14), transparent 48%),
                 radial-gradient(circle at 0% 50%, rgba(251,188,4,0.12), transparent 48%),
                 radial-gradient(circle at 50% 100%, rgba(52,168,83,0.14), transparent 48%),
                 radial-gradient(circle at 85% 50%, rgba(66,133,244,0.18), transparent 55%),
                 #0D131F;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-    padding: 26px 32px;
+    padding: 24px 30px;
     color: #EDF2FA;
     overflow: hidden;
   }
   .header {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
   .title-block h1 {
-    font-size: 22px; font-weight: 800;
+    font-size: 21px; font-weight: 800;
     background: linear-gradient(90deg, #FF6B63 0%, #FFD15C 33%, #4BE084 66%, #6BA5FF 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
-  .title-block p { font-size: 12.5px; color: #9EB0CC; margin-top: 4px; }
-  .pills { display: flex; gap: 8px; }
+  .title-block p { font-size: 12px; color: #9EB0CC; margin-top: 3px; }
+  .pills { display: flex; gap: 6px; flex-wrap: wrap; }
   .pill {
-    padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 99px; font-size: 10.5px; font-weight: 600;
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14);
     font-family: "SF Mono", Menlo, monospace;
   }
   .grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;
   }
   .win {
-    border-radius: 11px; overflow: hidden;
-    box-shadow: 0 14px 32px rgba(0,0,0,0.35);
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
     display: flex; flex-direction: column;
-    height: 365px;
+    height: 308px;
   }
   .w-title {
-    height: 32px; padding: 0 12px;
+    height: 29px; padding: 0 11px;
     display: flex; align-items: center; justify-content: space-between;
-    font-size: 11.5px; font-weight: 700;
+    font-size: 11px; font-weight: 700;
   }
-  .dots { display: flex; gap: 6px; }
-  .d { width: 10px; height: 10px; border-radius: 50%; }
+  .dots { display: flex; gap: 5px; }
+  .d { width: 9px; height: 9px; border-radius: 50%; }
   .d.r { background: #FF5F56; } .d.y { background: #FFBD2E; } .d.g { background: #27C93F; }
-  .w-badge { font-size: 9.5px; padding: 2px 7px; border-radius: 99px; font-weight: 700; }
+  .w-badge { font-size: 9px; padding: 2px 6px; border-radius: 99px; font-weight: 700; }
   .w-body { flex: 1; display: flex; overflow: hidden; }
-  .w-side { width: 128px; padding: 10px 8px; font-size: 11px; display: flex; flex-direction: column; gap: 4px; }
-  .s-hdr { font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 4px; }
-  .s-item { padding: 4px 6px; border-radius: 4px; font-family: "SF Mono", Menlo, monospace; font-size: 10.5px; }
+  .w-side { width: 122px; padding: 8px 7px; font-size: 10.5px; display: flex; flex-direction: column; gap: 3px; }
+  .s-hdr { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .s-item { padding: 3px 5px; border-radius: 4px; font-family: "SF Mono", Menlo, monospace; font-size: 10px; }
   .w-ed { flex: 1; display: flex; flex-direction: column; }
-  .w-tabs { height: 28px; display: flex; font-size: 11px; }
-  .w-tab { padding: 0 12px; display: flex; align-items: center; font-weight: 600; }
+  .w-tabs { height: 25px; display: flex; font-size: 10.5px; }
+  .w-tab { padding: 0 10px; display: flex; align-items: center; font-weight: 600; }
   .w-code {
-    flex: 1; padding: 14px;
+    flex: 1; padding: 11px 12px;
     font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
-    font-size: 11.8px; line-height: 1.68;
+    font-size: 11.2px; line-height: 1.58;
   }
   .w-term {
-    height: 36px; padding: 0 14px;
+    height: 30px; padding: 0 12px;
     display: flex; align-items: center; gap: 8px;
-    font-family: "SF Mono", Menlo, monospace; font-size: 11px;
+    font-family: "SF Mono", Menlo, monospace; font-size: 10.5px;
   }
   .w-status {
-    height: 24px; padding: 0 12px;
+    height: 22px; padding: 0 10px;
     display: flex; align-items: center; justify-content: space-between;
-    font-size: 10.5px; font-family: "SF Mono", Menlo, monospace; font-weight: 600;
+    font-size: 10px; font-family: "SF Mono", Menlo, monospace; font-weight: 600;
   }
 </style>
 </head>
 <body>
   <div class="header">
     <div class="title-block">
-      <h1>VS Code Gradient Themes — Single-Color Glacial Palette Suite</h1>
-      <p>7%–22% Perimeter-to-Canvas Gradients • Monochromatic Syntax Tokens • 13:1–17:1 WCAG AAA Contrast</p>
+      <h1>VS Code Gradient Themes — 20 Glacial &amp; Rainbow Themes</h1>
+      <p>7%–22% Perimeter-to-Canvas Gradients • Monochromatic Syntax Tokens • 12:1–17.8:1 WCAG AAA Contrast</p>
     </div>
     <div class="pills">
-      <span class="pill">💙 Pure Blue</span>
-      <span class="pill">💚 Pure Green</span>
-      <span class="pill">🩷 Pure Pink</span>
-      <span class="pill">💛 Pure Yellow</span>
-      <span class="pill">💜 Pure Purple</span>
+      <span class="pill">💙 Blue</span>
+      <span class="pill">🩵 Cyan</span>
+      <span class="pill">💚 Green</span>
+      <span class="pill">💛 Yellow</span>
+      <span class="pill">🧡 Peach</span>
+      <span class="pill">🌹 Rose</span>
+      <span class="pill">🩷 Pink</span>
+      <span class="pill">💜 Purple</span>
+      <span class="pill">🌌 Indigo</span>
     </div>
   </div>
   <div class="grid">
@@ -126,10 +130,45 @@
       </div>
     </div>
     
+    <div class="win" style="background:#F7FEFF;color:#112B2F;border:1px solid rgba(15,23,42,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#D8F8FD,#E2FAFE);border-bottom:1px solid rgba(15,23,42,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">2. Pure Cyan Lagoon (Light)</div>
+        <div class="w-badge" style="background:#07CCEE;color:#fff">22% → 7% FROST</div>
+      </div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#D8F8FD,#E2FAFE,#F7FEFF);border-right:1px solid rgba(15,23,42,0.10)">
+          <div class="s-hdr" style="color:#39676F">EXPLORER</div>
+          <div class="s-item active" style="color:#112B2F;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#39676F">color_harmony.ts</div>
+          <div class="s-item" style="color:#39676F">renderer.rs</div>
+        </div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#E2FAFE 0%,#F7FEFF 65%)">
+          <div class="w-tabs" style="background:#E2FAFE;border-bottom:1px solid rgba(15,23,42,0.10)">
+            <div class="w-tab active" style="background:#F7FEFF;color:#112B2F;border-top:2px solid #07CCEE">glacial_shader.py</div>
+            <div class="w-tab" style="color:#39676F">renderer.rs</div>
+          </div>
+          <div class="w-code">
+            <div style="color:#78A8B0;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#1B6683;font-weight:600">class</span> <span style="color:#207977">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#1B6683;font-weight:600">def</span> <span style="color:#197E8F">sample</span>(<span style="color:#34617F">self</span>, <span style="color:#34617F">stop</span>=<span style="color:#275682">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#1B6683;font-weight:600">return</span> <span style="color:#1E7867">"#D8F8FD → #F7FEFF"</span></div>
+          </div>
+          <div class="w-term" style="border-top:1px solid rgba(15,23,42,0.10);color:#39676F">
+            <span style="color:#197E8F;font-weight:600">➜ aurora</span> <span style="color:#1E7867">✓ WCAG AAA Verified</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-status" style="background:linear-gradient(90deg,#D8F8FD,#E2FAFE);border-top:1px solid rgba(15,23,42,0.10);color:#112B2F">
+        <span>🌿 main*</span>
+        <span>🎲 #D8F8FD → #F7FEFF</span>
+      </div>
+    </div>
+    
     <div class="win" style="background:#F6FDF9;color:#102419;border:1px solid rgba(15,23,42,0.10)">
       <div class="w-title" style="background:linear-gradient(90deg,#D6F3E0,#E0F6E8);border-bottom:1px solid rgba(15,23,42,0.10)">
         <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
-        <div class="w-name">2. Pure Green Matcha (Light)</div>
+        <div class="w-name">3. Pure Green Matcha (Light)</div>
         <div class="w-badge" style="background:#16A34A;color:#fff">22% → 7% FROST</div>
       </div>
       <div class="w-body">
@@ -158,41 +197,6 @@
       <div class="w-status" style="background:linear-gradient(90deg,#D6F3E0,#E0F6E8);border-top:1px solid rgba(15,23,42,0.10);color:#102419">
         <span>🌿 main*</span>
         <span>🎲 #D6F3E0 → #F6FDF9</span>
-      </div>
-    </div>
-    
-    <div class="win" style="background:#FFF7FB;color:#26111B;border:1px solid rgba(15,23,42,0.10)">
-      <div class="w-title" style="background:linear-gradient(90deg,#FADCEB,#FBE4F0);border-bottom:1px solid rgba(15,23,42,0.10)">
-        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
-        <div class="w-name">3. Pure Pink Sakura (Light)</div>
-        <div class="w-badge" style="background:#DB2777;color:#fff">22% → 7% FROST</div>
-      </div>
-      <div class="w-body">
-        <div class="w-side" style="background:linear-gradient(180deg,#FADCEB,#FBE4F0,#FFF7FB);border-right:1px solid rgba(15,23,42,0.10)">
-          <div class="s-hdr" style="color:#5E384A">EXPLORER</div>
-          <div class="s-item active" style="color:#26111B;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
-          <div class="s-item" style="color:#5E384A">color_harmony.ts</div>
-          <div class="s-item" style="color:#5E384A">renderer.rs</div>
-        </div>
-        <div class="w-ed" style="background:linear-gradient(135deg,#FBE4F0 0%,#FFF7FB 65%)">
-          <div class="w-tabs" style="background:#FBE4F0;border-bottom:1px solid rgba(15,23,42,0.10)">
-            <div class="w-tab active" style="background:#FFF7FB;color:#26111B;border-top:2px solid #DB2777">glacial_shader.py</div>
-            <div class="w-tab" style="color:#5E384A">renderer.rs</div>
-          </div>
-          <div class="w-code">
-            <div style="color:#A37A8E;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
-            <div><span style="color:#7A244B;font-weight:600">class</span> <span style="color:#752946">GlacialTheme</span>:</div>
-            <div>&nbsp;&nbsp;<span style="color:#7A244B;font-weight:600">def</span> <span style="color:#8C2D56">sample</span>(<span style="color:#6B3B52">self</span>, <span style="color:#6B3B52">stop</span>=<span style="color:#823059">0.22</span>):</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7A244B;font-weight:600">return</span> <span style="color:#6E3550">"#FADCEB → #FFF7FB"</span></div>
-          </div>
-          <div class="w-term" style="border-top:1px solid rgba(15,23,42,0.10);color:#5E384A">
-            <span style="color:#8C2D56;font-weight:600">➜ aurora</span> <span style="color:#6E3550">✓ WCAG AAA Verified</span>
-          </div>
-        </div>
-      </div>
-      <div class="w-status" style="background:linear-gradient(90deg,#FADCEB,#FBE4F0);border-top:1px solid rgba(15,23,42,0.10);color:#26111B">
-        <span>🌿 main*</span>
-        <span>🎲 #FADCEB → #FFF7FB</span>
       </div>
     </div>
     
@@ -231,10 +235,115 @@
       </div>
     </div>
     
+    <div class="win" style="background:#FFFBF7;color:#2F1D11;border:1px solid rgba(15,23,42,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#FDE7D8,#FEEEE2);border-bottom:1px solid rgba(15,23,42,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">5. Pure Peach Apricot (Light)</div>
+        <div class="w-badge" style="background:#EF6506;color:#fff">22% → 7% FROST</div>
+      </div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#FDE7D8,#FEEEE2,#FFFBF7);border-right:1px solid rgba(15,23,42,0.10)">
+          <div class="s-hdr" style="color:#6F4F39">EXPLORER</div>
+          <div class="s-item active" style="color:#2F1D11;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#6F4F39">color_harmony.ts</div>
+          <div class="s-item" style="color:#6F4F39">renderer.rs</div>
+        </div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#FEEEE2 0%,#FFFBF7 65%)">
+          <div class="w-tabs" style="background:#FEEEE2;border-bottom:1px solid rgba(15,23,42,0.10)">
+            <div class="w-tab active" style="background:#FFFBF7;color:#2F1D11;border-top:2px solid #EF6506">glacial_shader.py</div>
+            <div class="w-tab" style="color:#6F4F39">renderer.rs</div>
+          </div>
+          <div class="w-code">
+            <div style="color:#B08F78;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#83541B;font-weight:600">class</span> <span style="color:#793620">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#83541B;font-weight:600">def</span> <span style="color:#8F4A19">sample</span>(<span style="color:#7F6534">self</span>, <span style="color:#7F6534">stop</span>=<span style="color:#826A27">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#83541B;font-weight:600">return</span> <span style="color:#78251E">"#FDE7D8 → #FFFBF7"</span></div>
+          </div>
+          <div class="w-term" style="border-top:1px solid rgba(15,23,42,0.10);color:#6F4F39">
+            <span style="color:#8F4A19;font-weight:600">➜ aurora</span> <span style="color:#78251E">✓ WCAG AAA Verified</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-status" style="background:linear-gradient(90deg,#FDE7D8,#FEEEE2);border-top:1px solid rgba(15,23,42,0.10);color:#2F1D11">
+        <span>🌿 main*</span>
+        <span>🎲 #FDE7D8 → #FFFBF7</span>
+      </div>
+    </div>
+    
+    <div class="win" style="background:#FFF7F9;color:#2F1116;border:1px solid rgba(15,23,42,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#FDD8DF,#FEE2E7);border-bottom:1px solid rgba(15,23,42,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">6. Pure Rose Camellia (Light)</div>
+        <div class="w-badge" style="background:#E80D33;color:#fff">22% → 7% FROST</div>
+      </div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#FDD8DF,#FEE2E7,#FFF7F9);border-right:1px solid rgba(15,23,42,0.10)">
+          <div class="s-hdr" style="color:#6F3942">EXPLORER</div>
+          <div class="s-item active" style="color:#2F1116;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#6F3942">color_harmony.ts</div>
+          <div class="s-item" style="color:#6F3942">renderer.rs</div>
+        </div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#FEE2E7 0%,#FFF7F9 65%)">
+          <div class="w-tabs" style="background:#FEE2E7;border-bottom:1px solid rgba(15,23,42,0.10)">
+            <div class="w-tab active" style="background:#FFF7F9;color:#2F1116;border-top:2px solid #E80D33">glacial_shader.py</div>
+            <div class="w-tab" style="color:#6F3942">renderer.rs</div>
+          </div>
+          <div class="w-code">
+            <div style="color:#B07882;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#831B1F;font-weight:600">class</span> <span style="color:#79203E">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#831B1F;font-weight:600">def</span> <span style="color:#8F192D">sample</span>(<span style="color:#7F3A34">self</span>, <span style="color:#7F3A34">stop</span>=<span style="color:#823527">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#831B1F;font-weight:600">return</span> <span style="color:#781E4C">"#FDD8DF → #FFF7F9"</span></div>
+          </div>
+          <div class="w-term" style="border-top:1px solid rgba(15,23,42,0.10);color:#6F3942">
+            <span style="color:#8F192D;font-weight:600">➜ aurora</span> <span style="color:#781E4C">✓ WCAG AAA Verified</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-status" style="background:linear-gradient(90deg,#FDD8DF,#FEE2E7);border-top:1px solid rgba(15,23,42,0.10);color:#2F1116">
+        <span>🌿 main*</span>
+        <span>🎲 #FDD8DF → #FFF7F9</span>
+      </div>
+    </div>
+    
+    <div class="win" style="background:#FFF7FB;color:#26111B;border:1px solid rgba(15,23,42,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#FADCEB,#FBE4F0);border-bottom:1px solid rgba(15,23,42,0.10)">
+        <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
+        <div class="w-name">7. Pure Pink Sakura (Light)</div>
+        <div class="w-badge" style="background:#DB2777;color:#fff">22% → 7% FROST</div>
+      </div>
+      <div class="w-body">
+        <div class="w-side" style="background:linear-gradient(180deg,#FADCEB,#FBE4F0,#FFF7FB);border-right:1px solid rgba(15,23,42,0.10)">
+          <div class="s-hdr" style="color:#5E384A">EXPLORER</div>
+          <div class="s-item active" style="color:#26111B;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#5E384A">color_harmony.ts</div>
+          <div class="s-item" style="color:#5E384A">renderer.rs</div>
+        </div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#FBE4F0 0%,#FFF7FB 65%)">
+          <div class="w-tabs" style="background:#FBE4F0;border-bottom:1px solid rgba(15,23,42,0.10)">
+            <div class="w-tab active" style="background:#FFF7FB;color:#26111B;border-top:2px solid #DB2777">glacial_shader.py</div>
+            <div class="w-tab" style="color:#5E384A">renderer.rs</div>
+          </div>
+          <div class="w-code">
+            <div style="color:#A37A8E;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#7A244B;font-weight:600">class</span> <span style="color:#752946">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#7A244B;font-weight:600">def</span> <span style="color:#8C2D56">sample</span>(<span style="color:#6B3B52">self</span>, <span style="color:#6B3B52">stop</span>=<span style="color:#823059">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7A244B;font-weight:600">return</span> <span style="color:#6E3550">"#FADCEB → #FFF7FB"</span></div>
+          </div>
+          <div class="w-term" style="border-top:1px solid rgba(15,23,42,0.10);color:#5E384A">
+            <span style="color:#8C2D56;font-weight:600">➜ aurora</span> <span style="color:#6E3550">✓ WCAG AAA Verified</span>
+          </div>
+        </div>
+      </div>
+      <div class="w-status" style="background:linear-gradient(90deg,#FADCEB,#FBE4F0);border-top:1px solid rgba(15,23,42,0.10);color:#26111B">
+        <span>🌿 main*</span>
+        <span>🎲 #FADCEB → #FFF7FB</span>
+      </div>
+    </div>
+    
     <div class="win" style="background:#201933;color:#EFEBF9;border:1px solid rgba(255,255,255,0.10)">
       <div class="w-title" style="background:linear-gradient(90deg,#0D0A14,#120E1C);border-bottom:1px solid rgba(255,255,255,0.10)">
         <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
-        <div class="w-name">5. Pure Purple Lavender (Dark)</div>
+        <div class="w-name">8. Pure Purple Lavender (Dark)</div>
         <div class="w-badge" style="background:#7C3AED;color:#fff">POLAR NIGHT</div>
       </div>
       <div class="w-body">
@@ -266,38 +375,38 @@
       </div>
     </div>
     
-    <div class="win" style="background:#142134;color:#E2ECF7;border:1px solid rgba(255,255,255,0.10)">
-      <div class="w-title" style="background:linear-gradient(90deg,#090E16,#0C131E);border-bottom:1px solid rgba(255,255,255,0.10)">
+    <div class="win" style="background:#14152F;color:#E3E3F5;border:1px solid rgba(255,255,255,0.10)">
+      <div class="w-title" style="background:linear-gradient(90deg,#080914,#0B0C1B);border-bottom:1px solid rgba(255,255,255,0.10)">
         <div class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></div>
-        <div class="w-name">6. Pure Blue Cobalt (Dark)</div>
-        <div class="w-badge" style="background:#3B82F6;color:#fff">POLAR NIGHT</div>
+        <div class="w-name">9. Pure Indigo Starlight (Dark)</div>
+        <div class="w-badge" style="background:#2C30EC;color:#fff">POLAR NIGHT</div>
       </div>
       <div class="w-body">
-        <div class="w-side" style="background:linear-gradient(180deg,#090E16,#0C131E,#142134);border-right:1px solid rgba(255,255,255,0.10)">
-          <div class="s-hdr" style="color:#94B0CE">EXPLORER</div>
-          <div class="s-item active" style="color:#E2ECF7;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
-          <div class="s-item" style="color:#94B0CE">color_harmony.ts</div>
-          <div class="s-item" style="color:#94B0CE">renderer.rs</div>
+        <div class="w-side" style="background:linear-gradient(180deg,#080914,#0B0C1B,#14152F);border-right:1px solid rgba(255,255,255,0.10)">
+          <div class="s-hdr" style="color:#9E9FD1">EXPLORER</div>
+          <div class="s-item active" style="color:#E3E3F5;background:rgba(128,128,128,0.12)">glacial_shader.py</div>
+          <div class="s-item" style="color:#9E9FD1">color_harmony.ts</div>
+          <div class="s-item" style="color:#9E9FD1">renderer.rs</div>
         </div>
-        <div class="w-ed" style="background:linear-gradient(135deg,#0C131E 0%,#142134 65%)">
-          <div class="w-tabs" style="background:#0C131E;border-bottom:1px solid rgba(255,255,255,0.10)">
-            <div class="w-tab active" style="background:#142134;color:#E2ECF7;border-top:2px solid #3B82F6">glacial_shader.py</div>
-            <div class="w-tab" style="color:#94B0CE">renderer.rs</div>
+        <div class="w-ed" style="background:linear-gradient(135deg,#0B0C1B 0%,#14152F 65%)">
+          <div class="w-tabs" style="background:#0B0C1B;border-bottom:1px solid rgba(255,255,255,0.10)">
+            <div class="w-tab active" style="background:#14152F;color:#E3E3F5;border-top:2px solid #2C30EC">glacial_shader.py</div>
+            <div class="w-tab" style="color:#9E9FD1">renderer.rs</div>
           </div>
           <div class="w-code">
-            <div style="color:#4E6A8A;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
-            <div><span style="color:#7CC0F8;font-weight:600">class</span> <span style="color:#A8C7FA">GlacialTheme</span>:</div>
-            <div>&nbsp;&nbsp;<span style="color:#7CC0F8;font-weight:600">def</span> <span style="color:#9CD2FC">sample</span>(<span style="color:#94B8D8">self</span>, <span style="color:#94B8D8">stop</span>=<span style="color:#8CA8E8">0.22</span>):</div>
-            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7CC0F8;font-weight:600">return</span> <span style="color:#7AC7D4">"#090E16 → #142134"</span></div>
+            <div style="color:#54558C;font-style:italic"># 7%–22% Glacial Frost &amp; Monochromatic Tokens</div>
+            <div><span style="color:#9488F2;font-weight:600">class</span> <span style="color:#ABBAF7">GlacialTheme</span>:</div>
+            <div>&nbsp;&nbsp;<span style="color:#9488F2;font-weight:600">def</span> <span style="color:#9C9EF6">sample</span>(<span style="color:#A999E1">self</span>, <span style="color:#A999E1">stop</span>=<span style="color:#AF94EB">0.22</span>):</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#9488F2;font-weight:600">return</span> <span style="color:#87A8E3">"#080914 → #14152F"</span></div>
           </div>
-          <div class="w-term" style="border-top:1px solid rgba(255,255,255,0.10);color:#94B0CE">
-            <span style="color:#9CD2FC;font-weight:600">➜ aurora</span> <span style="color:#7AC7D4">✓ WCAG AAA Verified</span>
+          <div class="w-term" style="border-top:1px solid rgba(255,255,255,0.10);color:#9E9FD1">
+            <span style="color:#9C9EF6;font-weight:600">➜ aurora</span> <span style="color:#87A8E3">✓ WCAG AAA Verified</span>
           </div>
         </div>
       </div>
-      <div class="w-status" style="background:linear-gradient(90deg,#090E16,#0C131E);border-top:1px solid rgba(255,255,255,0.10);color:#E2ECF7">
+      <div class="w-status" style="background:linear-gradient(90deg,#080914,#0B0C1B);border-top:1px solid rgba(255,255,255,0.10);color:#E3E3F5">
         <span>🌿 main*</span>
-        <span>🎲 #090E16 → #142134</span>
+        <span>🎲 #080914 → #14152F</span>
       </div>
     </div>
     
