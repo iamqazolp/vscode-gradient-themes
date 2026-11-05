@@ -1,7 +1,7 @@
 {
   "name": "vscode-gradient-themes",
   "displayName": "VS Code Gradient Themes",
-  "description": "20 Glacial Single-Color & 4-Color Gradient Themes + a Universal Translucent 4-Color Rainbow Overlay & Live Status Bar Randomizer.",
+  "description": "Full-workbench atmospheric gradient meshes, single-hue ombré themes, and a 0ms Status Bar (🎲) mood roller with 30 curated palettes.",
   "version": "1.1.0",
   "publisher": "iamqazolp",
   "license": "MIT",
