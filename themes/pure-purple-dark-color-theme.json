@@ -130,7 +130,7 @@
     "panelTitle.activeBorder": "#7C3AED",
     "panelTitle.activeForeground": "#EFEBF9",
     "panelTitle.inactiveForeground": "#B6A6D9",
-    "terminal.background": "#1D172FE6",
+    "terminal.background": "#1D172F00",
     "terminal.border": "#00000000",
     "terminal.foreground": "#EFEBF9",
     "terminal.selectionBackground": "#8B5CF630",

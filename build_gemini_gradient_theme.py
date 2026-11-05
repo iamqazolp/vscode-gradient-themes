@@ -242,7 +242,9 @@ def make_ombre_theme(name: str, ui_type: str, p: dict) -> dict:
             "panelTitle.inactiveForeground": p["fg_muted"],
 
             # Gradient Integrated Terminal (High-contrast text & clean ANSI colors)
-            "terminal.background": c_step5,
+            # Use 6-digit RRGGBB + "00" alpha (8 hex digits total) so xterm.js keeps allowTransparency=true
+            # while computing selection contrast against RRGGBB instead of #000000 black!
+            "terminal.background": f"{c_step5[:7]}00",
             "terminal.border": "#00000000",
             "terminal.foreground": p["fg"],
             "terminal.selectionBackground": p["selection"],
