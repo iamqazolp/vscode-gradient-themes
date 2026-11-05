@@ -92,14 +92,16 @@
 .monaco-workbench .editor-group-container > .title .tabs-container > .tab:not(.active) > .tab-fill,
 .monaco-workbench .editor-group-container > .title .tabs-container > .tab > .tab-connected-edge,
 .monaco-workbench .breadcrumbs-below-tabs,
+.monaco-workbench .breadcrumbs-control,
+.monaco-workbench .breadcrumbs-control.with-editor-type > .breadcrumbs-editor-type,
 .monaco-workbench .monaco-breadcrumbs,
 .monaco-workbench .monaco-editor,
 .monaco-workbench .monaco-editor .overflow-guard,
 .monaco-workbench .monaco-editor .margin,
 .monaco-workbench .monaco-editor .monaco-editor-background,
 .monaco-workbench .monaco-editor .inputarea.ime-input,
-.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-line-numbers,
-.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines-scrollable,
+.monaco-workbench .monaco-editor .sticky-widget,
+.monaco-workbench .monaco-editor .sticky-widget .monaco-editor-background,
 .monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines,
 .monaco-workbench .monaco-editor .sticky-widget .sticky-line-number,
 .monaco-workbench .monaco-editor .sticky-widget .sticky-line-content,
@@ -112,6 +114,11 @@
 .monaco-workbench .part.sidebar > .title,
 .monaco-workbench .part.sidebar > .composite.title,
 .monaco-workbench .pane-body.integrated-terminal,
+.monaco-workbench .pane-body.integrated-terminal .tabs-container,
+.monaco-workbench .pane-body.integrated-terminal .tabs-list-container,
+.monaco-workbench.modern-ui-tabs .pane-body.integrated-terminal .tabs-list-container:not(.drop-target),
+.monaco-workbench .pane-body.integrated-terminal .tabs-list,
+.monaco-workbench .pane-body.integrated-terminal .tabs-list .monaco-list-rows,
 .monaco-workbench .terminal-outer-container,
 .monaco-workbench .terminal-groups-container,
 .monaco-workbench .terminal-group,
@@ -125,6 +132,8 @@
 .monaco-workbench .xterm canvas.xterm-link-layer,
 .monaco-workbench .monaco-editor .minimap,
 .monaco-workbench .monaco-editor .minimap-slider,
+.monaco-workbench .monaco-editor .decorationsOverviewRuler,
+.monaco-workbench .monaco-scrollable-element > .scrollbar,
 .monaco-workbench .notebookOverlay,
 .monaco-workbench .notebook-editor,
 .monaco-workbench .monaco-split-view2 > .monaco-scrollable-element > .split-view-container > .split-view-view {
@@ -133,12 +142,14 @@
   background-image: none !important;
 }
 
-/* Blend Minimap HTML5 <canvas> bitmap transparently into the Editor Gradient */
-.monaco-workbench:not(.vs-dark):not(.hc-black) .monaco-editor .minimap {
+/* Blend Minimap & Scrollbar Overview Ruler <canvas> bitmaps transparently into the Editor Gradient */
+.monaco-workbench:not(.vs-dark):not(.hc-black) .monaco-editor .minimap,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .monaco-editor .decorationsOverviewRuler {
   mix-blend-mode: multiply !important;
   opacity: 0.88 !important;
 }
-.monaco-workbench.vs-dark .monaco-editor .minimap {
+.monaco-workbench.vs-dark .monaco-editor .minimap,
+.monaco-workbench.vs-dark .monaco-editor .decorationsOverviewRuler {
   mix-blend-mode: screen !important;
   opacity: 0.85 !important;
 }
@@ -214,14 +225,21 @@
   border-radius: 3px !important;
 }
 
-/* Sticky Scroll (Editor, Terminal & Explorer Tree): Uses active theme's base + Gemini wash */
-.monaco-workbench .monaco-editor .sticky-widget,
-.monaco-workbench .monaco-editor .sticky-widget .monaco-editor-background,
+/* Sticky Scroll (Editor, Terminal & Explorer Tree): Seamless frosted glass that lets underlying gradient shine through */
+.monaco-workbench .monaco-editor .sticky-widget {
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-line-numbers,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines-scrollable,
 .monaco-workbench .terminal-sticky-scroll,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar) .monaco-tree-sticky-container {
-  background-color: var(--vscode-editor-background) !important;
-  background-image: var(--g-bar) !important;
-  backdrop-filter: blur(12px) !important;
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 62%, transparent) !important;
+  background-image: none !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.12) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03) !important;
 }
 
 /* Active Editor Tab Pill & Active Panel Tab Pill (e.g. [Terminal]): Clean rounded pill, zero boxy borders or side-ears */
@@ -252,7 +270,15 @@
 }
 
 /* Scrollbar Slider & Editor Cursor */
-.monaco-workbench .monaco-scrollable-element > .scrollbar > .slider,
+.monaco-workbench .monaco-scrollable-element > .scrollbar > .slider {
+  background: var(--g-border) !important;
+  border-radius: 99px !important;
+  opacity: 0.38 !important;
+}
+.monaco-workbench .monaco-scrollable-element > .scrollbar > .slider:hover,
+.monaco-workbench .monaco-scrollable-element > .scrollbar > .slider.active {
+  opacity: 0.75 !important;
+}
 .monaco-workbench .monaco-editor .cursors-layer .cursor {
   background: var(--g-border) !important;
   border-radius: 99px !important;
