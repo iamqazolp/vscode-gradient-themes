@@ -1083,7 +1083,7 @@ def build_package_json(manifest: list[dict]) -> dict:
     return {
         "name": "vscode-gradient-themes",
         "displayName": "VS Code Gradient Themes",
-        "description": "20 Glacial Single-Color & 4-Color Gradient Themes + a Universal Translucent 4-Color Rainbow Overlay & Live Status Bar Randomizer.",
+        "description": "Full-workbench atmospheric gradient meshes, single-hue ombré themes, and a 0ms Status Bar (🎲) mood roller with 30 curated palettes.",
         "version": "1.1.0",
         "publisher": "iamqazolp",
         "license": "MIT",
@@ -1149,8 +1149,34 @@ def build_package_json(manifest: list[dict]) -> dict:
                 {
                     "command": "gradientThemes.openPreview",
                     "title": "Gradient Themes: Open Interactive Theme & Gradient Preview",
+                    "icon": "$(symbol-color)",
+                },
+                {
+                    "command": "gradientThemes.openGitHub",
+                    "title": "Gradient Themes: Open GitHub Repository",
+                    "icon": "$(github)",
+                },
+                {
+                    "command": "gradientThemes.reportIssue",
+                    "title": "Gradient Themes: Report Issue on GitHub (with Diagnostics)",
+                    "icon": "$(bug)",
+                },
+                {
+                    "command": "gradientThemes.showTelemetryStats",
+                    "title": "Gradient Themes: Show Extension Telemetry & Marketplace Stats",
+                    "icon": "$(graph)",
                 },
             ],
+            "configuration": {
+                "title": "VS Code Gradient Themes",
+                "properties": {
+                    "gradientThemes.telemetry": {
+                        "type": "boolean",
+                        "default": True,
+                        "description": "Enable anonymous extension usage and error telemetry (automatically disabled for the extension author and when VS Code telemetry is off).",
+                    }
+                },
+            },
         },
     }
 

@@ -1,23 +1,20 @@
-<div align="center">
-
-<img src="./media/icon.png" width="88" height="88" alt="VS Code Gradient Themes Logo" />
-
 # VS Code Gradient Themes
 
-**Full-workbench atmospheric gradient meshes, serene single-hue ombré themes, and a `0ms` Status Bar `🎲` mood roller.**  
-*Designed for VS Code, Cursor, Windsurf, and Antigravity IDE.*
+[![VS Code Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/iamqazolp.vscode-gradient-themes?label=VS%20Code%20Marketplace&logo=visual-studio-code&color=22c55e)](https://marketplace.visualstudio.com/items?itemName=iamqazolp.vscode-gradient-themes)
+[![VS Code Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/iamqazolp.vscode-gradient-themes?label=Downloads&color=38bdf8)](https://marketplace.visualstudio.com/items?itemName=iamqazolp.vscode-gradient-themes)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-iamqazolp%2Fvscode--gradient--themes-181717?logo=github)](https://github.com/iamqazolp/vscode-gradient-themes)
+[![Report Issue](https://img.shields.io/badge/Issues-Report%20Bug%20%2F%20Feature-f59e0b?logo=github)](https://github.com/iamqazolp/vscode-gradient-themes/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-a855f7.svg)](https://github.com/iamqazolp/vscode-gradient-themes/blob/main/LICENSE.txt)
 
-</div>
+**Full-workbench atmospheric gradient meshes, serene single-hue ombré themes, and a `0ms` Status Bar `🎲` mood roller with 30 curated palettes for VS Code, Cursor, Windsurf, and Antigravity IDE.**
 
----
+![Prism Rainbow 4-Color Mesh](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/rainbow-overview.png)
 
-![Prism Rainbow 4-Color Mesh](./media/screenshots/rainbow-overview.png)
-
-![Visual Mood Gallery](./media/screenshots/theme-gallery-grid.png)
+![Visual Mood Gallery](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/theme-gallery-grid.png)
 
 | 🌸 Live `🎲` Randomizer — *Sakura Horizon (Light)* | 🌌 Live `🎲` Randomizer — *Antarctic Borealis (Dark)* |
 | :---: | :---: |
-| ![Sakura Horizon Light](./media/screenshots/live-randomizer-light.png) | ![Antarctic Borealis Dark](./media/screenshots/live-randomizer-dark.png) |
+| ![Sakura Horizon Light](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/live-randomizer-light.png) | ![Antarctic Borealis Dark](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/live-randomizer-dark.png) |
 
 ---
 
@@ -41,7 +38,7 @@
 | **🔮 Purple Mist** | `Purple Mist Gradient` | `Purple Mist Night` | Wisteria & lavender mist / Cosmic amethyst |
 | **🌸 Pink Blossom** | `Pink Blossom Gradient` | `Pink Blossom Night` | Sakura petal blush / Velvet berry night |
 
-![Pure Blue Glacial](./media/screenshots/pure-blue-glacial.png)
+![Pure Blue Glacial](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/pure-blue-glacial.png)
 
 ---
 
@@ -80,11 +77,22 @@ Click **`🎲`** in the bottom-right Status Bar to roll across **30 curated pale
 | **Reset / Toggle Off** | **Right-Click / `Shift + Click` `🎲`** or **`Alt + Shift + 0`** | Cycles between **Prism Classic** and **Theme Native (Overlay Off)** |
 | **Auto-Roll on Startup** | **`Cmd/Ctrl + Click` `🎲`** | Toggles `• Auto` to roll a fresh palette every time VS Code opens |
 
+### Command Palette (`Cmd + Shift + P`)
+| Command | ID | Description |
+| :--- | :--- | :--- |
+| **Gradient Themes: Enable 4-Color Rainbow Gradient & Live Randomizer** | `gradientThemes.enableGradientOverlay` | Injects the 4-color gradient CSS and `🎲` randomizer into `vscode_custom_css.imports` |
+| **Gradient Themes: Disable 4-Color Rainbow Gradient Overlay** | `gradientThemes.disableGradientOverlay` | Removes the gradient overlay from `vscode_custom_css.imports` |
+| **Gradient Themes: Roll Random Single-Color Glacial Theme** | `gradientThemes.rollRandomTheme` | Switches to a random core theme from the 12-theme suite |
+| **Gradient Themes: Open Interactive Theme & Gradient Preview** | `gradientThemes.openPreview` | Opens the interactive webview preview gallery |
+| **Gradient Themes: Open GitHub Repository** | `gradientThemes.openGitHub` | Opens `github.com/iamqazolp/vscode-gradient-themes` |
+| **Gradient Themes: Report Issue on GitHub (with Diagnostics)** | `gradientThemes.reportIssue` | Opens a pre-filled GitHub issue with IDE, OS, active theme & overlay diagnostics |
+| **Gradient Themes: Show Extension Telemetry & Marketplace Stats** | `gradientThemes.showTelemetryStats` | Queries live VS Code Marketplace metrics (`install` vs `downloadCount` vs `updateCount`) and shows author telemetry exclusion status |
+
 ---
 
-## 🛠️ Create Your Own Palettes ([`COLOR_GUIDE.md`](./COLOR_GUIDE.md))
+## 🛠️ Create Your Own Palettes ([`COLOR_GUIDE.md`](https://github.com/iamqazolp/vscode-gradient-themes/blob/main/COLOR_GUIDE.md))
 
-Generate new themes or add custom 4-color presets to the `🎲` randomizer with [`add_color.py`](./add_color.py):
+Generate new themes or add custom 4-color presets to the `🎲` randomizer with [`add_color.py`](https://github.com/iamqazolp/vscode-gradient-themes/blob/main/add_color.py):
 
 ```bash
 # Generate a Light + Dark theme pair from a single hex color

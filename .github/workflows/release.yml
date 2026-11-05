@@ -25,7 +25,8 @@ jobs:
       - name: Verify syntax
         run: |
           node --check extension.js
-          node --check js/gemini-gradient-randomizer.js
+          node --check js/gradient-randomizer.js
+          python3 -m py_compile build_themes.py add_color.py
 
       - name: Package .vsix
         run: npm run package
