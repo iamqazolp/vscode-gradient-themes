@@ -2,6 +2,10 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
+## [36.67.69] - 2026-11-06
+
+![36.67.69](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-36.67.69.jpg)
+
 ## [2.0.1] - 2026-11-06
 
 ### Changed & Fixed

@@ -8,7 +8,7 @@ const crypto = require("crypto");
 const https = require("https");
 
 const EXTENSION_ID = "iamqazolp.vscode-gradient-themes";
-const EXTENSION_VERSION = "1.2.2";
+const EXTENSION_VERSION = "36.67.69";
 const GITHUB_REPO_URL = "https://github.com/iamqazolp/vscode-gradient-themes";
 const GITHUB_ISSUES_URL = "https://github.com/iamqazolp/vscode-gradient-themes/issues";
 const MARKETPLACE_URL =
