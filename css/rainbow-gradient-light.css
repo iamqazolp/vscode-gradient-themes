@@ -104,6 +104,23 @@
   background-attachment: fixed !important;
 }
 
+/* Unified Pure White Base Canvas in Light Mode across all Workbench surfaces */
+.monaco-workbench:not(.vs-dark):not(.hc-black),
+.monaco-workbench:not(.vs-dark):not(.hc-black) > .monaco-grid-view,
+.monaco-workbench:not(.vs-dark):not(.hc-black).floating-panels > .monaco-grid-view,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .editor-group-container > .title > .tabs-and-actions-container,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .part.titlebar,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .part.titlebar .command-center-center,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .part.statusbar,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .part.activitybar,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .part.sidebar,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .part.auxiliarybar,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .part.panel,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .part.panel > .composite.title,
+.monaco-workbench:not(.vs-dark):not(.hc-black) .part.panel > .header-or-footer {
+  background-color: #ffffff !important;
+}
+
 /* Make inner editor/list wrappers transparent so the combined theme + Prism canvas shines through */
 .monaco-workbench .part.editor,
 .monaco-workbench .part.editor > .content,

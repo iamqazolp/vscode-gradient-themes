@@ -187,7 +187,7 @@ function isGradientAssetUrl(url) {
  * Built-in Zero-Dependency Workbench HTML Locator
  * Supports VSCode, Cursor, Windsurf, and Antigravity IDE across macOS, Linux, and Windows.
  */
-function locateWorkbenchHtml() {
+function locateAllWorkbenchHtmls() {
   const roots = [];
   if (vscode.env && vscode.env.appRoot) {
     roots.push(path.join(vscode.env.appRoot, "out"));
@@ -201,10 +201,10 @@ function locateWorkbenchHtml() {
   }
 
   const subDirs = [
-    path.join("vs", "code", "electron-browser", "workbench"),
-    path.join("vs", "code", "electron-browser"),
     path.join("vs", "code", "electron-sandbox", "workbench"),
+    path.join("vs", "code", "electron-browser", "workbench"),
     path.join("vs", "code", "electron-sandbox"),
+    path.join("vs", "code", "electron-browser"),
   ];
   const fileNames = [
     "workbench.html",
@@ -213,23 +213,37 @@ function locateWorkbenchHtml() {
     "workbench-apc-extension.html",
   ];
 
+  const found = [];
+  const seen = new Set();
   for (const r of roots) {
     for (const sub of subDirs) {
       const dir = path.join(r, sub);
       for (const fn of fileNames) {
         const candidate = path.join(dir, fn);
-        if (fs.existsSync(candidate)) {
-          return { workbenchDir: dir, htmlPath: candidate };
+        if (!seen.has(candidate) && fs.existsSync(candidate)) {
+          seen.add(candidate);
+          found.push({ workbenchDir: dir, htmlPath: candidate });
         }
       }
     }
   }
-  return null;
+  return found;
+}
+
+function locateWorkbenchHtml() {
+  const all = locateAllWorkbenchHtmls();
+  return all.length > 0 ? all[0] : null;
 }
 
 function buildInjectionPayload(context) {
   const { cssPath, jsPath } = getAssetUrls(context);
-  const cssContent = fs.readFileSync(cssPath, "utf8");
+  const fontPath = path.join(context.extensionPath, "media", "Comfortaa.ttf");
+  const fontFileUrl = toFileUrl(fontPath);
+  let cssContent = fs.readFileSync(cssPath, "utf8");
+  cssContent = cssContent.replace(
+    /url\("file:\/\/\/[^"]*Comfortaa\.ttf"\)/g,
+    `url("${fontFileUrl}")`
+  );
   const jsContent = fs.readFileSync(jsPath, "utf8");
   const hash = crypto
     .createHash("sha1")
@@ -313,8 +327,8 @@ async function applyWorkbenchSettings(context, enable = true) {
 async function enableGradientOverlay(context, silent = false) {
   trackEvent("command.enableGradientOverlay", { silent });
 
-  const loc = locateWorkbenchHtml();
-  if (!loc) {
+  const targets = locateAllWorkbenchHtmls();
+  if (targets.length === 0) {
     await applyWorkbenchSettings(context, true);
     if (!silent) {
       vscode.window.showWarningMessage(
@@ -325,26 +339,27 @@ async function enableGradientOverlay(context, silent = false) {
   }
 
   try {
-    const { htmlPath, workbenchDir } = loc;
-    const backupPath = path.join(workbenchDir, "workbench.gradient-themes.bak");
-    let html = await fs.promises.readFile(htmlPath, "utf8");
-
-    if (!fs.existsSync(backupPath)) {
-      const cleanForBackup = stripGradientBlocks(html);
-      await fs.promises.writeFile(backupPath, cleanForBackup, "utf8");
-    }
-
-    html = stripGradientBlocks(html);
-    html = html.replace(/<meta\s+http-equiv="Content-Security-Policy"[\s\S]*?\/>/i, "");
-
     const { block } = buildInjectionPayload(context);
-    if (/<\/html>/i.test(html)) {
-      html = html.replace(/(<\/html>)/i, `${block}\n$1`);
-    } else {
-      html = html.replace(/(<\/head>)/i, `${block}\n$1`);
-    }
+    for (const { htmlPath } of targets) {
+      const backupPath = `${htmlPath}.gradient-themes.bak`;
+      let html = await fs.promises.readFile(htmlPath, "utf8");
 
-    await fs.promises.writeFile(htmlPath, html, "utf8");
+      if (!fs.existsSync(backupPath)) {
+        const cleanForBackup = stripGradientBlocks(html);
+        await fs.promises.writeFile(backupPath, cleanForBackup, "utf8");
+      }
+
+      html = stripGradientBlocks(html);
+      html = html.replace(/<meta\s+http-equiv="Content-Security-Policy"[\s\S]*?\/>/i, "");
+
+      if (/<\/html>/i.test(html)) {
+        html = html.replace(/(<\/html>)/i, `${block}\n$1`);
+      } else {
+        html = html.replace(/(<\/head>)/i, `${block}\n$1`);
+      }
+
+      await fs.promises.writeFile(htmlPath, html, "utf8");
+    }
     await applyWorkbenchSettings(context, true);
 
     if (!silent) {
@@ -376,13 +391,16 @@ async function disableGradientOverlay(context) {
   trackEvent("command.disableGradientOverlay");
   await applyWorkbenchSettings(context, false);
 
-  const loc = locateWorkbenchHtml();
-  if (loc) {
+  const targets = locateAllWorkbenchHtmls();
+  for (const { htmlPath, workbenchDir } of targets) {
     try {
-      const { htmlPath, workbenchDir } = loc;
-      const backupPath = path.join(workbenchDir, "workbench.gradient-themes.bak");
+      const backupPath = `${htmlPath}.gradient-themes.bak`;
+      const legacyBackup = path.join(workbenchDir, "workbench.gradient-themes.bak");
       if (fs.existsSync(backupPath)) {
         const cleanHtml = await fs.promises.readFile(backupPath, "utf8");
+        await fs.promises.writeFile(htmlPath, cleanHtml, "utf8");
+      } else if (fs.existsSync(legacyBackup) && htmlPath.endsWith("workbench.html")) {
+        const cleanHtml = await fs.promises.readFile(legacyBackup, "utf8");
         await fs.promises.writeFile(htmlPath, cleanHtml, "utf8");
       } else {
         const current = await fs.promises.readFile(htmlPath, "utf8");
@@ -426,28 +444,40 @@ async function autoSyncWorkbenchOnStartup(context) {
       return;
     }
 
-    const loc = locateWorkbenchHtml();
-    if (!loc) {
+    const targets = locateAllWorkbenchHtmls();
+    if (targets.length === 0) {
       return;
     }
 
-    const statBefore = await fs.promises.stat(loc.htmlPath);
-    const currentHtml = await fs.promises.readFile(loc.htmlPath, "utf8");
     const { hash } = buildInjectionPayload(context);
+    let allUpToDate = true;
+    let recentlyPatched = false;
+    let hadPreviousPatch = false;
 
-    // Already up-to-date with the exact current CSS + 30-palette JS hash
-    if (currentHtml.includes(`<!-- !! VSCODE-GRADIENT-THEMES-START ${hash} !! -->`)) {
-      // If another window in a multi-window startup just patched workbench.html within the last 15s,
-      // this window booted before the patch and also needs a reload prompt.
+    for (const { htmlPath } of targets) {
+      const statBefore = await fs.promises.stat(htmlPath);
+      const currentHtml = await fs.promises.readFile(htmlPath, "utf8");
+      if (!currentHtml.includes(`<!-- !! VSCODE-GRADIENT-THEMES-START ${hash} !! -->`)) {
+        allUpToDate = false;
+      }
       if (Date.now() - statBefore.mtimeMs < 15000) {
+        recentlyPatched = true;
+      }
+      if (
+        currentHtml.includes("VSCODE-GRADIENT-THEMES-START") ||
+        currentHtml.includes("PRISM 4-COLOR RAINBOW BLEND ENGINE")
+      ) {
+        hadPreviousPatch = true;
+      }
+    }
+
+    // Already up-to-date with the exact current CSS + 30-palette JS hash across all workbench HTMLs
+    if (allUpToDate) {
+      if (recentlyPatched) {
         showReloadStatusBarPrompt(context);
       }
       return;
     }
-
-    const hadPreviousPatch =
-      currentHtml.includes("VSCODE-GRADIENT-THEMES-START") ||
-      currentHtml.includes("PRISM 4-COLOR RAINBOW BLEND ENGINE");
 
     const ok = await enableGradientOverlay(context, true);
     if (ok && !hadPreviousPatch) {

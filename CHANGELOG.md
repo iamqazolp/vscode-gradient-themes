@@ -2,6 +2,15 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
+## [2.0.1] - 2026-11-06
+
+### Changed & Fixed
+- **Unified Pure White (`#FFFFFF`) Base Canvas in Light Mode (`themes/prism-rainbow-light-color-theme.json`, `css/rainbow-gradient-light.css`)**:
+  - Replaced tinted yellow/green/grey base surfaces with a uniform pure white (`#FFFFFF`) base canvas across the Workbench, Editor, Title Bar, Tabs, Activity Bar, Sidebars, Terminal Panel, and Status Bar so translucent 4-color gradients blend cleanly without color muddiness.
+- **Cross-Platform & Windows Workbench Patching (`extension.js`)**:
+  - Added `locateAllWorkbenchHtmls()` to patch and verify **all** matching workbench HTML entrypoints (`workbench.html` + `workbench.esm.html` across `electron-sandbox` and `electron-browser`) on Windows, macOS, and Linux.
+  - Added dynamic cross-platform `file:///` path resolution for bundled `media/Comfortaa.ttf` in `buildInjectionPayload()`.
+
 ## [2.0.0] - 2026-11-06
 
 ### Added
