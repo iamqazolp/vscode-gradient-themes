@@ -1,4 +1,4 @@
-# VSCode Gradient Themes
+# <img src="https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/icon.png" width="38" height="38" align="top" alt="VSCode Gradient Themes Logo" /> VSCode Gradient Themes
 
 [![VSCode Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/iamqazolp.vscode-gradient-themes?label=VSCode%20Marketplace&logo=visual-studio-code&color=22c55e)](https://marketplace.visualstudio.com/items?itemName=iamqazolp.vscode-gradient-themes)
 [![VSCode Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/iamqazolp.vscode-gradient-themes?label=Downloads&color=38bdf8)](https://marketplace.visualstudio.com/items?itemName=iamqazolp.vscode-gradient-themes)
@@ -6,25 +6,48 @@
 [![Report Issue](https://img.shields.io/badge/Issues-Report%20Bug%20%2F%20Feature-f59e0b?logo=github)](https://github.com/iamqazolp/vscode-gradient-themes/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-a855f7.svg)](https://github.com/iamqazolp/vscode-gradient-themes/blob/main/LICENSE.txt)
 
-**Full-workbench atmospheric gradient meshes, serene single-hue ombré themes, and a `0ms` Status Bar `🎲` mood roller with 30 curated palettes for VSCode, Cursor, Windsurf, and Antigravity IDE.**
+**Full-workbench atmospheric gradient meshes, universal 4-color gradient text selection, serene single-hue ombré themes, and a live Status Bar `Gradient Studio` with 30+ curated palettes, `Breathing Aurora` animations, and a 4-stop color sculptor for VSCode, Cursor, Windsurf, and Antigravity IDE.**
+
+| 🌸 Gradient Studio — *Sakura Horizon (Light)* | 🌌 Gradient Studio — *Antarctic Borealis + Breathing (Dark)* |
+| :---: | :---: |
+| ![Gradient Studio Light](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/gradient-studio-light.png) | ![Gradient Studio Dark](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/gradient-studio-dark.png) |
 
 ![Prism Rainbow 4-Color Mesh](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/rainbow-overview.png)
 
 ![Visual Mood Gallery](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/theme-gallery-grid.png)
 
-| 🌸 Live `🎲` Randomizer — *Sakura Horizon (Light)* | 🌌 Live `🎲` Randomizer — *Antarctic Borealis (Dark)* |
+| 🌸 Live Randomizer — *Sakura Horizon (Light)* | 🌌 Live Randomizer — *Antarctic Borealis (Dark)* |
 | :---: | :---: |
 | ![Sakura Horizon Light](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/live-randomizer-light.png) | ![Antarctic Borealis Dark](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/live-randomizer-dark.png) |
 
 ---
 
-## ✨ Zero-Setup Built-In Engine
+## ✨ Live Gradient Studio & Breathing Aurora
 
-No extra extensions or manual config files required:
+Click **`Studio ▴`** in the bottom-right Status Bar (or press **`Alt + Shift + P`**) to open the frosted-glass **Gradient Studio**:
 
-1. **Install `VSCode Gradient Themes`** — the built-in engine automatically enables the 4-Color Gradient Mesh & Status Bar **`🎲`** Randomizer and prompts you with a single **`Reload Window`** button.
-2. **Pick a Base Color Theme (`Cmd + K, Cmd + T`)** — sets your canvas tone (Light or Polar Night Dark) and calm, monochromatic syntax highlighting matched to that color family.
-3. **Click `🎲` in the Status Bar** — rolls 30 curated multi-color & single-hue gradient palettes across your Title Bar, Sidebar, Editor, Terminal, and Status Bar in `0ms` (or **Right-Click `🎲`** to toggle the overlay off).
+* **Intensity Slider (`40%` – `180%`)**: Dial the gradient mesh opacity from whisper-soft (`60%`) to vivid neon (`150%`) in `0ms`.
+* **4-Mode `Breathing Aurora` Engine (`Alt + Shift + B`)**: Mix and match four organic animation behaviors with a continuous **`Speed` (`25%` – `250%`)** slider:
+  * **`Full Wave`**: Smoothly rotates linear gradient angles and corner focal points across your Editor, Title Bar, Status Bar, Tabs, Sidebar, and Terminal.
+  * **`Pulse`**: Gently inhales and exhales gradient intensity like a calm heartbeat.
+  * **`Shimmer`**: Continuously rotates and interpolates the 4 color stops around the workbench.
+  * **`Auto-Morph`**: Cross-fades RGB values into new palettes automatically with zero abrupt jumps.
+* **30+ Palettes & Favorites (`★`)**: Filter by `All`, `Favs`, `Prism`, `Pastel`, `Pure`, or `Custom` and pin your favorite palettes so random rolls prioritize them.
+* **`Pick your own color` (4-Stop Live Sculptor)**: Drag 4 circular color orbs for `0ms` live preview, generate procedural HSL harmonies with **`Harmony`**, and save custom named palettes.
+
+---
+
+## ⚡ Controls & Shortcuts
+
+### Status Bar Pill (`↻` & `Studio ▴` — `0ms`, No Reload)
+| Action | Click / Shortcut | What It Does |
+| :--- | :--- | :--- |
+| **Roll New Mood** | **Left-Click `↻`** or **`Alt + Shift + G`** | Instantly blends a new 4-color gradient & mesh angle |
+| **Open Gradient Studio** | **Click `Studio ▴`**, **`Alt + Click`**, or **`Alt + Shift + P`** | Opens the interactive Gradient Studio & Color Picker window |
+| **Toggle Breathing Aurora** | **Click `Breathe`** in Studio or **`Alt + Shift + B`** | Starts/pauses the multi-mode Breathing Aurora engine |
+| **Adjust Intensity** | **Drag Slider** in Studio or **`Alt + Shift + Up / Down`** | Increases or decreases gradient intensity (`40%`–`180%`) |
+| **Reset / Toggle Off** | **Right-Click / `Shift + Click`** or **`Alt + Shift + 0`** | Cycles between **Prism Classic** and **Theme Native (Overlay Off)** |
+| **Auto-Roll on Startup** | **`Cmd/Ctrl + Click`** | Toggles `• Auto` to roll a fresh palette every time VSCode opens |
 
 ---
 
@@ -64,19 +87,10 @@ Click **`🎲`** in the bottom-right Status Bar to roll across **30 curated pale
 
 ---
 
-## ⚡ Controls & Shortcuts
-
-### Status Bar `🎲` Shortcuts (`0ms`, No Reload)
-| Action | Click / Shortcut | What It Does |
-| :--- | :--- | :--- |
-| **Roll New Mood** | **Left-Click `🎲`** or **`Alt + Shift + G`** | Instantly blends a new 4-color gradient & mesh angle |
-| **Reset / Toggle Off** | **Right-Click / `Shift + Click` `🎲`** or **`Alt + Shift + 0`** | Cycles between **Prism Classic** and **Theme Native (Overlay Off)** |
-| **Auto-Roll on Startup** | **`Cmd/Ctrl + Click` `🎲`** | Toggles `• Auto` to roll a fresh palette every time VSCode opens |
-
-### Command Palette (`Cmd + Shift + P`)
+## ⚡ Command Palette (`Cmd + Shift + P`)
 | Command | ID | Description |
 | :--- | :--- | :--- |
-| **Gradient Themes: Enable 4-Color Rainbow Gradient & Live Randomizer** | `gradientThemes.enableGradientOverlay` | Enables the built-in 4-color gradient mesh and `🎲` randomizer |
+| **Gradient Themes: Enable 4-Color Rainbow Gradient & Live Randomizer** | `gradientThemes.enableGradientOverlay` | Enables the built-in 4-color gradient mesh and Status Bar Studio |
 | **Gradient Themes: Disable 4-Color Rainbow Gradient Overlay** | `gradientThemes.disableGradientOverlay` | Cleanly removes the full-workbench gradient mesh |
 | **Gradient Themes: Roll Random Single-Color Glacial Theme** | `gradientThemes.rollRandomTheme` | Switches to a random core theme from the 12-theme suite |
 | **Gradient Themes: Open Interactive Theme & Gradient Preview** | `gradientThemes.openPreview` | Opens the interactive webview preview gallery |

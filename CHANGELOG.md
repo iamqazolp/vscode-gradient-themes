@@ -2,6 +2,22 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
+## [2.0.0] - 2026-11-06
+
+### Added
+- **Interactive Status Bar `Gradient Studio` Popover (`Alt + Shift + P` / `Studio ▴`)**:
+  - Soft frosted-glass studio window styled with **Comfortaa** typography, a custom 4-color gradient scrollbar, and a fixed-height 2-column palette browser across `All`, `Favs`, `Prism`, `Pastel`, `Pure`, and `Custom` tabs.
+  - Added ability to pin favorites (`★`) and remove any palette (`×`).
+- **Live Gradient Intensity Slider (`40%` – `180%`)**:
+  - Continuous slider, `60%`/`100%`/`150%` quick presets, and `Alt + Shift + Up / Down` shortcuts that scale gradient mesh opacity in place without resetting the active colors.
+- **4-Mode `Breathing Aurora` Engine (`Alt + Shift + B` & Status Bar `Breathe` Pill)**:
+  - Combinable **`Full Wave`** (rotating angles & corner focal points), **`Pulse`** (heartbeat intensity breathing), **`Shimmer`** (continuous 4-stop rotation), and **`Auto-Morph`** (smooth RGB cross-fading across palettes) with a continuous **`Speed` (`25%` – `250%`)** slider.
+  - Pausing `Breathe` freezes and preserves the exact live colors on screen instead of snapping back to the original palette.
+- **`Pick your own color` 4-Stop Live Color Sculptor**:
+  - Full-bleed rounded color pills with `0ms` live workbench preview, procedural **`Harmony`** generator, and custom palette saving.
+- **Redesigned Status Bar Controls & Extension Logo**:
+  - Updated extension icon (`media/icon.svg`, `media/icon.png`) and circular Studio badge (`Studio ▴`), dedicated Status Bar `Breathe` toggle pill, animated cycle-arrows button (`↻`), and a continuous live 4-color sneak-peek bar.
+
 ## [1.2.2] - 2026-11-06
 
 ### Added

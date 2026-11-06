@@ -6,7 +6,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    width: 1440px; height: 1080px;
+    width: 100%; min-height: 100vh;
     background: radial-gradient(circle at 50% 0%, rgba(234,67,53,0.14), transparent 48%),
                 radial-gradient(circle at 0% 50%, rgba(251,188,4,0.12), transparent 48%),
                 radial-gradient(circle at 50% 100%, rgba(52,168,83,0.14), transparent 48%),
@@ -15,7 +15,62 @@
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
     padding: 24px 30px;
     color: #EDF2FA;
+    overflow-y: auto;
+  }
+  .studio-card {
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(18px);
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .studio-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    min-width: 320px;
+  }
+  .studio-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .studio-btn {
+    padding: 6px 12px;
+    border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.10);
+    color: #EDF2FA;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .studio-btn:hover { background: rgba(255,255,255,0.18); }
+  .studio-input {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    font-size: 12px;
+  }
+  .studio-preview {
+    width: 420px;
+    height: 126px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.18);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.4);
   }
   .header {
     display: flex; justify-content: space-between; align-items: center;
@@ -93,6 +148,93 @@
       <span class="pill">🌌 Indigo</span>
     </div>
   </div>
+  <div class="studio-card">
+    <div class="studio-controls">
+      <div style="font-size:14px;font-weight:700;color:#fff;">🎨 Interactive 4-Stop Gradient Studio &amp; Playground</div>
+      <div style="font-size:11.5px;color:#9EB0CC;">Design a custom 4-color mesh below, or click <b>🎲 ▾</b> in the bottom-right Status Bar (`Alt+Shift+P`) to open the live in-workbench Studio Popover!</div>
+      <div class="studio-row">
+        <label style="font-size:11.5px;font-weight:600;">Stops:</label>
+        <input type="color" id="st-c1" value="#EA4335" style="width:32px;height:26px;border:none;background:none;cursor:pointer;">
+        <input type="color" id="st-c2" value="#FBBC04" style="width:32px;height:26px;border:none;background:none;cursor:pointer;">
+        <input type="color" id="st-c3" value="#34A853" style="width:32px;height:26px;border:none;background:none;cursor:pointer;">
+        <input type="color" id="st-c4" value="#4285F4" style="width:32px;height:26px;border:none;background:none;cursor:pointer;">
+        <label style="font-size:11.5px;font-weight:600;margin-left:8px;">Intensity:</label>
+        <input type="range" id="st-int" min="40" max="180" step="5" value="100" style="width:110px;cursor:pointer;">
+        <span id="st-int-val" style="font-family:monospace;font-size:11.5px;">100%</span>
+      </div>
+      <div class="studio-row">
+        <input type="text" id="st-name" class="studio-input" placeholder="Custom Palette Name (e.g. Cyber Mint)" value="Cyber Mint">
+        <button class="studio-btn" id="st-copy-cli">📋 Copy add_color.py CLI Command</button>
+        <button class="studio-btn" id="st-roll-theme">↻ Roll Random Theme</button>
+      </div>
+    </div>
+    <div class="studio-preview" id="st-preview-box">
+      <div id="st-prev-bar" style="height:24px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;font-size:10.5px;font-weight:700;">
+        <span>✨ Live 4-Stop Mesh Preview</span>
+        <span id="st-prev-hex" style="font-family:monospace;font-size:10px;">#EA4335 → #4285F4</span>
+      </div>
+      <div id="st-prev-body" style="flex:1;padding:12px 14px;font-family:monospace;font-size:11.5px;line-height:1.55;">
+        <div><span style="color:#93C5FD;font-weight:600;">const</span> mesh = <span style="color:#86EFAC;">createPrismOverlay</span>({ stops: 4 });</div>
+        <div id="st-prev-sel" style="display:inline-block;padding:1px 6px;border-radius:4px;margin-top:4px;">// Selected text &amp; workbench glow in 0ms</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function() {
+      const vscodeApi = typeof acquireVsCodeApi === "function" ? acquireVsCodeApi() : null;
+      const c1 = document.getElementById("st-c1");
+      const c2 = document.getElementById("st-c2");
+      const c3 = document.getElementById("st-c3");
+      const c4 = document.getElementById("st-c4");
+      const intSlider = document.getElementById("st-int");
+      const intVal = document.getElementById("st-int-val");
+      const nameInp = document.getElementById("st-name");
+      const prevBox = document.getElementById("st-preview-box");
+      const prevBar = document.getElementById("st-prev-bar");
+      const prevSel = document.getElementById("st-prev-sel");
+      const prevHex = document.getElementById("st-prev-hex");
+
+      function hexToRgba(hex, a) {
+        const h = hex.replace("#", "");
+        const r = parseInt(h.slice(0,2), 16), g = parseInt(h.slice(2,4), 16), b = parseInt(h.slice(4,6), 16);
+        return `rgba(${r},${g},${b},${Math.min(0.65, a).toFixed(2)})`;
+      }
+
+      function updatePreview() {
+        const k = parseInt(intSlider.value, 10) / 100;
+        intVal.textContent = intSlider.value + "%";
+        const v1 = c1.value.toUpperCase(), v2 = c2.value.toUpperCase(), v3 = c3.value.toUpperCase(), v4 = c4.value.toUpperCase();
+        prevHex.textContent = `${v1} · ${v2} · ${v3} · ${v4}`;
+        prevBar.style.background = `linear-gradient(90deg, ${hexToRgba(v1, 0.28*k)}, ${hexToRgba(v2, 0.22*k)}, ${hexToRgba(v3, 0.22*k)}, ${hexToRgba(v4, 0.30*k)})`;
+        prevBox.style.background = `
+          radial-gradient(ellipse 75% 60% at 15% 15%, ${hexToRgba(v1, 0.22*k)}, transparent 70%),
+          radial-gradient(ellipse 70% 70% at 85% 25%, ${hexToRgba(v2, 0.22*k)}, transparent 70%),
+          radial-gradient(ellipse 75% 60% at 25% 85%, ${hexToRgba(v3, 0.22*k)}, transparent 70%),
+          radial-gradient(ellipse 70% 70% at 85% 85%, ${hexToRgba(v4, 0.25*k)}, transparent 75%),
+          #111827
+        `;
+        prevSel.style.background = `linear-gradient(90deg, ${hexToRgba(v1, 0.34*k)}, ${hexToRgba(v2, 0.28*k)}, ${hexToRgba(v3, 0.28*k)}, ${hexToRgba(v4, 0.36*k)})`;
+      }
+
+      [c1, c2, c3, c4, intSlider].forEach(el => el.addEventListener("input", updatePreview));
+      updatePreview();
+
+      document.getElementById("st-copy-cli").addEventListener("click", () => {
+        const nm = (nameInp.value || "Custom Palette").trim();
+        const stops = [c1.value, c2.value, c3.value, c4.value].map(s => s.toUpperCase()).join(",");
+        const cmd = `python3 add_color.py randomizer --name "${nm}" --stops "${stops}"`;
+        if (vscodeApi) {
+          vscodeApi.postMessage({ type: "copyCliCommand", command: cmd });
+        } else if (navigator.clipboard) {
+          navigator.clipboard.writeText(cmd);
+        }
+      });
+
+      document.getElementById("st-roll-theme").addEventListener("click", () => {
+        if (vscodeApi) vscodeApi.postMessage({ type: "rollTheme" });
+      });
+    })();
+  </script>
   <div class="grid">
     
     <div class="win" style="background:#F6FBFF;color:#122238;border:1px solid rgba(15,23,42,0.10)">

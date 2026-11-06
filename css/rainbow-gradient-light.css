@@ -1,3 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap');
+@font-face {
+  font-family: "Comfortaa";
+  src: local("Comfortaa"), url("file:///Users/iamqazolp/Library/Fonts/Comfortaa.ttf") format("truetype");
+  font-weight: 300 700;
+  font-style: normal;
+}
+
 /* ==========================================================================
  * ✨ PRISM 4-COLOR RAINBOW BLEND ENGINE (7%–22% Translucent Overlay)
  *
@@ -66,6 +74,16 @@
     rgba(66, 133, 244, 0.32) 100%
   );
   --g-sel-tint: rgba(66, 133, 244, 0.28);
+
+  /* Radial mesh focal coordinates (drifted smoothly when 🌊 Breathing Aurora is active) */
+  --g-p1x: 15%;
+  --g-p1y: 15%;
+  --g-p2x: 85%;
+  --g-p2y: 25%;
+  --g-p3x: 25%;
+  --g-p3y: 85%;
+  --g-p4x: 85%;
+  --g-p4y: 85%;
 }
 
 /* --------------------------------------------------------------------------
@@ -78,10 +96,10 @@
 .monaco-workbench.floating-panels > .monaco-grid-view {
   background-color: var(--vscode-editor-background) !important;
   background-image:
-    radial-gradient(ellipse 75% 55% at 15% 15%, var(--g-r1) 0%, transparent 70%),
-    radial-gradient(ellipse 65% 75% at 85% 25%, var(--g-r2) 0%, transparent 72%),
-    radial-gradient(ellipse 75% 60% at 25% 85%, var(--g-r3) 0%, transparent 72%),
-    radial-gradient(ellipse 70% 70% at 85% 85%, var(--g-r4) 0%, transparent 75%),
+    radial-gradient(ellipse 75% 55% at var(--g-p1x, 15%) var(--g-p1y, 15%), var(--g-r1) 0%, transparent 70%),
+    radial-gradient(ellipse 65% 75% at var(--g-p2x, 85%) var(--g-p2y, 25%), var(--g-r2) 0%, transparent 72%),
+    radial-gradient(ellipse 75% 60% at var(--g-p3x, 25%) var(--g-p3y, 85%), var(--g-r3) 0%, transparent 72%),
+    radial-gradient(ellipse 70% 70% at var(--g-p4x, 85%) var(--g-p4y, 85%), var(--g-r4) 0%, transparent 75%),
     var(--g-base) !important;
   background-attachment: fixed !important;
 }
@@ -336,4 +354,564 @@
 .monaco-workbench .monaco-editor .cursors-layer .cursor {
   background: var(--g-border) !important;
   border-radius: 99px !important;
+}
+
+/* --------------------------------------------------------------------------
+ * 4. STATUS BAR GRADIENT STUDIO POPOVER (Soft Frosted Aurora & 4-Color UI)
+ * -------------------------------------------------------------------------- */
+#prism-palette-popover,
+#prism-palette-popover *,
+#prism-randomizer-item,
+#prism-randomizer-item * {
+  font-family: "Comfortaa", -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "Segoe UI", sans-serif !important;
+}
+
+#prism-randomizer-item,
+#prism-randomizer-item:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+#prism-randomizer-roll {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  transition: background-color 0.15s ease !important;
+}
+#prism-randomizer-roll:hover {
+  background-color: var(--vscode-statusBarItem-hoverBackground, rgba(128, 128, 128, 0.18)) !important;
+}
+#prism-randomizer-item .prism-cycle-svg {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#prism-randomizer-roll:hover .prism-cycle-svg {
+  transform: rotate(180deg);
+}
+#prism-randomizer-breathe {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  gap: 4px !important;
+  padding: 2px 9px !important;
+  margin-left: 2px !important;
+  height: 19px !important;
+  border-radius: 999px !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 55%, transparent) !important;
+  background-image: var(--g-bar) !important;
+  border: 1.5px solid rgba(128, 128, 128, 0.28) !important;
+  opacity: 0.86 !important;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
+}
+#prism-randomizer-breathe:hover {
+  opacity: 1 !important;
+  transform: translateY(-1px) scale(1.04) !important;
+  border-color: rgba(128, 128, 128, 0.52) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14) !important;
+}
+#prism-randomizer-breathe.active {
+  opacity: 1 !important;
+  background-image: var(--g-selection, var(--g-bar)) !important;
+  border-color: rgba(59, 130, 246, 0.82) !important;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.28), 0 1px 6px rgba(59, 130, 246, 0.16) !important;
+}
+#prism-randomizer-chevron {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  gap: 4px !important;
+  padding: 2px 9px !important;
+  margin-left: 3px !important;
+  height: 19px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 55%, transparent) !important;
+  background-image: var(--g-selection, var(--g-bar)) !important;
+  border: 1.5px solid rgba(128, 128, 128, 0.30) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+#prism-randomizer-chevron:hover {
+  transform: translateY(-1px) scale(1.04) !important;
+  border-color: rgba(128, 128, 128, 0.52) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+#prism-palette-popover {
+  position: fixed;
+  right: 14px;
+  bottom: 34px;
+  width: 456px;
+  z-index: 100001;
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  background-color: color-mix(in srgb, var(--vscode-editorWidget-background, var(--vscode-editor-background)) 86%, transparent) !important;
+  background-image:
+    radial-gradient(ellipse 90% 75% at 12% 12%, var(--g-r1) 0%, transparent 76%),
+    radial-gradient(ellipse 85% 75% at 88% 18%, var(--g-r2) 0%, transparent 76%),
+    radial-gradient(ellipse 90% 75% at 18% 88%, var(--g-r3) 0%, transparent 76%),
+    radial-gradient(ellipse 85% 80% at 88% 88%, var(--g-r4) 0%, transparent 78%),
+    var(--g-base) !important;
+  backdrop-filter: blur(36px) saturate(145%) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(145%) !important;
+  border: 1.5px solid rgba(128, 128, 128, 0.28);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.22),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  color: var(--vscode-foreground);
+  font-family: "Comfortaa", -apple-system, BlinkMacSystemFont, "SF Pro Rounded", sans-serif !important;
+  font-size: 12px;
+  user-select: none;
+  overflow: hidden;
+  animation: prismPopIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes prismPopIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+#prism-palette-popover .pp-top-ribbon {
+  height: 3px;
+  width: 100%;
+  background: var(--g-border);
+  opacity: 0.78;
+  flex-shrink: 0;
+}
+#prism-palette-popover .pp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1.5px solid rgba(128, 128, 128, 0.16);
+  background-image: var(--g-bar);
+  flex-shrink: 0;
+}
+#prism-palette-popover .pp-title {
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+#prism-palette-popover .pp-title-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background-image: var(--g-selection, var(--g-bar));
+  border: 1.5px solid rgba(128, 128, 128, 0.28);
+  color: var(--vscode-foreground);
+  opacity: 0.92;
+}
+#prism-palette-popover .pp-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+#prism-palette-popover .pp-btn {
+  height: 27px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(128, 128, 128, 0.28);
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 62%, transparent);
+  background-image: var(--g-bar);
+  color: var(--vscode-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#prism-palette-popover .pp-btn:hover {
+  border-color: rgba(128, 128, 128, 0.48);
+  background-image: var(--g-selection, var(--g-bar));
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+#prism-palette-popover .pp-btn.active {
+  background-image: var(--g-selection, var(--g-bar));
+  border-color: rgba(59, 130, 246, 0.78);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35), 0 3px 10px rgba(59, 130, 246, 0.14);
+}
+#prism-palette-popover .pp-btn-primary {
+  background-image: var(--g-selection, var(--g-bar)) !important;
+  border: 1.5px solid rgba(128, 128, 128, 0.36) !important;
+  color: var(--vscode-foreground) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+#prism-palette-popover .pp-btn-primary:hover {
+  border-color: rgba(128, 128, 128, 0.55) !important;
+  transform: translateY(-1px);
+}
+#prism-palette-popover .pp-section {
+  padding: 11px 16px;
+  border-bottom: 1.5px solid rgba(128, 128, 128, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex-shrink: 0;
+}
+#prism-palette-popover .pp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+#prism-palette-popover .pp-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--g-border);
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  opacity: 0.9;
+  outline: none;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.14);
+  transition: opacity 0.15s ease;
+}
+#prism-palette-popover .pp-slider:hover {
+  opacity: 1;
+}
+#prism-palette-popover .pp-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid rgba(59, 130, 246, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#prism-palette-popover .pp-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+#prism-palette-popover .pp-breathe-drawer {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(128, 128, 128, 0.22);
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 48%, transparent);
+  background-image: var(--g-side);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#prism-palette-popover .pp-breathe-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#prism-palette-popover .pp-breathe-title {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.92;
+}
+#prism-palette-popover .pp-chip-group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+#prism-palette-popover .pp-chip {
+  width: 100%;
+  height: 26px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1.5px solid rgba(128, 128, 128, 0.25);
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 58%, transparent);
+  color: var(--vscode-foreground);
+  transition: all 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#prism-palette-popover .pp-chip:hover {
+  border-color: rgba(128, 128, 128, 0.45);
+  transform: translateY(-0.5px);
+}
+#prism-palette-popover .pp-chip.active {
+  background-image: var(--g-selection, var(--g-bar));
+  border-color: rgba(59, 130, 246, 0.78);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+#prism-palette-popover .pp-tabs {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 9px 16px;
+  border-bottom: 1.5px solid rgba(128, 128, 128, 0.15);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+#prism-palette-popover .pp-tabs::-webkit-scrollbar {
+  height: 0;
+}
+#prism-palette-popover .pp-tab {
+  flex: 1;
+  height: 25px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1.5px solid rgba(128, 128, 128, 0.24);
+  background: color-mix(in srgb, var(--vscode-editor-background) 50%, transparent);
+  color: var(--vscode-foreground);
+  opacity: 0.85;
+  transition: all 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#prism-palette-popover .pp-tab:hover {
+  background-image: var(--g-bar);
+  border-color: rgba(128, 128, 128, 0.42);
+  opacity: 1;
+}
+#prism-palette-popover .pp-tab.active {
+  background-image: var(--g-selection, var(--g-bar));
+  border-color: rgba(59, 130, 246, 0.72);
+  font-weight: 700;
+  opacity: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+/* Fixed height grid so switching tabs NEVER shrinks or jumps the window */
+#prism-palette-popover .pp-grid {
+  width: 100%;
+  box-sizing: border-box;
+  height: 244px;
+  min-height: 244px;
+  max-height: 244px;
+  flex: 0 0 244px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding: 11px 10px 11px 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: max-content;
+  align-content: start;
+  gap: 8px;
+}
+/* In-Style Gradient Pill Scrollbar */
+#prism-palette-popover .pp-grid::-webkit-scrollbar {
+  width: 6px;
+}
+#prism-palette-popover .pp-grid::-webkit-scrollbar-track {
+  background: rgba(128, 128, 128, 0.08);
+  border-radius: 999px;
+  margin: 8px 0;
+}
+#prism-palette-popover .pp-grid::-webkit-scrollbar-thumb {
+  background: var(--g-border);
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+  min-height: 36px;
+}
+#prism-palette-popover .pp-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--g-border);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background-clip: padding-box;
+}
+#prism-palette-popover .pp-card {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 13px;
+  border: 1.5px solid rgba(128, 128, 128, 0.25);
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 58%, transparent);
+  cursor: pointer;
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.16s ease, box-shadow 0.16s ease;
+}
+#prism-palette-popover .pp-card:hover {
+  border-color: rgba(128, 128, 128, 0.48);
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.09);
+}
+#prism-palette-popover .pp-card.selected {
+  border-color: rgba(59, 130, 246, 0.80);
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.35),
+    0 6px 16px rgba(59, 130, 246, 0.12);
+}
+#prism-palette-popover .pp-swatch {
+  height: 8px;
+  width: 100%;
+  border-radius: 999px;
+  opacity: 0.92;
+  border: 1px solid rgba(128, 128, 128, 0.20);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.28);
+}
+#prism-palette-popover .pp-card-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+#prism-palette-popover .pp-card-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#prism-palette-popover .pp-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+#prism-palette-popover .pp-dot {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  opacity: 0.9;
+  box-shadow: 0 0 0 1px rgba(128, 128, 128, 0.32);
+}
+#prism-palette-popover .pp-star {
+  font-size: 12px;
+  opacity: 0.48;
+  cursor: pointer;
+  padding: 0 1px;
+  transition: transform 0.14s ease, opacity 0.14s ease;
+}
+#prism-palette-popover .pp-star:hover,
+#prism-palette-popover .pp-star.fav {
+  opacity: 1;
+  transform: scale(1.15);
+}
+#prism-palette-popover .pp-del {
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 700;
+  opacity: 0.38;
+  cursor: pointer;
+  padding: 0 2px;
+  transition: transform 0.14s ease, opacity 0.14s ease, color 0.14s ease;
+}
+#prism-palette-popover .pp-del:hover {
+  opacity: 1;
+  color: #ef4444;
+  transform: scale(1.18);
+}
+#prism-palette-popover .pp-builder {
+  padding: 11px 16px 14px;
+  border-top: 1.5px solid rgba(128, 128, 128, 0.16);
+  background-image: var(--g-bar);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+#prism-palette-popover .pp-builder-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#prism-palette-popover .pp-builder-title {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.9;
+}
+#prism-palette-popover .pp-builder-preview {
+  height: 6px;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--g-border);
+  border: 1px solid rgba(128, 128, 128, 0.22);
+  opacity: 0.9;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.28);
+}
+#prism-palette-popover .pp-orbs-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+#prism-palette-popover .pp-color-orb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 26px;
+  padding: 0;
+  border: 1.5px solid rgba(128, 128, 128, 0.34);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.10),
+    inset 0 1px 2px rgba(255, 255, 255, 0.38);
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.16s ease, box-shadow 0.16s ease;
+}
+#prism-palette-popover .pp-color-orb:hover {
+  transform: translateY(-1.5px);
+  border-color: rgba(128, 128, 128, 0.58);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.16),
+    inset 0 1px 2px rgba(255, 255, 255, 0.48);
+}
+#prism-palette-popover .pp-color-orb::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 999px;
+}
+#prism-palette-popover .pp-color-orb::-webkit-color-swatch {
+  border: none;
+  border-radius: 999px;
+}
+#prism-palette-popover .pp-text-input {
+  flex: 1;
+  min-width: 86px;
+  height: 27px;
+  padding: 0 11px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 1.5px solid rgba(128, 128, 128, 0.28);
+  background: color-mix(in srgb, var(--vscode-editor-background) 68%, transparent);
+  color: var(--vscode-foreground);
+  font-size: 11px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+#prism-palette-popover .pp-text-input:focus {
+  border-color: rgba(59, 130, 246, 0.78);
 }

@@ -499,7 +499,7 @@ function openPreviewPanel(context) {
   trackEvent("command.openPreview");
   const panel = vscode.window.createWebviewPanel(
     "gradientThemesPreview",
-    "VSCode Gradient Themes Preview",
+    "VSCode Gradient Themes Studio & Preview",
     vscode.ViewColumn.One,
     { enableScripts: true }
   );
@@ -509,6 +509,22 @@ function openPreviewPanel(context) {
   } else {
     panel.webview.html = "<html><body><h2>VSCode Gradient Themes</h2></body></html>";
   }
+
+  panel.webview.onDidReceiveMessage(
+    async (msg) => {
+      if (!msg || typeof msg !== "object") return;
+      if (msg.type === "copyCliCommand" && msg.command) {
+        await vscode.env.clipboard.writeText(String(msg.command));
+        vscode.window.showInformationMessage(
+          `📋 Copied to clipboard: ${msg.command}`
+        );
+      } else if (msg.type === "rollTheme") {
+        await rollRandomTheme(context);
+      }
+    },
+    undefined,
+    context.subscriptions
+  );
 }
 
 async function openGitHubRepository() {
