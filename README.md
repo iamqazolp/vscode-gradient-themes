@@ -1,4 +1,4 @@
-# <img src="media/icon.png" width="38" height="38" align="top" alt="VSCode Gradient Themes Logo" /> VSCode Gradient Themes
+# <img src="https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/icon.png" width="38" height="38" align="top" alt="VSCode Gradient Themes Logo" /> VSCode Gradient Themes
 
 [![VSCode Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/iamqazolp.vscode-gradient-themes?label=VSCode%20Marketplace&logo=visual-studio-code&color=22c55e)](https://marketplace.visualstudio.com/items?itemName=iamqazolp.vscode-gradient-themes)
 [![VSCode Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/iamqazolp.vscode-gradient-themes?label=Downloads&color=38bdf8)](https://marketplace.visualstudio.com/items?itemName=iamqazolp.vscode-gradient-themes)
@@ -8,17 +8,17 @@
 
 > **Turn your code editor into living aurora glass.** Seamless full-window 4-color gradients, rainbow code highlighting, breathing animations, and a live Status Bar **`Gradient Studio`** with **30+ hand-crafted moods** for **VSCode, Cursor, Windsurf, and Antigravity**.
 
-![Prism Rainbow Seamless Full-Window Mesh](media/screenshots/rainbow-overview.png)
+![Prism Rainbow Seamless Full-Window Mesh](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/rainbow-overview.png)
 
 | 🌸 Gradient Studio — *Sakura Horizon (Light)* | 🌌 Gradient Studio — *Antarctic Borealis (Dark)* |
 | :---: | :---: |
-| ![Gradient Studio Light](media/screenshots/gradient-studio-light.png) | ![Gradient Studio Dark](media/screenshots/gradient-studio-dark.png) |
+| ![Gradient Studio Light](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/gradient-studio-light.png) | ![Gradient Studio Dark](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/gradient-studio-dark.png) |
 
 ---
 
 ## 🌈 Gradient Code Highlighting (`Alt + Shift + C`)
 
-![Gradient Code Highlighting Showcase](media/screenshots/syntax-gradient-showcase.png)
+![Gradient Code Highlighting Showcase](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/syntax-gradient-showcase.png)
 
 * **Crisp & Effortless to Read** — Plain variables, punctuation, and comments stay crystal-clear solid text while keywords, functions, strings, and numbers shimmer in smooth 2-color gradients.
 * **Two Ways to Glow (`Alt + Shift + C`)** — Keep your theme's natural syntax colors gently tinted by your palette (**Semantic Blend**), or paint your code directly with your active 4-color palette (**Palette Prism**).
@@ -37,7 +37,7 @@
 
 ## 🖼️ Visual Mood Gallery & 12 Core Themes (`Cmd + K, Cmd + T`)
 
-![Visual Mood Gallery](media/screenshots/theme-gallery-grid.png)
+![Visual Mood Gallery](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/theme-gallery-grid.png)
 
 | Family | ☀️ Light Theme | 🌙 Dark Theme | Vibe |
 | :--- | :--- | :--- | :--- |
