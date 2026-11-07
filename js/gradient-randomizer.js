@@ -447,6 +447,14 @@
     } catch (_) {}
     const wb = document.querySelector(".monaco-workbench");
     syncSeamlessClass(wb);
+    if (!next && wb && lastLiveStops && lastLiveStops.length === 4) {
+      writeGradientCssVars(
+        wb,
+        lastLiveStops,
+        lastLiveAngles || { base: 135, bar: 90, side: 165, panel: 105 },
+        getIntensity()
+      );
+    }
     refreshPopoverHeaderAndIntensity();
     renderPaletteGrid();
   }
@@ -539,7 +547,10 @@
   let lastSyntaxK = 1.0;
   let monacoColorsObserver = null;
   let observedMonacoStyleEl = null;
+  let cachedMonacoTokenSig = "";
+  let cachedMonacoTokenMap = null;
   let lastSyntaxHexSig = "";
+  let lastSyntaxSheetUpdateTs = 0;
   let cachedComponentsConfig = null;
   let lastAppliedWbElement = null;
   const lastAppliedVars = new Map();
@@ -602,8 +613,16 @@
   }
 
   function extractMonacoTokenColors(isDark) {
-    const tokenMap = new Map();
     const fastStyle = document.querySelector("style.vscode-tokens-styles, style.monaco-colors");
+    if (
+      fastStyle &&
+      fastStyle === observedMonacoStyleEl &&
+      cachedMonacoTokenMap &&
+      cachedMonacoTokenSig === `${isDark ? "d" : "l"}|${fastStyle.textContent?.length || 0}`
+    ) {
+      return cachedMonacoTokenMap;
+    }
+    const tokenMap = new Map();
     const styles = fastStyle
       ? [fastStyle]
       : document.querySelectorAll("style:not(#prism-syntax-style)");
@@ -622,6 +641,8 @@
           monacoColorsObserver.disconnect();
         }
         monacoColorsObserver = new MutationObserver(() => {
+          cachedMonacoTokenSig = "";
+          cachedMonacoTokenMap = null;
           const wb = document.querySelector(".monaco-workbench");
           if (wb) ensureSyntaxStyleSheet(wb, true);
         });
@@ -669,6 +690,10 @@
       defaults.forEach(([idx, rgb]) => {
         if (!tokenMap.has(idx)) tokenMap.set(idx, rgb);
       });
+    }
+    if (fastStyle) {
+      cachedMonacoTokenSig = `${isDark ? "d" : "l"}|${fastStyle.textContent?.length || 0}`;
+      cachedMonacoTokenMap = tokenMap;
     }
     return tokenMap;
   }
@@ -783,7 +808,7 @@
     setWbProp(wb, "--g-syntax-frame", "none");
   }
 
-  function applySyntaxCssVars(wb, compStops, compAngles, effectiveK) {
+  function applySyntaxCssVars(wb, compStops, compAngles, effectiveK, fromBreatheTick = false) {
     if (!wb) return;
     wb.classList.remove("prism-no-syntax");
     syncSyntaxModeClass(wb);
@@ -801,7 +826,11 @@
       setWbProp(wb, "--g-syntax-strong", buildSelectionCss(compStops, compAngles, effectiveK * 0.85));
       setWbProp(wb, "--g-syntax-frame", buildFrameCss(compStops));
     }
-    ensureSyntaxStyleSheet(wb, false, compStops, effectiveK);
+    const now = performance.now();
+    if (!fromBreatheTick || now - lastSyntaxSheetUpdateTs >= 240) {
+      lastSyntaxSheetUpdateTs = now;
+      ensureSyntaxStyleSheet(wb, false, compStops, effectiveK);
+    }
   }
 
   function getComponentsConfig() {
@@ -1166,6 +1195,7 @@
   let breatheTimer = null;
   let breathePhase = 0;
   let morphSourceStops = null;
+  let morphSourceAngles = null;
   let morphTargetPalette = null;
   let morphProgress = 0;
   let lastLiveStops = null;
@@ -1320,19 +1350,25 @@
     )} 33%, ${rgba(s3, 0.13 * kVal)} 66%, ${rgba(s4, 0.16 * kVal)} 100%)`;
   }
 
-  function buildTerminalPanelCss(cStops, cAngles, kVal) {
+  function buildTerminalPanelCss(cStops, cAngles, kVal, coords) {
     const [s1, s2, s3, s4] = cStops;
     const r1 = rgba(s1, 0.18 * kVal);
     const r2 = rgba(s2, 0.18 * kVal);
     const r3 = rgba(s3, 0.18 * kVal);
+    const t1x = coords ? coords.p1x : 12;
+    const t1y = coords ? coords.p1y : 20;
+    const t2x = coords ? coords.p2x : 88;
+    const t2y = coords ? coords.p4y : 80;
+    const t3x = coords ? Math.round(50 + (coords.p3x - 25)) : 50;
+    const t3y = coords ? Math.round(50 + (coords.p2y - 25)) : 50;
     const panel = `linear-gradient(${Math.round(cAngles.panel)}deg, ${rgba(s2, 0.07 * kVal)} 0%, ${rgba(
       s3,
       0.13 * kVal
     )} 50%, ${rgba(s4, 0.18 * kVal)} 100%)`;
     return [
-      `radial-gradient(ellipse 65% 85% at 12% 20%, ${r1} 0%, transparent 70%)`,
-      `radial-gradient(ellipse 60% 80% at 88% 80%, ${r2} 0%, transparent 70%)`,
-      `radial-gradient(ellipse 55% 65% at 50% 50%, ${r3} 0%, transparent 75%)`,
+      `radial-gradient(ellipse 65% 85% at ${t1x}% ${t1y}%, ${r1} 0%, transparent 70%)`,
+      `radial-gradient(ellipse 60% 80% at ${t2x}% ${t2y}%, ${r2} 0%, transparent 70%)`,
+      `radial-gradient(ellipse 55% 65% at ${t3x}% ${t3y}%, ${r3} 0%, transparent 75%)`,
       panel,
     ].join(", ");
   }
@@ -1353,10 +1389,14 @@
     )} 33%, ${rgba(s3, 0.66)} 66%, ${rgba(s4, 0.76)} 100%)`;
   }
 
-  function writeGradientCssVars(wb, stops, angles, k, coords) {
+  function writeGradientCssVars(wb, stops, angles, k, coords, opts) {
+    const fromBreatheTick = Boolean(opts && opts.fromBreatheTick);
     const [c1, c2, c3, c4] = stops;
     const defaultMeshCss = buildMeshCss(stops, angles, k, coords);
+    const defaultTerminalPanelCss = buildTerminalPanelCss(stops, angles, k, coords);
     setBackdropMesh(wb, defaultMeshCss);
+    setWbProp(wb, "--g-default-mesh", defaultMeshCss);
+    setWbProp(wb, "--g-default-terminal-panel", defaultTerminalPanelCss);
 
     setWbProp(wb, "--g-r1", rgba(c1, 0.18 * k));
     setWbProp(wb, "--g-r2", rgba(c2, 0.18 * k));
@@ -1450,7 +1490,7 @@
           setWbProp(wb, "--g-selection", buildSelectionCss(stops, angles, k));
           setWbProp(wb, "--g-sel-tint", rgba(stops[0], 0.28 * k));
         } else if (key === "syntax") {
-          applySyntaxCssVars(wb, stops, angles, k);
+          applySyntaxCssVars(wb, stops, angles, k, fromBreatheTick);
         } else {
           setWbProp(wb, `--g-${key}-mesh`, "var(--g-default-mesh)");
           setWbProp(wb, `--g-${key}-bar`, "var(--g-bar)");
@@ -1488,7 +1528,7 @@
         setWbProp(wb, "--g-selection", buildSelectionCss(compStops, compAngles, k));
         setWbProp(wb, "--g-sel-tint", rgba(compStops[0], 0.28 * k));
       } else if (key === "syntax") {
-        applySyntaxCssVars(wb, compStops, compAngles, k);
+        applySyntaxCssVars(wb, compStops, compAngles, k, fromBreatheTick);
       } else {
         setWbProp(wb, `--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k, coords));
         setWbProp(wb, `--g-${key}-bar`, buildBarCss(compStops, compAngles, k));
@@ -1499,7 +1539,7 @@
           setWbProp(
             wb,
             "--g-terminal-panel",
-            buildTerminalPanelCss(compStops, compAngles, k)
+            buildTerminalPanelCss(compStops, compAngles, k, coords)
           );
         }
       }
@@ -1566,19 +1606,22 @@
           : CURATED_PALETTES[0];
 
       let baseStops = activePalette.stops.map((s) => [...s]);
-      const baseAngles = activePalette.angles || {
-        base: 135,
-        bar: 90,
-        side: 165,
-        panel: 105,
+      let baseAngles = {
+        ...(activePalette.angles || {
+          base: 135,
+          bar: 90,
+          side: 165,
+          panel: 105,
+        }),
       };
 
       let morphCompleted = false;
 
-      // 1. Auto-Morph Between Palettes (Smooth RGB crossfade starting at 0.0)
+      // 1. Auto-Morph Between Palettes (Smooth RGB + Angle crossfade starting at 0.0)
       if (cfg.morph) {
         if (!morphSourceStops || !morphTargetPalette) {
           morphSourceStops = baseStops.map((s) => [...s]);
+          morphSourceAngles = { ...baseAngles };
           morphTargetPalette = rollRandomPalette(activePalette.name);
           morphProgress = 0;
         }
@@ -1586,10 +1629,18 @@
         if (morphProgress >= 1) {
           const completed = morphTargetPalette;
           morphSourceStops = completed.stops.map((s) => [...s]);
+          morphSourceAngles = {
+            ...(completed.angles || {
+              base: 135,
+              bar: 90,
+              side: 165,
+              panel: 105,
+            }),
+          };
           try {
             localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(completed));
           } catch (_) {}
-          updateStatusBarPill(completed.name, completed.stops);
+          updateStatusBarPill(completed.name, null);
           if (isPopoverOpen()) {
             if (activeComponent === "all") {
               syncBuilderPickers(completed.stops);
@@ -1599,6 +1650,7 @@
           morphTargetPalette = rollRandomPalette(completed.name);
           morphProgress = 0;
           baseStops = morphSourceStops.map((s) => [...s]);
+          baseAngles = { ...morphSourceAngles };
           morphCompleted = true;
         } else {
           const smoothT =
@@ -1606,9 +1658,23 @@
           baseStops = [0, 1, 2, 3].map((i) =>
             lerpRgb(morphSourceStops[i], morphTargetPalette.stops[i], smoothT)
           );
+          const srcA = morphSourceAngles || baseAngles;
+          const tgtA = morphTargetPalette.angles || {
+            base: 135,
+            bar: 90,
+            side: 165,
+            panel: 105,
+          };
+          baseAngles = {
+            base: srcA.base + (tgtA.base - srcA.base) * smoothT,
+            bar: srcA.bar + (tgtA.bar - srcA.bar) * smoothT,
+            side: srcA.side + (tgtA.side - srcA.side) * smoothT,
+            panel: srcA.panel + (tgtA.panel - srcA.panel) * smoothT,
+          };
         }
       } else {
         morphSourceStops = null;
+        morphSourceAngles = null;
         morphTargetPalette = null;
         morphProgress = 0;
       }
@@ -1624,8 +1690,7 @@
         ? Math.max(0.25, Math.min(2.2, baseK * (1 + Math.sin(breathePhase * 0.78) * 0.24)))
         : baseK;
 
-      // 4. Full-Workbench Wave (Update leaf #prism-aurora-backdrop directly with zero .monaco-workbench
-      //    inherited CSS variable mutations -> 0 DOM tree RecalcStyle walks and 0 Oilpan GC churn!)
+      // 4. Full-Workbench Wave
       let liveAngles = baseAngles;
       let waveCoords = null;
       if (cfg.wave) {
@@ -1647,30 +1712,11 @@
         };
       }
 
-      if (morphCompleted) {
-        writeGradientCssVars(targetWb, animatedStops, liveAngles, effectiveK, waveCoords);
-        return;
-      }
-
-      // Fast-path leaf update: only touch childless #prism-aurora-backdrop (3 DOM levels deep, contain: strict)
-      // Do not mutate #prism-randomizer-swatch (~14 levels deep inside .part.statusbar) on 100ms ticks
-      setBackdropMesh(targetWb, buildMeshCss(animatedStops, liveAngles, effectiveK, waveCoords));
-      lastLiveStops = animatedStops.map((s) => [...s]);
-      lastLiveAngles = { ...liveAngles };
-
-      if (isPopoverOpen() && (!activeComponent || activeComponent === "all")) {
-        const [c1, c2, c3, c4] = animatedStops;
-        const liveGrad = `linear-gradient(90deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
-          c2
-        )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`;
-        if (liveGrad !== lastSwatchGrad) {
-          lastSwatchGrad = liveGrad;
-          const previewBar = document.getElementById("pp-builder-preview-bar");
-          if (previewBar) {
-            previewBar.style.backgroundImage = liveGrad;
-          }
-        }
-      }
+      // Smoothly update backdrop, all component & UI chrome CSS variables (sticky bars, active tabs,
+      // selected files, selected text, borders), and the statusbar swatch on every 100ms tick in both modes.
+      writeGradientCssVars(targetWb, animatedStops, liveAngles, effectiveK, waveCoords, {
+        fromBreatheTick: !morphCompleted,
+      });
     }, 100);
   }
 
@@ -1785,6 +1831,7 @@
 
     // Reset any in-flight morph transition and phase offset when user explicitly picks/rolls a palette
     morphSourceStops = null;
+    morphSourceAngles = null;
     morphTargetPalette = null;
     morphProgress = 0;
     breathePhase = 0;
@@ -1800,6 +1847,8 @@
         "--g-bar",
         "--g-side",
         "--g-panel",
+        "--g-default-mesh",
+        "--g-default-terminal-panel",
         "--g-default-frame",
         "--g-workbench-mesh",
         "--g-explorer-side",

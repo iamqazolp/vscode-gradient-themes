@@ -195,6 +195,18 @@
 .monaco-workbench .monaco-editor .inputarea.ime-input,
 .monaco-workbench .monaco-editor .sticky-widget .monaco-editor-background,
 .monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-line-numbers,
+.monaco-workbench .monaco-editor.peek .sticky-widget .sticky-widget-line-numbers,
+.monaco-workbench .monaco-editor .sticky-widget.peek .sticky-widget-line-numbers,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines-scrollable,
+.monaco-workbench .monaco-editor.peek .sticky-widget .sticky-widget-lines-scrollable,
+.monaco-workbench .monaco-editor .sticky-widget.peek .sticky-widget-lines-scrollable,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-line-number,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-line-number-inner,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-line-content,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-line-content:hover,
+.monaco-workbench .notebookOverlay .notebook-sticky-scroll-container .notebook-sticky-scroll-element,
+.monaco-workbench .notebookOverlay .notebook-sticky-scroll-container .notebook-sticky-scroll-element:hover,
 .monaco-workbench .part.titlebar > .titlebar-container,
 .monaco-workbench:not(.prism-split-panels) .part.titlebar .command-center-center,
 .monaco-workbench .part.activitybar > .content,
@@ -233,10 +245,19 @@
 .monaco-workbench .terminal-wrapper,
 .monaco-workbench .terminal-tabs-container,
 .monaco-workbench .xterm,
+.monaco-workbench .xterm .xterm-scrollable-element,
 .monaco-workbench .xterm .xterm-viewport,
 .monaco-workbench .xterm .xterm-screen,
 .monaco-workbench .xterm .xterm-rows,
 .monaco-workbench .xterm canvas.xterm-link-layer,
+.monaco-workbench .terminal-sticky-scroll .xterm,
+.monaco-workbench .terminal-sticky-scroll .xterm-scrollable-element,
+.monaco-workbench .terminal-sticky-scroll .xterm-viewport,
+.monaco-workbench .terminal-sticky-scroll .xterm-screen,
+.monaco-workbench .terminal-sticky-scroll .xterm-rows,
+.monaco-workbench .terminal-sticky-scroll .xterm-rows > div,
+.monaco-workbench .terminal-sticky-scroll .hover-overlay,
+.monaco-workbench .terminal-sticky-scroll .hover-overlay:hover,
 .monaco-workbench .monaco-editor .minimap,
 .monaco-workbench .monaco-editor .minimap-slider,
 .monaco-workbench .monaco-editor .decorationsOverviewRuler,
@@ -548,22 +569,15 @@
 
 /* A. Editor Sticky Scroll, Notebook Sticky Scroll & Coverage Summary */
 .monaco-workbench .monaco-editor .sticky-widget,
-.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-line-numbers,
-.monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines-scrollable,
-.monaco-workbench .monaco-editor .sticky-widget .sticky-line-number,
-.monaco-workbench .monaco-editor .sticky-widget .sticky-line-content,
 .monaco-workbench .notebookOverlay .notebook-sticky-scroll-container,
-.monaco-workbench .notebookOverlay .notebook-sticky-scroll-container .notebook-sticky-scroll-element,
 .monaco-workbench .coverage-summary-widget {
+  background: var(--g-editor-bar, none) !important;
   background-color: var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) !important;
   background-image: var(--g-editor-bar, none) !important;
   background-attachment: scroll !important;
-}
-.monaco-workbench .monaco-editor .sticky-widget,
-.monaco-workbench .notebookOverlay .notebook-sticky-scroll-container,
-.monaco-workbench .coverage-summary-widget {
   border: none !important;
   border-radius: 0 0 8px 8px !important;
+  overflow: hidden !important;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16) !important;
 }
 .monaco-workbench .monaco-editor .sticky-widget::after,
@@ -653,12 +667,30 @@
 .monaco-workbench .terminal-sticky-scroll,
 .monaco-workbench .part.sidebar .output-view .sticky-widget,
 .monaco-workbench .part.panel > .content .pane-body.output-view .sticky-widget {
+  background: var(--g-terminal-bar, none) !important;
   background-color: var(--g-canvas-bg, var(--vscode-panel-background, var(--vscode-editor-background, #ffffff))) !important;
   background-image: var(--g-terminal-bar, none) !important;
   background-attachment: scroll !important;
   border: none !important;
   border-radius: 0 0 8px 8px !important;
+  overflow: hidden !important;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16) !important;
+}
+.monaco-workbench .part.sidebar .terminal-sticky-scroll,
+.monaco-workbench .part.sidebar .output-view .sticky-widget {
+  background: var(--g-explorer-bar, none) !important;
+  background-color: var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) !important;
+  background-image: var(--g-explorer-bar, none) !important;
+}
+.monaco-workbench :is(.part.auxiliarybar, .part.sessionspart) .terminal-sticky-scroll {
+  background: var(--g-chat-bar, none) !important;
+  background-color: var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) !important;
+  background-image: var(--g-chat-bar, none) !important;
+}
+.monaco-workbench .editor-instance .terminal-sticky-scroll {
+  background: var(--g-editor-bar, none) !important;
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) !important;
+  background-image: var(--g-editor-bar, none) !important;
 }
 .monaco-workbench .terminal-sticky-scroll::after,
 .monaco-workbench .part.sidebar .output-view .sticky-widget::after,
@@ -674,6 +706,28 @@
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
+}
+.monaco-workbench .part.sidebar .terminal-sticky-scroll::after,
+.monaco-workbench .part.sidebar .output-view .sticky-widget::after {
+  background: var(--g-explorer-frame, var(--g-border)) !important;
+}
+.monaco-workbench :is(.part.auxiliarybar, .part.sessionspart) .terminal-sticky-scroll::after {
+  background: var(--g-chat-frame, var(--g-border)) !important;
+}
+.monaco-workbench .editor-instance .terminal-sticky-scroll::after {
+  background: var(--g-editor-frame, var(--g-border)) !important;
+}
+.monaco-workbench .terminal-sticky-scroll:hover {
+  filter: brightness(1.06);
+}
+.monaco-workbench .terminal-sticky-scroll .xterm-shadow {
+  display: none !important;
+}
+.monaco-workbench:not(.vs-dark):not(.hc-black) .terminal-sticky-scroll .xterm-screen canvas {
+  mix-blend-mode: multiply !important;
+}
+.monaco-workbench.vs-dark .terminal-sticky-scroll .xterm-screen canvas {
+  mix-blend-mode: screen !important;
 }
 
 /* D. Chat Sticky Prompt Bubbles, Prompt Timeline Sticky Band, Sticky Progress & Chat Input Boxes */

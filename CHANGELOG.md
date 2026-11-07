@@ -2,6 +2,17 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
+## [67.420.69] - 2026-11-08
+
+### Changed & Fixed
+- **Terminal Sticky Scroll Gradient Framing & Opaque White Bar Fix (`css/rainbow-gradient-dark.css`, `css/rainbow-gradient-light.css`)**:
+  - Forced `.xterm-scrollable-element`, `.hover-overlay`, and `.hover-overlay:hover` inside `.terminal-sticky-scroll` to `background: transparent !important` so xterm.js inline styles (`#FFFFFF`) no longer paint an opaque white bar at the top of the terminal.
+  - Styled `.terminal-sticky-scroll` with the same 3-layer opaque canvas + gradient fill (`--g-panel-bar` / `--g-side-bar` / `--g-chat-bar` / `--g-editor-bar`) + `1.5px` 4-color gradient frame as Editor Sticky Scroll, with WebGL/canvas `mix-blend-mode` support (`multiply` in Light, `screen` in Dark).
+- **Unified Editor Sticky Scroll Header (`css/rainbow-gradient-dark.css`, `css/rainbow-gradient-light.css`)**:
+  - Removed duplicate per-column `--g-editor-bar` backgrounds from `.sticky-widget-line-numbers` and `.sticky-widget-lines-scrollable` so the entire `.monaco-editor .sticky-widget` renders as a single continuous horizontal gradient bar without a vertical seam between line numbers and sticky code.
+- **Smooth 100ms Breathing Aurora & Morph Across All UI Chrome (`js/gradient-randomizer.js`)**:
+  - Updated `startOrStopBreathingAurora` and `writeGradientCssVars` so both **Seamless Mode (`ON`)** and **Split-Panel Mode (`OFF`)** continuously interpolate `--g-default-mesh`, `--g-default-terminal-panel`, per-component directional gradients (`--g-editor`, `--g-side`, `--g-chat`, `--g-panel`, `--g-bar`), sticky scroll bars, active editor tabs, selected explorer rows, text selections, syntax highlights, and the status bar `#prism-randomizer-swatch` indicator on every 100ms tick without jumping at morph completion.
+
 ## [67.67.67] - 2026-11-07
 
 ![67.67.67](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-67.67.67.png)
