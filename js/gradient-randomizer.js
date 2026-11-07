@@ -540,6 +540,42 @@
   let lastSyntaxHexSig = "";
   let lastSyntaxUpdateTs = 0;
   let cachedComponentsConfig = null;
+  let lastAppliedWbElement = null;
+  const lastAppliedVars = new Map();
+  let lastSwatchGrad = "";
+
+  function setWbProp(wb, prop, val) {
+    if (!wb) return;
+    if (lastAppliedWbElement !== wb) {
+      lastAppliedWbElement = wb;
+      lastAppliedVars.clear();
+    }
+    if (lastAppliedVars.get(prop) === val) return;
+    lastAppliedVars.set(prop, val);
+    wb.style.setProperty(prop, val);
+  }
+
+  function removeWbProp(wb, prop) {
+    if (!wb) return;
+    if (lastAppliedWbElement !== wb) {
+      lastAppliedWbElement = wb;
+      lastAppliedVars.clear();
+    }
+    if (!lastAppliedVars.has(prop) && !wb.style.getPropertyValue(prop)) return;
+    lastAppliedVars.delete(prop);
+    wb.style.removeProperty(prop);
+  }
+
+  function isPopoverOpen() {
+    const pop = document.getElementById("prism-palette-popover");
+    return Boolean(pop && pop.isConnected && pop.style.display !== "none");
+  }
+
+  function isWindowActive() {
+    if (document.hidden) return false;
+    if (typeof document.hasFocus === "function" && !document.hasFocus()) return false;
+    return true;
+  }
 
   function extractMonacoTokenColors(isDark) {
     const tokenMap = new Map();
@@ -701,9 +737,9 @@
   function disableSyntaxCssVars(wb) {
     if (!wb) return;
     wb.classList.add("prism-no-syntax");
-    wb.style.setProperty("--g-syntax-bar", "none");
-    wb.style.setProperty("--g-syntax-strong", "none");
-    wb.style.setProperty("--g-syntax-frame", "none");
+    setWbProp(wb, "--g-syntax-bar", "none");
+    setWbProp(wb, "--g-syntax-strong", "none");
+    setWbProp(wb, "--g-syntax-frame", "none");
   }
 
   function applySyntaxCssVars(wb, compStops, compAngles, effectiveK) {
@@ -722,15 +758,15 @@
     if (hexSig !== lastSyntaxHexSig && (!breatheTimer || now - lastSyntaxUpdateTs >= 240)) {
       lastSyntaxHexSig = hexSig;
       lastSyntaxUpdateTs = now;
-      wb.style.setProperty("--g-syn-1", h1);
-      wb.style.setProperty("--g-syn-2", h2);
-      wb.style.setProperty("--g-syn-3", h3);
-      wb.style.setProperty("--g-syn-4", h4);
-      wb.style.setProperty("--g-syn-angle", "95deg");
-      wb.style.setProperty("--g-syn-mix", mixPct);
-      wb.style.setProperty("--g-syntax-bar", buildBarCss(compStops, compAngles, effectiveK * 0.72));
-      wb.style.setProperty("--g-syntax-strong", buildSelectionCss(compStops, compAngles, effectiveK * 0.85));
-      wb.style.setProperty("--g-syntax-frame", buildFrameCss(compStops));
+      setWbProp(wb, "--g-syn-1", h1);
+      setWbProp(wb, "--g-syn-2", h2);
+      setWbProp(wb, "--g-syn-3", h3);
+      setWbProp(wb, "--g-syn-4", h4);
+      setWbProp(wb, "--g-syn-angle", "95deg");
+      setWbProp(wb, "--g-syn-mix", mixPct);
+      setWbProp(wb, "--g-syntax-bar", buildBarCss(compStops, compAngles, effectiveK * 0.72));
+      setWbProp(wb, "--g-syntax-strong", buildSelectionCss(compStops, compAngles, effectiveK * 0.85));
+      setWbProp(wb, "--g-syntax-frame", buildFrameCss(compStops));
     }
     ensureSyntaxStyleSheet(wb, false);
   }
@@ -810,8 +846,9 @@
     if (!cfg.enabled) {
       if (compKey === "selection") {
         wb.classList.add("prism-no-selection");
-        wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
-        wb.style.setProperty(
+        setWbProp(wb, "--g-selection", "var(--vscode-editor-selectionBackground)");
+        setWbProp(
+          wb,
           "--g-sel-tint",
           "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
         );
@@ -819,16 +856,17 @@
       } else if (compKey === "syntax") {
         disableSyntaxCssVars(wb);
       } else {
-        wb.style.setProperty(`--g-${compKey}-mesh`, "none");
-        wb.style.setProperty(`--g-${compKey}-bar`, "none");
-        wb.style.setProperty(
+        setWbProp(wb, `--g-${compKey}-mesh`, "none");
+        setWbProp(wb, `--g-${compKey}-bar`, "none");
+        setWbProp(
+          wb,
           `--g-${compKey}-frame`,
           "linear-gradient(90deg, rgba(128, 128, 128, 0.22), rgba(128, 128, 128, 0.22))"
         );
         if (compKey === "explorer" || compKey === "chat") {
-          wb.style.setProperty(`--g-${compKey}-side`, "none");
+          setWbProp(wb, `--g-${compKey}-side`, "none");
         } else if (compKey === "terminal") {
-          wb.style.setProperty("--g-terminal-panel", "none");
+          setWbProp(wb, "--g-terminal-panel", "none");
         }
       }
       return;
@@ -844,12 +882,12 @@
 
     let compStops = fallbackStops;
     let compAngles = fallbackAngles;
-
-    if (
+    const hasCustom =
       cfg.customPalette &&
       Array.isArray(cfg.customPalette.stops) &&
-      cfg.customPalette.stops.length === 4
-    ) {
+      cfg.customPalette.stops.length === 4;
+
+    if (hasCustom) {
       const phaseDelta = Math.max(0, breathePhase - (Number(cfg.customPalette.phaseOffset) || 0));
       compStops = shimmerOn
         ? getShiftedStops(cfg.customPalette.stops, phaseDelta * 0.16)
@@ -877,18 +915,28 @@
 
     if (compKey === "selection") {
       wb.classList.remove("prism-no-selection");
-      wb.style.setProperty("--g-selection", buildSelectionCss(compStops, compAngles, effectiveK));
-      wb.style.setProperty("--g-sel-tint", rgba(compStops[0], 0.28 * effectiveK));
+      setWbProp(wb, "--g-selection", buildSelectionCss(compStops, compAngles, effectiveK));
+      setWbProp(wb, "--g-sel-tint", rgba(compStops[0], 0.28 * effectiveK));
     } else if (compKey === "syntax") {
       applySyntaxCssVars(wb, compStops, compAngles, effectiveK);
-    } else {
-      wb.style.setProperty(`--g-${compKey}-mesh`, buildMeshCss(compStops, compAngles, effectiveK));
-      wb.style.setProperty(`--g-${compKey}-bar`, buildBarCss(compStops, compAngles, effectiveK));
-      wb.style.setProperty(`--g-${compKey}-frame`, buildFrameCss(compStops));
+    } else if (!hasCustom) {
+      setWbProp(wb, `--g-${compKey}-mesh`, "var(--g-default-mesh)");
+      setWbProp(wb, `--g-${compKey}-bar`, "var(--g-bar)");
+      setWbProp(wb, `--g-${compKey}-frame`, "var(--g-default-frame)");
       if (compKey === "explorer" || compKey === "chat") {
-        wb.style.setProperty(`--g-${compKey}-side`, buildSideCss(compStops, compAngles, effectiveK));
+        setWbProp(wb, `--g-${compKey}-side`, "var(--g-side)");
       } else if (compKey === "terminal") {
-        wb.style.setProperty(
+        setWbProp(wb, "--g-terminal-panel", "var(--g-default-terminal-panel)");
+      }
+    } else {
+      setWbProp(wb, `--g-${compKey}-mesh`, buildMeshCss(compStops, compAngles, effectiveK));
+      setWbProp(wb, `--g-${compKey}-bar`, buildBarCss(compStops, compAngles, effectiveK));
+      setWbProp(wb, `--g-${compKey}-frame`, buildFrameCss(compStops));
+      if (compKey === "explorer" || compKey === "chat") {
+        setWbProp(wb, `--g-${compKey}-side`, buildSideCss(compStops, compAngles, effectiveK));
+      } else if (compKey === "terminal") {
+        setWbProp(
+          wb,
           "--g-terminal-panel",
           buildTerminalPanelCss(compStops, compAngles, effectiveK)
         );
@@ -1261,44 +1309,47 @@
 
   function writeGradientCssVars(wb, stops, angles, k) {
     const [c1, c2, c3, c4] = stops;
-    wb.style.setProperty("--g-r1", rgba(c1, 0.18 * k));
-    wb.style.setProperty("--g-r2", rgba(c2, 0.18 * k));
-    wb.style.setProperty("--g-r3", rgba(c3, 0.18 * k));
-    wb.style.setProperty("--g-r4", rgba(c4, 0.22 * k));
+    setWbProp(wb, "--g-r1", rgba(c1, 0.18 * k));
+    setWbProp(wb, "--g-r2", rgba(c2, 0.18 * k));
+    setWbProp(wb, "--g-r3", rgba(c3, 0.18 * k));
+    setWbProp(wb, "--g-r4", rgba(c4, 0.22 * k));
 
-    wb.style.setProperty(
+    setWbProp(
+      wb,
       "--g-base",
-      `linear-gradient(${angles.base}deg, ${rgba(c1, 0.14 * k)} 0%, ${rgba(
+      `linear-gradient(${Math.round(angles.base)}deg, ${rgba(c1, 0.14 * k)} 0%, ${rgba(
         c2,
         0.11 * k
       )} 33%, ${rgba(c3, 0.11 * k)} 66%, ${rgba(c4, 0.16 * k)} 100%)`
     );
 
-    const sharedMeshCss = buildMeshCss(stops, angles, k);
     const sharedBarCss = buildBarCss(stops, angles, k);
     const sharedSideCss = buildSideCss(stops, angles, k);
-    const sharedTerminalPanelCss = buildTerminalPanelCss(stops, angles, k);
     const sharedFrameCss = buildFrameCss(stops);
 
-    wb.style.setProperty("--g-bar", sharedBarCss);
-    wb.style.setProperty("--g-side", sharedSideCss);
+    setWbProp(wb, "--g-bar", sharedBarCss);
+    setWbProp(wb, "--g-side", sharedSideCss);
+    setWbProp(wb, "--g-default-frame", sharedFrameCss);
 
-    wb.style.setProperty(
+    setWbProp(
+      wb,
       "--g-panel",
-      `linear-gradient(${angles.panel}deg, ${rgba(c2, 0.07 * k)} 0%, ${rgba(
+      `linear-gradient(${Math.round(angles.panel)}deg, ${rgba(c2, 0.07 * k)} 0%, ${rgba(
         c3,
         0.13 * k
       )} 50%, ${rgba(c4, 0.18 * k)} 100%)`
     );
 
-    wb.style.setProperty(
+    setWbProp(
+      wb,
       "--g-border",
       `linear-gradient(90deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
         c2
       )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`
     );
 
-    // Apply per-component gradients & Off toggles (reuse shared strings when using unified palette)
+    // Apply per-component gradients & Off toggles (use CSS variable indirection for unified components
+    // so Blink reuses root variables without allocating new CSSRadialGradientValue objects on every tick)
     const compMap = getComponentsConfig();
     const breatheOn = isBreathingEnabled();
     const breatheCfg = getBreatheConfig();
@@ -1311,8 +1362,9 @@
       if (!cfg.enabled) {
         if (key === "selection") {
           wb.classList.add("prism-no-selection");
-          wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
-          wb.style.setProperty(
+          setWbProp(wb, "--g-selection", "var(--vscode-editor-selectionBackground)");
+          setWbProp(
+            wb,
             "--g-sel-tint",
             "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
           );
@@ -1320,16 +1372,17 @@
         } else if (key === "syntax") {
           disableSyntaxCssVars(wb);
         } else {
-          wb.style.setProperty(`--g-${key}-mesh`, "none");
-          wb.style.setProperty(`--g-${key}-bar`, "none");
-          wb.style.setProperty(
+          setWbProp(wb, `--g-${key}-mesh`, "none");
+          setWbProp(wb, `--g-${key}-bar`, "none");
+          setWbProp(
+            wb,
             `--g-${key}-frame`,
             "linear-gradient(90deg, rgba(128, 128, 128, 0.22), rgba(128, 128, 128, 0.22))"
           );
           if (key === "explorer" || key === "chat") {
-            wb.style.setProperty(`--g-${key}-side`, "none");
+            setWbProp(wb, `--g-${key}-side`, "none");
           } else if (key === "terminal") {
-            wb.style.setProperty("--g-terminal-panel", "none");
+            setWbProp(wb, "--g-terminal-panel", "none");
           }
         }
         return;
@@ -1343,18 +1396,18 @@
       if (!hasCustom) {
         if (key === "selection") {
           wb.classList.remove("prism-no-selection");
-          wb.style.setProperty("--g-selection", buildSelectionCss(stops, angles, k));
-          wb.style.setProperty("--g-sel-tint", rgba(stops[0], 0.28 * k));
+          setWbProp(wb, "--g-selection", buildSelectionCss(stops, angles, k));
+          setWbProp(wb, "--g-sel-tint", rgba(stops[0], 0.28 * k));
         } else if (key === "syntax") {
           applySyntaxCssVars(wb, stops, angles, k);
         } else {
-          wb.style.setProperty(`--g-${key}-mesh`, sharedMeshCss);
-          wb.style.setProperty(`--g-${key}-bar`, sharedBarCss);
-          wb.style.setProperty(`--g-${key}-frame`, sharedFrameCss);
+          setWbProp(wb, `--g-${key}-mesh`, "var(--g-default-mesh)");
+          setWbProp(wb, `--g-${key}-bar`, "var(--g-bar)");
+          setWbProp(wb, `--g-${key}-frame`, "var(--g-default-frame)");
           if (key === "explorer" || key === "chat") {
-            wb.style.setProperty(`--g-${key}-side`, sharedSideCss);
+            setWbProp(wb, `--g-${key}-side`, "var(--g-side)");
           } else if (key === "terminal") {
-            wb.style.setProperty("--g-terminal-panel", sharedTerminalPanelCss);
+            setWbProp(wb, "--g-terminal-panel", "var(--g-default-terminal-panel)");
           }
         }
         return;
@@ -1381,18 +1434,19 @@
 
       if (key === "selection") {
         wb.classList.remove("prism-no-selection");
-        wb.style.setProperty("--g-selection", buildSelectionCss(compStops, compAngles, k));
-        wb.style.setProperty("--g-sel-tint", rgba(compStops[0], 0.28 * k));
+        setWbProp(wb, "--g-selection", buildSelectionCss(compStops, compAngles, k));
+        setWbProp(wb, "--g-sel-tint", rgba(compStops[0], 0.28 * k));
       } else if (key === "syntax") {
         applySyntaxCssVars(wb, compStops, compAngles, k);
       } else {
-        wb.style.setProperty(`--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k));
-        wb.style.setProperty(`--g-${key}-bar`, buildBarCss(compStops, compAngles, k));
-        wb.style.setProperty(`--g-${key}-frame`, buildFrameCss(compStops));
+        setWbProp(wb, `--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k));
+        setWbProp(wb, `--g-${key}-bar`, buildBarCss(compStops, compAngles, k));
+        setWbProp(wb, `--g-${key}-frame`, buildFrameCss(compStops));
         if (key === "explorer" || key === "chat") {
-          wb.style.setProperty(`--g-${key}-side`, buildSideCss(compStops, compAngles, k));
+          setWbProp(wb, `--g-${key}-side`, buildSideCss(compStops, compAngles, k));
         } else if (key === "terminal") {
-          wb.style.setProperty(
+          setWbProp(
+            wb,
             "--g-terminal-panel",
             buildTerminalPanelCss(compStops, compAngles, k)
           );
@@ -1400,9 +1454,9 @@
       }
     });
 
-    // Keep .monaco-workbench mesh synced with the global gradient so floating-panel gaps
-    // never show a white separator, while each component's opaque --g-canvas-bg isolates its own surface
-    wb.style.setProperty("--g-workbench-mesh", sharedMeshCss);
+    // Keep .monaco-workbench mesh synced via CSS variable indirection so floating-panel gaps
+    // never show a white separator and zero extra radial-gradient strings are allocated
+    setWbProp(wb, "--g-workbench-mesh", "var(--g-default-mesh)");
     syncSeamlessClass(wb);
 
     lastLiveStops = stops.map((s) => [...s]);
@@ -1410,22 +1464,27 @@
     const liveGrad = `linear-gradient(90deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
       c2
     )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`;
-    const swatchEl = document.getElementById("prism-randomizer-swatch");
-    if (swatchEl) {
-      swatchEl.style.background = liveGrad;
+    if (liveGrad !== lastSwatchGrad) {
+      lastSwatchGrad = liveGrad;
+      const swatchEl = document.getElementById("prism-randomizer-swatch");
+      if (swatchEl) {
+        swatchEl.style.background = liveGrad;
+      }
     }
 
-    const activeTargetStops =
-      activeComponent && activeComponent !== "all"
-        ? getActiveTargetPalette(activeComponent).stops
-        : stops;
-    const [tc1, tc2, tc3, tc4] = activeTargetStops;
-    const targetGrad = `linear-gradient(90deg, ${rgbToHex(tc1)} 0%, ${rgbToHex(
-      tc2
-    )} 33%, ${rgbToHex(tc3)} 66%, ${rgbToHex(tc4)} 100%)`;
-    const previewBar = document.getElementById("pp-builder-preview-bar");
-    if (previewBar) {
-      previewBar.style.background = targetGrad;
+    if (isPopoverOpen()) {
+      const activeTargetStops =
+        activeComponent && activeComponent !== "all"
+          ? getActiveTargetPalette(activeComponent).stops
+          : stops;
+      const [tc1, tc2, tc3, tc4] = activeTargetStops;
+      const targetGrad = `linear-gradient(90deg, ${rgbToHex(tc1)} 0%, ${rgbToHex(
+        tc2
+      )} 33%, ${rgbToHex(tc3)} 66%, ${rgbToHex(tc4)} 100%)`;
+      const previewBar = document.getElementById("pp-builder-preview-bar");
+      if (previewBar) {
+        previewBar.style.background = targetGrad;
+      }
     }
   }
 
@@ -1434,13 +1493,13 @@
       clearInterval(breatheTimer);
       breatheTimer = null;
     }
-    if (!isBreathingEnabled()) {
-      // Freeze smoothly in place without snapping coordinates or overwriting saved palettes
+    if (!isBreathingEnabled() || !isWindowActive()) {
+      // Freeze smoothly in place when disabled or when window is unfocused (0% background CPU/heap churn)
       return;
     }
 
     breatheTimer = setInterval(() => {
-      if (document.hidden) return;
+      if (!isWindowActive()) return;
       const targetWb = document.querySelector(".monaco-workbench");
       if (!targetWb) return;
       const saved = getSavedPalette();
@@ -1449,7 +1508,8 @@
       const cfg = getBreatheConfig();
       const speedMult = (cfg.speedPct || 100) / 100;
 
-      breathePhase += 0.018 * speedMult;
+      // 100ms tick interval (10 FPS): 2x step size preserves identical visual speed at half the style/GC rate
+      breathePhase += 0.036 * speedMult;
 
       const activePalette =
         saved && saved.stops && saved.stops.length === 4
@@ -1471,7 +1531,7 @@
           morphTargetPalette = rollRandomPalette(activePalette.name);
           morphProgress = 0;
         }
-        morphProgress += 0.0028 * speedMult;
+        morphProgress += 0.0056 * speedMult;
         if (morphProgress >= 1) {
           const completed = morphTargetPalette;
           morphSourceStops = completed.stops.map((s) => [...s]);
@@ -1479,10 +1539,12 @@
             localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(completed));
           } catch (_) {}
           updateStatusBarPill(completed.name, completed.stops);
-          if (activeComponent === "all") {
-            syncBuilderPickers(completed.stops);
+          if (isPopoverOpen()) {
+            if (activeComponent === "all") {
+              syncBuilderPickers(completed.stops);
+            }
+            renderPaletteGrid();
           }
-          renderPaletteGrid();
           morphTargetPalette = rollRandomPalette(completed.name);
           morphProgress = 0;
           baseStops = morphSourceStops.map((s) => [...s]);
@@ -1513,22 +1575,22 @@
       // 4. Full-Workbench Wave (All Math.sin centered on resting coordinates & angles -> 0 jump at start)
       let liveAngles = baseAngles;
       if (cfg.wave) {
-        const p1x = 15 + Math.sin(breathePhase * 0.9) * 14;
-        const p1y = 15 + Math.sin(breathePhase * 0.75) * 13;
-        const p2x = 85 - Math.sin(breathePhase * 0.85) * 14;
-        const p2y = 25 + Math.sin(breathePhase * 1.05) * 14;
-        const p3x = 25 + Math.sin(breathePhase * 0.7) * 14;
-        const p3y = 85 - Math.sin(breathePhase * 0.8) * 13;
-        const p4x = 85 - Math.sin(breathePhase * 0.65) * 14;
-        const p4y = 85 - Math.sin(breathePhase * 0.95) * 13;
-        targetWb.style.setProperty("--g-p1x", `${p1x.toFixed(1)}%`);
-        targetWb.style.setProperty("--g-p1y", `${p1y.toFixed(1)}%`);
-        targetWb.style.setProperty("--g-p2x", `${p2x.toFixed(1)}%`);
-        targetWb.style.setProperty("--g-p2y", `${p2y.toFixed(1)}%`);
-        targetWb.style.setProperty("--g-p3x", `${p3x.toFixed(1)}%`);
-        targetWb.style.setProperty("--g-p3y", `${p3y.toFixed(1)}%`);
-        targetWb.style.setProperty("--g-p4x", `${p4x.toFixed(1)}%`);
-        targetWb.style.setProperty("--g-p4y", `${p4y.toFixed(1)}%`);
+        const p1x = Math.round(15 + Math.sin(breathePhase * 0.9) * 14);
+        const p1y = Math.round(15 + Math.sin(breathePhase * 0.75) * 13);
+        const p2x = Math.round(85 - Math.sin(breathePhase * 0.85) * 14);
+        const p2y = Math.round(25 + Math.sin(breathePhase * 1.05) * 14);
+        const p3x = Math.round(25 + Math.sin(breathePhase * 0.7) * 14);
+        const p3y = Math.round(85 - Math.sin(breathePhase * 0.8) * 13);
+        const p4x = Math.round(85 - Math.sin(breathePhase * 0.65) * 14);
+        const p4y = Math.round(85 - Math.sin(breathePhase * 0.95) * 13);
+        setWbProp(targetWb, "--g-p1x", `${p1x}%`);
+        setWbProp(targetWb, "--g-p1y", `${p1y}%`);
+        setWbProp(targetWb, "--g-p2x", `${p2x}%`);
+        setWbProp(targetWb, "--g-p2y", `${p2y}%`);
+        setWbProp(targetWb, "--g-p3x", `${p3x}%`);
+        setWbProp(targetWb, "--g-p3y", `${p3y}%`);
+        setWbProp(targetWb, "--g-p4x", `${p4x}%`);
+        setWbProp(targetWb, "--g-p4y", `${p4y}%`);
 
         liveAngles = {
           base: Math.round(baseAngles.base + Math.sin(breathePhase * 0.65) * 32),
@@ -1538,12 +1600,12 @@
         };
       } else {
         ["--g-p1x", "--g-p1y", "--g-p2x", "--g-p2y", "--g-p3x", "--g-p3y", "--g-p4x", "--g-p4y"].forEach(
-          (p) => targetWb.style.removeProperty(p)
+          (p) => removeWbProp(targetWb, p)
         );
       }
 
       writeGradientCssVars(targetWb, animatedStops, liveAngles, effectiveK);
-    }, 50);
+    }, 100);
   }
 
   function setBreathingEnabled(next) {
@@ -1662,41 +1724,44 @@
     breathePhase = 0;
     if (!isBreathingEnabled()) {
       ["--g-p1x", "--g-p1y", "--g-p2x", "--g-p2y", "--g-p3x", "--g-p3y", "--g-p4x", "--g-p4y"].forEach(
-        (p) => wb.style.removeProperty(p)
+        (p) => removeWbProp(wb, p)
       );
     }
 
     if (palette && palette.isNativeOff) {
       // Turn off the 4-color overlay so the pure single-color theme shines through natively
       ["--g-r1", "--g-r2", "--g-r3", "--g-r4"].forEach((prop) =>
-        wb.style.setProperty(prop, "transparent")
+        setWbProp(wb, prop, "transparent")
       );
       [
         "--g-base",
         "--g-bar",
         "--g-side",
         "--g-panel",
+        "--g-default-frame",
         "--g-workbench-mesh",
         "--g-explorer-side",
         "--g-chat-side",
         "--g-terminal-panel",
-      ].forEach((prop) => wb.style.setProperty(prop, "none"));
+      ].forEach((prop) => setWbProp(wb, prop, "none"));
       COMPONENT_DEFS.forEach((def) => {
         if (def.key === "selection" || def.key === "syntax") return;
-        wb.style.setProperty(`--g-${def.key}-mesh`, "none");
-        wb.style.setProperty(`--g-${def.key}-bar`, "none");
-        wb.style.setProperty(
+        setWbProp(wb, `--g-${def.key}-mesh`, "none");
+        setWbProp(wb, `--g-${def.key}-bar`, "none");
+        setWbProp(
+          wb,
           `--g-${def.key}-frame`,
           "linear-gradient(90deg, rgba(128, 128, 128, 0.22), rgba(128, 128, 128, 0.22))"
         );
       });
       wb.classList.add("prism-no-selection");
-      wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
-      wb.style.setProperty(
+      setWbProp(wb, "--g-selection", "var(--vscode-editor-selectionBackground)");
+      setWbProp(
+        wb,
         "--g-sel-tint",
         "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
       );
-      wb.style.setProperty("--g-border", "var(--vscode-focusBorder, #3B82F6)");
+      setWbProp(wb, "--g-border", "var(--vscode-focusBorder, #3B82F6)");
       disableSyntaxCssVars(wb);
       clearDomSelectionOverlay();
       try {
@@ -1706,8 +1771,10 @@
         );
       } catch (_) {}
       updateStatusBarPill("Theme Native", null, true);
-      renderPaletteGrid();
-      refreshPopoverHeaderAndIntensity();
+      if (isPopoverOpen()) {
+        renderPaletteGrid();
+        refreshPopoverHeaderAndIntensity();
+      }
       return;
     }
 
@@ -1733,10 +1800,12 @@
     }
 
     updateStatusBarPill(activePalette.name, activePalette.stops, false);
-    const targetPal = getActiveTargetPalette(activeComponent);
-    syncBuilderPickers(targetPal.stops);
-    renderPaletteGrid();
-    refreshPopoverHeaderAndIntensity();
+    if (isPopoverOpen()) {
+      const targetPal = getActiveTargetPalette(activeComponent);
+      syncBuilderPickers(targetPal.stops);
+      renderPaletteGrid();
+      refreshPopoverHeaderAndIntensity();
+    }
   }
 
   function toggleResetOrNative() {
@@ -1787,7 +1856,7 @@
   }
 
   function syncBuilderPickers(stops) {
-    if (!stops || stops.length !== 4) return;
+    if (!isPopoverOpen() || !stops || stops.length !== 4) return;
     const hexes = stops.map(rgbToHex);
     for (let i = 0; i < 4; i++) {
       const inp = document.getElementById(`pp-stop-${i}`);
@@ -1802,6 +1871,7 @@
   }
 
   function refreshPopoverTabs() {
+    if (!isPopoverOpen()) return;
     const tabsBar = document.getElementById("prism-popover-tabs");
     if (!tabsBar) return;
     const all = getAllPalettes();
@@ -1848,6 +1918,7 @@
   }
 
   function refreshPopoverHeaderAndIntensity() {
+    if (!isPopoverOpen()) return;
     const pop = document.getElementById("prism-palette-popover");
     if (!pop) return;
     const k = getIntensity();
@@ -1943,6 +2014,7 @@
   }
 
   function renderPaletteGrid() {
+    if (!isPopoverOpen()) return;
     refreshPopoverTabs();
     const grid = document.getElementById("prism-popover-grid");
     if (!grid) return;
@@ -2982,6 +3054,19 @@
   window.addEventListener("resize", scheduleDomSelectionUpdate, {
     capture: true,
     passive: true,
+  });
+
+  // Pause Breathing Aurora in unfocused / background VS Code windows so only the active
+  // window animates (0% background CPU and 0 MB/hr Oilpan CSSValue heap growth).
+  window.addEventListener("focus", () => {
+    cachedComponentsConfig = null;
+    startOrStopBreathingAurora();
+  });
+  window.addEventListener("blur", () => {
+    startOrStopBreathingAurora();
+  });
+  document.addEventListener("visibilitychange", () => {
+    startOrStopBreathingAurora();
   });
 
   // Global keyboard shortcuts:

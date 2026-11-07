@@ -102,27 +102,28 @@
     radial-gradient(ellipse 60% 80% at 88% 80%, var(--g-r2) 0%, transparent 70%),
     radial-gradient(ellipse 55% 65% at 50% 50%, var(--g-r3) 0%, transparent 75%),
     var(--g-panel);
+  --g-default-frame: var(--g-border);
 
   /* Per-Component Gradient Variables (Default: Same unified gradient across everything) */
   --g-workbench-mesh: var(--g-default-mesh);
   --g-editor-mesh: var(--g-default-mesh);
   --g-editor-bar: var(--g-bar);
-  --g-editor-frame: var(--g-border);
+  --g-editor-frame: var(--g-default-frame);
   --g-explorer-mesh: var(--g-default-mesh);
   --g-explorer-bar: var(--g-bar);
   --g-explorer-side: var(--g-side);
-  --g-explorer-frame: var(--g-border);
+  --g-explorer-frame: var(--g-default-frame);
   --g-chat-mesh: var(--g-default-mesh);
   --g-chat-bar: var(--g-bar);
   --g-chat-side: var(--g-side);
-  --g-chat-frame: var(--g-border);
+  --g-chat-frame: var(--g-default-frame);
   --g-terminal-mesh: var(--g-default-mesh);
   --g-terminal-bar: var(--g-bar);
   --g-terminal-panel: var(--g-default-terminal-panel);
-  --g-terminal-frame: var(--g-border);
+  --g-terminal-frame: var(--g-default-frame);
   --g-bars-mesh: var(--g-default-mesh);
   --g-bars-bar: var(--g-bar);
-  --g-bars-frame: var(--g-border);
+  --g-bars-frame: var(--g-default-frame);
 
   /* Syntax Highlighting & Editor Highlight Box Gradient Variables */
   --g-syn-1: #FF857A;
