@@ -5,6 +5,11 @@ All notable changes to **VSCode Gradient Themes** will be documented in this fil
 ## [67.67.67] - 2026-11-07
 
 ### Added & Changed
+- **Gradient Code Highlighting & `Syntax` Component (`js/gradient-randomizer.js`, `css/rainbow-gradient-light.css`)**:
+  - Added a dedicated **`Syntax`** component pill in the Status Bar Gradient Studio to toggle or customize code syntax gradients independently.
+  - **Per-Token Semantic Gradients (`Semantic Blend` Mode)**: Dynamically reads Monaco's `.vscode-tokens-styles` `.mtk*` token colors and builds high-contrast 2-stop analogous hue gradients blended in perceptual `oklch` space with the active 4-color palette while keeping plain identifiers (`.mtk1`), punctuation, and comments 100% solid native CoreText-antialiased text.
+  - **Active 4-Color Palette Syntax (`Palette Prism` Mode & `Alt + Shift + C`)**: Paints colored syntax tokens directly with luminance-clamped, high-contrast stops from the active Studio palette, plus `.hljs-*` fenced code blocks and inline `code` pills in Markdown/AI Chat.
+  - **Gradient Editor Highlight Boxes**: Styled `.wordHighlight`, `.wordHighlightStrong`, `.findMatch`, `.currentFindMatch`, and `.bracket-match` with translucent gradient washes and frames.
 - **Seamless Unified Full-Window Gradient Canvas (`css/rainbow-gradient-dark.css`, `css/rainbow-gradient-light.css`)**:
   - Replaced separate per-panel gradients (`--g-bar`, `--g-side`, `--g-panel` restarting inside each box) with a **single continuous full-window gradient** across the Title Bar, Activity Bar, Left Sidebar, Right AI Chat Bar, Editor Tabs, Code Editor, Integrated Terminal, and Status Bar (`Seamless` mode on by default; optional split-panel mode via toggle).
 - **Surface Scope Controls (`js/gradient-randomizer.js`, `css/`)**:

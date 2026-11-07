@@ -28,6 +28,7 @@
   const STORAGE_KEY_SCOPE = "gradientThemes.randomizer.scope.v1";
   const STORAGE_KEY_COMPONENTS = "gradientThemes.randomizer.components.v1";
   const STORAGE_KEY_SEAMLESS = "gradientThemes.randomizer.seamless.v1";
+  const STORAGE_KEY_SYNTAX_MODE = "gradientThemes.randomizer.syntaxMode.v1";
   const STORAGE_KEY_HISTORY = "gradientThemes.randomizer.history.v1";
 
   const COMPONENT_DEFS = [
@@ -37,6 +38,7 @@
     { key: "terminal", label: "Terminal", tip: "Bottom Terminal / Output Panel" },
     { key: "bars", label: "Bars", tip: "Title Bar, Editor Tabs, Breadcrumbs & Status Bar" },
     { key: "selection", label: "Select", tip: "Text Selection Highlight (Editor, Terminal & DOM)" },
+    { key: "syntax", label: "Syntax", tip: "Gradient Code Syntax Coloring & Highlight Boxes" },
   ];
 
   // Curated 4-stop palettes (RGB tuples; alpha is strictly clamped to 7%–22%)
@@ -449,6 +451,263 @@
     renderPaletteGrid();
   }
 
+  function rgbToHsl([r, g, b]) {
+    const rn = r / 255;
+    const gn = g / 255;
+    const bn = b / 255;
+    const max = Math.max(rn, gn, bn);
+    const min = Math.min(rn, gn, bn);
+    const d = max - min;
+    let h = 0;
+    let s = 0;
+    const l = (max + min) / 2;
+    if (d !== 0) {
+      s = d / (1 - Math.abs(2 * l - 1));
+      switch (max) {
+        case rn:
+          h = ((gn - bn) / d + (gn < bn ? 6 : 0)) * 60;
+          break;
+        case gn:
+          h = ((bn - rn) / d + 2) * 60;
+          break;
+        case bn:
+          h = ((rn - gn) / d + 4) * 60;
+          break;
+      }
+    }
+    return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
+  }
+
+  function parseCssColorToRgb(str) {
+    if (!str) return null;
+    const s = String(str).trim();
+    if (s.startsWith("#")) {
+      const hex = s.slice(1);
+      if (hex.length === 3 || hex.length === 4) {
+        return [
+          parseInt(hex[0] + hex[0], 16) || 0,
+          parseInt(hex[1] + hex[1], 16) || 0,
+          parseInt(hex[2] + hex[2], 16) || 0,
+        ];
+      }
+      if (hex.length >= 6) {
+        return [
+          parseInt(hex.slice(0, 2), 16) || 0,
+          parseInt(hex.slice(2, 4), 16) || 0,
+          parseInt(hex.slice(4, 6), 16) || 0,
+        ];
+      }
+    }
+    const m = s.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+    if (m) {
+      return [Number(m[1]) || 0, Number(m[2]) || 0, Number(m[3]) || 0];
+    }
+    return null;
+  }
+
+  function toReadableSyntaxRgb(rgb, isDark) {
+    const [h, s, l] = rgbToHsl(rgb);
+    if (isDark) {
+      return hslToRgb(h, Math.max(86, Math.min(98, s + 14)), Math.max(74, Math.min(86, l + 8)));
+    }
+    return hslToRgb(h, Math.max(82, Math.min(96, s + 14)), Math.max(22, Math.min(35, l - 8)));
+  }
+
+  function getSyntaxMode() {
+    return localStorage.getItem(STORAGE_KEY_SYNTAX_MODE) === "palette" ? "palette" : "semantic";
+  }
+
+  function syncSyntaxModeClass(wb) {
+    if (!wb) return;
+    wb.classList.toggle("prism-syntax-palette", getSyntaxMode() === "palette");
+  }
+
+  function toggleSyntaxMode() {
+    const next = getSyntaxMode() === "palette" ? "semantic" : "palette";
+    try {
+      localStorage.setItem(STORAGE_KEY_SYNTAX_MODE, next);
+    } catch (_) {}
+    const wb = document.querySelector(".monaco-workbench");
+    syncSyntaxModeClass(wb);
+    refreshPopoverHeaderAndIntensity();
+    renderPaletteGrid();
+  }
+
+  let lastSyntaxSheetSig = "";
+  let monacoColorsObserver = null;
+  let observedMonacoStyleEl = null;
+
+  function extractMonacoTokenColors(isDark) {
+    const tokenMap = new Map();
+    const styles = document.querySelectorAll("style:not(#prism-syntax-style)");
+    const mtkRegex = /\.mtk(\d+)\s*\{\s*color:\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi;
+    for (let i = 0; i < styles.length; i++) {
+      const st = styles[i];
+      const txt = st.textContent || "";
+      if (!txt.includes(".mtk")) continue;
+      if (
+        st.classList &&
+        (st.classList.contains("vscode-tokens-styles") || st.classList.contains("monaco-colors")) &&
+        observedMonacoStyleEl !== st
+      ) {
+        observedMonacoStyleEl = st;
+        if (monacoColorsObserver) {
+          monacoColorsObserver.disconnect();
+        }
+        monacoColorsObserver = new MutationObserver(() => {
+          const wb = document.querySelector(".monaco-workbench");
+          if (wb) ensureSyntaxStyleSheet(wb, true);
+        });
+        monacoColorsObserver.observe(st, { childList: true, characterData: true, subtree: true });
+      }
+      let match;
+      mtkRegex.lastIndex = 0;
+      while ((match = mtkRegex.exec(txt)) !== null) {
+        const idx = parseInt(match[1], 10);
+        const rgb = parseCssColorToRgb(match[2]);
+        if (idx > 0 && rgb) {
+          tokenMap.set(idx, rgb);
+        }
+      }
+    }
+
+    if (tokenMap.size < 4) {
+      const defaults = isDark
+        ? [
+            [1, [230, 237, 245]],
+            [3, [99, 122, 145]],
+            [4, [122, 191, 160]],
+            [5, [229, 115, 104]],
+            [6, [224, 159, 103]],
+            [7, [222, 193, 110]],
+            [8, [107, 196, 141]],
+            [9, [158, 178, 199]],
+            [10, [120, 173, 232]],
+            [11, [148, 187, 227]],
+            [12, [176, 148, 224]],
+          ]
+        : [
+            [1, [30, 41, 59]],
+            [3, [100, 116, 139]],
+            [4, [13, 148, 136]],
+            [5, [225, 29, 72]],
+            [6, [217, 119, 6]],
+            [7, [180, 83, 9]],
+            [8, [5, 150, 105]],
+            [9, [71, 85, 105]],
+            [10, [37, 99, 235]],
+            [11, [2, 132, 199]],
+            [12, [124, 58, 237]],
+          ];
+      defaults.forEach(([idx, rgb]) => {
+        if (!tokenMap.has(idx)) tokenMap.set(idx, rgb);
+      });
+    }
+    return tokenMap;
+  }
+
+  function ensureSyntaxStyleSheet(wb, force = false) {
+    if (!wb) return;
+    const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
+    const tokenMap = extractMonacoTokenColors(isDark);
+    const sigParts = [];
+    tokenMap.forEach((rgb, idx) => {
+      sigParts.push(`${idx}:${rgb[0]},${rgb[1]},${rgb[2]}`);
+    });
+    const sig = `${isDark ? "d" : "l"}|${sigParts.join(";")}`;
+    let styleEl = document.getElementById("prism-syntax-style");
+    if (!force && styleEl && styleEl.isConnected && sig === lastSyntaxSheetSig) {
+      return;
+    }
+    lastSyntaxSheetSig = sig;
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = "prism-syntax-style";
+      (document.documentElement || document.head || wb).appendChild(styleEl);
+    }
+
+    const rules = [];
+    const scopeSel =
+      ":is(.monaco-editor .view-line, .monaco-editor .sticky-line-content, .monaco-tokenized-source)";
+    const strokeRule = isDark
+      ? "-webkit-text-stroke: 0.2px rgba(255, 255, 255, 0.14);"
+      : "-webkit-text-stroke: 0.15px rgba(0, 0, 0, 0.10);";
+
+    let colorIdx = 0;
+    tokenMap.forEach((rgb, n) => {
+      if (n <= 1) return; // Keep .mtk1 (plain variables, identifiers, brackets & punctuation) 100% solid native text
+      const [h, s, l] = rgbToHsl(rgb);
+      if (s < 28) return; // Keep muted comments & slate operators 100% solid native CoreText-antialiased text
+
+      const slot1 = (colorIdx % 4) + 1;
+      const slot2 = ((colorIdx + 1) % 4) + 1;
+      colorIdx += 1;
+
+      const hexA = rgbToHex(
+        hslToRgb(
+          h - 18,
+          Math.max(86, Math.min(98, s + 16)),
+          isDark ? Math.min(86, Math.max(75, l + 12)) : Math.max(20, Math.min(32, l - 10))
+        )
+      );
+      const hexB = rgbToHex(
+        hslToRgb(
+          h + 24,
+          Math.max(86, Math.min(98, s + 16)),
+          isDark ? Math.max(71, Math.min(83, l + 6)) : Math.min(36, Math.max(24, l - 5))
+        )
+      );
+
+      rules.push(
+        `.monaco-workbench:not(.prism-no-syntax):not(.prism-syntax-palette) ${scopeSel} span.mtk${n} {` +
+          `background-image: linear-gradient(var(--g-syn-angle, 95deg), ` +
+          `color-mix(in oklch, ${hexA}, var(--g-syn-${slot1}) var(--g-syn-mix, 42%)) 0%, ` +
+          `color-mix(in oklch, ${hexB}, var(--g-syn-${slot2}) var(--g-syn-mix, 52%)) 100%) !important;` +
+          `-webkit-background-clip: text !important; background-clip: text !important;` +
+          `-webkit-text-fill-color: transparent !important; ${strokeRule}` +
+        `}`
+      );
+      rules.push(
+        `.monaco-workbench:not(.prism-no-syntax).prism-syntax-palette ${scopeSel} span.mtk${n} {` +
+          `background-image: linear-gradient(var(--g-syn-angle, 95deg), var(--g-syn-${slot1}) 0%, var(--g-syn-${slot2}) 100%) !important;` +
+          `-webkit-background-clip: text !important; background-clip: text !important;` +
+          `-webkit-text-fill-color: transparent !important; ${strokeRule}` +
+        `}`
+      );
+    });
+
+    styleEl.textContent = rules.join("\n");
+  }
+
+  function disableSyntaxCssVars(wb) {
+    if (!wb) return;
+    wb.classList.add("prism-no-syntax");
+    wb.style.setProperty("--g-syntax-bar", "none");
+    wb.style.setProperty("--g-syntax-strong", "none");
+    wb.style.setProperty("--g-syntax-frame", "none");
+  }
+
+  function applySyntaxCssVars(wb, compStops, compAngles, effectiveK) {
+    if (!wb) return;
+    wb.classList.remove("prism-no-syntax");
+    syncSyntaxModeClass(wb);
+    const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
+    const [s1, s2, s3, s4] = compStops;
+    wb.style.setProperty("--g-syn-1", rgbToHex(toReadableSyntaxRgb(s1, isDark)));
+    wb.style.setProperty("--g-syn-2", rgbToHex(toReadableSyntaxRgb(s2, isDark)));
+    wb.style.setProperty("--g-syn-3", rgbToHex(toReadableSyntaxRgb(s3, isDark)));
+    wb.style.setProperty("--g-syn-4", rgbToHex(toReadableSyntaxRgb(s4, isDark)));
+    wb.style.setProperty("--g-syn-angle", `${Math.round((compAngles.bar || 90) + 5)}deg`);
+    wb.style.setProperty(
+      "--g-syn-mix",
+      `${Math.round(Math.max(24, Math.min(76, 44 * effectiveK)))}%`
+    );
+    wb.style.setProperty("--g-syntax-bar", buildBarCss(compStops, compAngles, effectiveK * 0.72));
+    wb.style.setProperty("--g-syntax-strong", buildSelectionCss(compStops, compAngles, effectiveK * 0.85));
+    wb.style.setProperty("--g-syntax-frame", buildFrameCss(compStops));
+    ensureSyntaxStyleSheet(wb, false);
+  }
+
   function getComponentsConfig() {
     const out = {};
     let legacyScope = null;
@@ -517,7 +776,17 @@
     const waveOn = breatheOn && breatheCfg.wave;
 
     if (!cfg.enabled) {
-      if (compKey !== "selection") {
+      if (compKey === "selection") {
+        wb.classList.add("prism-no-selection");
+        wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
+        wb.style.setProperty(
+          "--g-sel-tint",
+          "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
+        );
+        clearDomSelectionOverlay();
+      } else if (compKey === "syntax") {
+        disableSyntaxCssVars(wb);
+      } else {
         wb.style.setProperty(`--g-${compKey}-mesh`, "none");
         wb.style.setProperty(`--g-${compKey}-bar`, "none");
         wb.style.setProperty(
@@ -529,14 +798,6 @@
         } else if (compKey === "terminal") {
           wb.style.setProperty("--g-terminal-panel", "none");
         }
-      } else {
-        wb.classList.add("prism-no-selection");
-        wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
-        wb.style.setProperty(
-          "--g-sel-tint",
-          "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
-        );
-        clearDomSelectionOverlay();
       }
       return;
     }
@@ -586,6 +847,8 @@
       wb.classList.remove("prism-no-selection");
       wb.style.setProperty("--g-selection", buildSelectionCss(compStops, compAngles, effectiveK));
       wb.style.setProperty("--g-sel-tint", rgba(compStops[0], 0.28 * effectiveK));
+    } else if (compKey === "syntax") {
+      applySyntaxCssVars(wb, compStops, compAngles, effectiveK);
     } else {
       wb.style.setProperty(`--g-${compKey}-mesh`, buildMeshCss(compStops, compAngles, effectiveK));
       wb.style.setProperty(`--g-${compKey}-bar`, buildBarCss(compStops, compAngles, effectiveK));
@@ -1014,7 +1277,17 @@
       const key = def.key;
       const cfg = compMap[key] || { enabled: true, customPalette: null };
       if (!cfg.enabled) {
-        if (key !== "selection") {
+        if (key === "selection") {
+          wb.classList.add("prism-no-selection");
+          wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
+          wb.style.setProperty(
+            "--g-sel-tint",
+            "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
+          );
+          clearDomSelectionOverlay();
+        } else if (key === "syntax") {
+          disableSyntaxCssVars(wb);
+        } else {
           wb.style.setProperty(`--g-${key}-mesh`, "none");
           wb.style.setProperty(`--g-${key}-bar`, "none");
           wb.style.setProperty(
@@ -1026,14 +1299,6 @@
           } else if (key === "terminal") {
             wb.style.setProperty("--g-terminal-panel", "none");
           }
-        } else {
-          wb.classList.add("prism-no-selection");
-          wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
-          wb.style.setProperty(
-            "--g-sel-tint",
-            "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
-          );
-          clearDomSelectionOverlay();
         }
         return;
       }
@@ -1048,6 +1313,8 @@
           wb.classList.remove("prism-no-selection");
           wb.style.setProperty("--g-selection", buildSelectionCss(stops, angles, k));
           wb.style.setProperty("--g-sel-tint", rgba(stops[0], 0.28 * k));
+        } else if (key === "syntax") {
+          applySyntaxCssVars(wb, stops, angles, k);
         } else {
           wb.style.setProperty(`--g-${key}-mesh`, sharedMeshCss);
           wb.style.setProperty(`--g-${key}-bar`, sharedBarCss);
@@ -1084,6 +1351,8 @@
         wb.classList.remove("prism-no-selection");
         wb.style.setProperty("--g-selection", buildSelectionCss(compStops, compAngles, k));
         wb.style.setProperty("--g-sel-tint", rgba(compStops[0], 0.28 * k));
+      } else if (key === "syntax") {
+        applySyntaxCssVars(wb, compStops, compAngles, k);
       } else {
         wb.style.setProperty(`--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k));
         wb.style.setProperty(`--g-${key}-bar`, buildBarCss(compStops, compAngles, k));
@@ -1381,7 +1650,7 @@
         "--g-terminal-panel",
       ].forEach((prop) => wb.style.setProperty(prop, "none"));
       COMPONENT_DEFS.forEach((def) => {
-        if (def.key === "selection") return;
+        if (def.key === "selection" || def.key === "syntax") return;
         wb.style.setProperty(`--g-${def.key}-mesh`, "none");
         wb.style.setProperty(`--g-${def.key}-bar`, "none");
         wb.style.setProperty(
@@ -1396,6 +1665,7 @@
         "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
       );
       wb.style.setProperty("--g-border", "var(--vscode-focusBorder, #3B82F6)");
+      disableSyntaxCssVars(wb);
       clearDomSelectionOverlay();
       try {
         localStorage.setItem(
@@ -1739,6 +2009,35 @@
         setComponentPalette(activeComponent, null);
       });
       grid.appendChild(inheritCard);
+
+      if (activeComponent === "syntax") {
+        const synMode = getSyntaxMode();
+        const isPalMode = synMode === "palette";
+        const modeCard = document.createElement("div");
+        modeCard.className = `pp-card${isPalMode ? " selected" : ""}`;
+        modeCard.style.gridColumn = "1 / -1";
+        const modeSwatch = document.createElement("div");
+        modeSwatch.className = "pp-swatch";
+        const sHexes = (targetPal && targetPal.stops ? targetPal.stops : globalStops).map(rgbToHex);
+        modeSwatch.style.background = isPalMode
+          ? `linear-gradient(90deg, ${sHexes[0]} 0%, ${sHexes[1]} 33%, ${sHexes[2]} 66%, ${sHexes[3]} 100%)`
+          : "linear-gradient(90deg, #E57368 0%, #6BC48D 33%, #78ADE8 66%, #B094E0 100%)";
+        const modeRow = document.createElement("div");
+        modeRow.className = "pp-card-row";
+        const modeName = document.createElement("span");
+        modeName.className = "pp-card-name";
+        modeName.textContent = isPalMode
+          ? "🌈 Syntax Mode: Active 4-Color Palette Prism (Click for Semantic Blend)"
+          : "✦ Syntax Mode: Per-Token Semantic Gradients (Click for 4-Color Palette Prism)";
+        modeRow.appendChild(modeName);
+        modeCard.appendChild(modeSwatch);
+        modeCard.appendChild(modeRow);
+        modeCard.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleSyntaxMode();
+        });
+        grid.appendChild(modeCard);
+      }
     }
 
     if (filtered.length === 0) {
@@ -2680,6 +2979,9 @@
       } else if (e.code === "KeyS" || e.key === "S" || e.key === "s") {
         e.preventDefault();
         toggleSeamlessMode();
+      } else if (e.code === "KeyC" || e.key === "C" || e.key === "c") {
+        e.preventDefault();
+        toggleSyntaxMode();
       } else if (e.code === "ArrowUp" || e.key === "ArrowUp") {
         e.preventDefault();
         setIntensity(getIntensity() + 0.15);
@@ -2703,6 +3005,7 @@
     const wb = document.querySelector(".monaco-workbench");
     if (!wb) return;
     syncSeamlessClass(wb);
+    syncSyntaxModeClass(wb);
     const saved = getSavedPalette();
     if (saved) {
       if (saved.isNativeOff && wb.style.getPropertyValue("--g-base") !== "none") {
@@ -2712,6 +3015,9 @@
       }
     } else if (!wb.style.getPropertyValue("--g-editor-mesh")) {
       applyPaletteToWorkbench(null, { skipHistory: true });
+    }
+    if (!wb.classList.contains("prism-no-syntax")) {
+      ensureSyntaxStyleSheet(wb, false);
     }
   }
 
