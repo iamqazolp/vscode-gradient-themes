@@ -20,10 +20,19 @@ import time
 from pathlib import Path
 
 REPO_DIR = Path(__file__).resolve().parent
+PACKAGE_JSON_PATH = REPO_DIR / "package.json"
 CUSTOM_THEMES_JSON = REPO_DIR / "palettes" / "custom_themes.json"
-EXT_DIR = Path(os.path.expanduser("~/.vscode/extensions/iamqazolp.vscode-gradient-themes-67.420.69"))
 VSCODE_EXT_JSON = Path(os.path.expanduser("~/.vscode/extensions/extensions.json"))
 VSCODE_SETTINGS_JSON = Path(os.path.expanduser("~/Library/Application Support/Code/User/settings.json"))
+
+
+def get_extension_version() -> str:
+    pkg = json.loads(PACKAGE_JSON_PATH.read_text(encoding="utf-8"))
+    return str(pkg["version"])
+
+
+EXT_VERSION = get_extension_version()
+EXT_DIR = Path(os.path.expanduser(f"~/.vscode/extensions/iamqazolp.vscode-gradient-themes-{EXT_VERSION}"))
 
 
 def hex_to_rgb(h: str) -> tuple[int, int, int]:
@@ -1080,113 +1089,21 @@ def get_all_themes_manifest() -> list[dict]:
 
 
 def build_package_json(manifest: list[dict]) -> dict:
-    return {
-        "name": "vscode-gradient-themes",
-        "displayName": "VSCode Gradient Themes",
-        "description": "Full-workbench atmospheric gradient meshes, single-hue ombré themes, and a 0ms Status Bar (🎲) mood roller with 30 curated palettes.",
-        "version": "67.420.69",
-        "publisher": "iamqazolp",
-        "license": "MIT",
-        "icon": "media/icon.png",
-        "galleryBanner": {
-            "color": "#f4f8ff",
-            "theme": "light",
-        },
-        "homepage": "https://github.com/iamqazolp/vscode-gradient-themes#readme",
-        "repository": {
-            "type": "git",
-            "url": "https://github.com/iamqazolp/vscode-gradient-themes.git",
-        },
-        "bugs": {
-            "url": "https://github.com/iamqazolp/vscode-gradient-themes/issues",
-        },
-        "qna": "marketplace",
-        "engines": {"vscode": "^1.75.0"},
-        "categories": ["Themes"],
-        "keywords": [
-            "gradient",
-            "rainbow",
-            "randomizer",
-            "antarctica",
-            "glacial",
-            "pastel",
-            "minimal",
-            "dark",
-            "light",
-            "theme",
-            "vscode",
-            "antigravity",
-        ],
-        "scripts": {
-            "package": "npx --yes @vscode/vsce package --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main --baseContentUrl https://github.com/iamqazolp/vscode-gradient-themes/blob/main",
-            "publish": "npx --yes @vscode/vsce publish --baseImagesUrl https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main --baseContentUrl https://github.com/iamqazolp/vscode-gradient-themes/blob/main",
-            "publish:ovsx": "npx --yes ovsx publish",
-        },
-        "activationEvents": ["onStartupFinished"],
-        "main": "./extension.js",
-        "contributes": {
-            "themes": [
-                {
-                    "label": item["label"],
-                    "uiTheme": item["uiTheme"],
-                    "path": f"./themes/{item['file']}",
-                }
-                for item in manifest
-            ],
-            "commands": [
-                {
-                    "command": "gradientThemes.enableGradientOverlay",
-                    "title": "Gradient Themes: Enable 4-Color Rainbow Gradient & Live Randomizer",
-                },
-                {
-                    "command": "gradientThemes.disableGradientOverlay",
-                    "title": "Gradient Themes: Disable 4-Color Rainbow Gradient Overlay",
-                },
-                {
-                    "command": "gradientThemes.rollRandomTheme",
-                    "title": "Gradient Themes: Roll Random Single-Color Glacial Theme",
-                },
-                {
-                    "command": "gradientThemes.openPreview",
-                    "title": "Gradient Themes: Open Interactive Theme & Gradient Preview",
-                    "icon": "$(symbol-color)",
-                },
-                {
-                    "command": "gradientThemes.openGitHub",
-                    "title": "Gradient Themes: Open GitHub Repository",
-                    "icon": "$(github)",
-                },
-                {
-                    "command": "gradientThemes.reportIssue",
-                    "title": "Gradient Themes: Report Issue on GitHub (with Diagnostics)",
-                    "icon": "$(bug)",
-                },
-                {
-                    "command": "gradientThemes.showTelemetryStats",
-                    "title": "Gradient Themes: Show Extension Telemetry & Marketplace Stats",
-                    "icon": "$(graph)",
-                },
-            ],
-            "configuration": {
-                "title": "VSCode Gradient Themes",
-                "properties": {
-                    "gradientThemes.autoEnableOverlay": {
-                        "type": "boolean",
-                        "default": True,
-                        "description": "Automatically inject and keep the 4-Color Gradient Mesh & Status Bar (🎲) Randomizer updated without requiring external extensions.",
-                    },
-                    "gradientThemes.telemetry": {
-                        "type": "boolean",
-                        "default": True,
-                        "description": "Enable anonymous extension usage and error telemetry (automatically disabled for the extension author and when VSCode telemetry is off).",
-                    },
-                },
-            },
-        },
-    }
+    existing = json.loads(PACKAGE_JSON_PATH.read_text(encoding="utf-8")) if PACKAGE_JSON_PATH.exists() else {}
+    existing["version"] = EXT_VERSION
+    contributes = existing.setdefault("contributes", {})
+    contributes["themes"] = [
+        {
+            "label": item["label"],
+            "uiTheme": item["uiTheme"],
+            "path": f"./themes/{item['file']}",
+        }
+        for item in manifest
+    ]
+    return existing
 
 
-def register_extension(ext_id: str, folder_name: str, ext_path: Path):
+def register_extension(ext_id: str, folder_name: str, ext_path: Path, version: str = EXT_VERSION):
     if not VSCODE_EXT_JSON.exists():
         return
     try:
@@ -1194,7 +1111,7 @@ def register_extension(ext_id: str, folder_name: str, ext_path: Path):
         ext_list = [e for e in ext_list if e.get("identifier", {}).get("id") != ext_id]
         ext_list.append({
             "identifier": {"id": ext_id},
-            "version": "67.420.69",
+            "version": version,
             "location": {
                 "$mid": 1,
                 "path": str(ext_path),
@@ -1227,8 +1144,9 @@ def main():
 
     register_extension(
         "iamqazolp.vscode-gradient-themes",
-        "iamqazolp.vscode-gradient-themes-67.420.69",
+        f"iamqazolp.vscode-gradient-themes-{EXT_VERSION}",
         EXT_DIR,
+        EXT_VERSION,
     )
 
     print(f"[OK] Built {len(built_themes)} themes across {REPO_DIR.name} and {EXT_DIR.name}.")

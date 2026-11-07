@@ -7,8 +7,9 @@ const os = require("os");
 const crypto = require("crypto");
 const https = require("https");
 
-const EXTENSION_ID = "iamqazolp.vscode-gradient-themes";
-const EXTENSION_VERSION = "67.420.69";
+const pkgJson = require("./package.json");
+const EXTENSION_ID = `${pkgJson.publisher}.${pkgJson.name}`;
+const EXTENSION_VERSION = pkgJson.version;
 const GITHUB_REPO_URL = "https://github.com/iamqazolp/vscode-gradient-themes";
 const GITHUB_ISSUES_URL = "https://github.com/iamqazolp/vscode-gradient-themes/issues";
 const MARKETPLACE_URL =

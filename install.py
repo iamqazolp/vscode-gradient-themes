@@ -3,10 +3,12 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
 import shutil
+import subprocess
 from pathlib import Path
 
 EXT_ID = "iamqazolp.vscode-gradient-themes"
@@ -88,9 +90,18 @@ def patch_local_workbench_html(repo_root: Path) -> list[Path]:
     return patched
 
 
+def set_package_version(repo_root: Path, new_version: str) -> str:
+    pkg_path = repo_root / "package.json"
+    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+    cleaned = new_version.strip().lstrip("v")
+    pkg["version"] = cleaned
+    pkg_path.write_text(json.dumps(pkg, indent=2) + "\n", encoding="utf-8")
+    return cleaned
+
+
 def install_extension(repo_root: Path) -> list[Path]:
     pkg = json.loads((repo_root / "package.json").read_text(encoding="utf-8"))
-    ext_version = str(pkg.get("version", "67.420.69"))
+    ext_version = str(pkg["version"])
     ext_dir_name = f"{EXT_ID}-{ext_version}"
 
     home = Path.home()
@@ -161,10 +172,45 @@ def install_extension(repo_root: Path) -> list[Path]:
     return installed_paths
 
 
+def package_vsix(repo_root: Path) -> None:
+    pkg = json.loads((repo_root / "package.json").read_text(encoding="utf-8"))
+    ext_name = str(pkg["name"])
+    ext_version = str(pkg["version"])
+    expected_vsix = f"{ext_name}-{ext_version}.vsix"
+
+    for old_vsix in repo_root.glob(f"{ext_name}-*.vsix"):
+        if old_vsix.name != expected_vsix:
+            old_vsix.unlink()
+            print(f"[OK] Removed old VSIX: {old_vsix.name}")
+
+    subprocess.run(["npm", "run", "package"], cwd=repo_root, check=True)
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Install, bump version, or package VSCode Gradient Themes.")
+    parser.add_argument(
+        "-v",
+        "--version",
+        help="Bump version in package.json (single source of truth) before installing/packaging.",
+    )
+    parser.add_argument(
+        "-p",
+        "--package",
+        action="store_true",
+        help="Remove old .vsix files and build the new .vsix package.",
+    )
+    args = parser.parse_args()
+
     root = Path(__file__).resolve().parent
+    if args.version:
+        updated_ver = set_package_version(root, args.version)
+        print(f"[OK] Bumped version in package.json to: {updated_ver}")
+
     paths = install_extension(root)
     for p in paths:
         print(f"[OK] Installed to: {p}")
     for wb in patch_local_workbench_html(root):
         print(f"[OK] Patched workbench HTML: {wb}")
+
+    if args.package:
+        package_vsix(root)
