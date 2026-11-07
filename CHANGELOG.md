@@ -20,12 +20,12 @@ All notable changes to **VSCode Gradient Themes** will be documented in this fil
   - Click any component pill in Gradient Studio to assign it a dedicated 4-color palette (indicated by a glowing colored dot on the pill) or toggle its gradient on/off (`Shift + Click` or click the status dot) in `0ms`.
 - **Sticky Scroll & Floating Widgets in a 4-Color Gradient Frame (`css/`)**:
   - Styled Editor Sticky Scroll, Tree/Explorer Sticky Scroll, Find/Replace widgets, Hover popups, Suggest menus, and AI Chat prompt boxes with an opaque base layer + translucent gradient wash inside a 4-color gradient border (`background-clip: padding-box, padding-box, border-box`) so scrolling code never bleeds through.
-- **Active Activity Bar, Explorer Row & Terminal Tab Gradient Pills (`css/`)**:
-  - Restored vivid 4-color gradient highlights on the active Activity Bar icon indicator, selected File Explorer row, active Editor Tab, and active Terminal tab.
+- **Active Editor Tab, Activity Bar, Explorer Row & Panel Tab 4-Color Gradient Frames (`css/`)**:
+  - Added a crisp `1.5px` 4-color gradient frame around the active/pinned Editor Tab (`.tab.active`, `.tab.sticky`), active leftmost Activity Bar function buttons, selected/focused File Explorer rows, and active Panel/Chat header tab pills (`Terminal`, `Problems`, `Output`, etc.).
 - **Decluttered Gradient Studio, Golden Favorites (`★`) & Runtime Performance (`js/gradient-randomizer.js`, `css/`)**:
   - Streamlined the Gradient Studio popover by removing redundant preset/toolbar buttons while keeping smart 4-hex / Coolors URL pasting directly in the `Name or paste 4 #hex colors...` input, 30-step roll undo (`Alt + Shift + Z`), stop rotation (`Alt + Shift + R`), and live category counts (`All`, `Favs`, `Custom`).
   - Updated favorite stars (`★` / `.pp-star.fav`) from black/inherited foreground to golden amber (`#F59E0B` / `#FBBF24`) with a soft golden glow.
-  - Optimized runtime CPU/GPU performance by isolating per-component CSS variable updates, smoothing `Breathing Aurora` pause/resume transitions, and replacing broad DOM observers with targeted listeners.
+  - Eliminated Blink Oilpan (`Memory Tag 255`) CSS gradient heap churn by routing unified component meshes through CSS variable indirection (`var(--g-default-mesh)`), deduplicating all custom property writes (`setWbProp`), guarding Studio DOM rebuilds behind `isPopoverOpen()`, and pausing `Breathing Aurora` (`0% CPU`) whenever a VS Code window is unfocused.
 - **Renewed `README.md` & 8 High-DPI `@2x` Visual Showcases (`media/screenshots/*.png`)**:
   - Updated all screenshots and tables in `README.md` to showcase `v67.67.67` Gradient Studio, Seamless vs Split-Panel modes, OKLCH Gradient Code Highlighting, the 12 Core Themes, and all 30 Curated Studio Palettes.
 
