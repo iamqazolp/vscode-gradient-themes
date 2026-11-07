@@ -4,23 +4,28 @@ All notable changes to **VSCode Gradient Themes** will be documented in this fil
 
 ## [67.67.67] - 2026-11-07
 
-### Added & Changed
-- **Gradient Code Highlighting & `Syntax` Component (`js/gradient-randomizer.js`, `css/rainbow-gradient-light.css`)**:
+### Added, Changed & Fixed
+- **Gradient Code Highlighting & `Syntax` Component (`js/gradient-randomizer.js`, `css/rainbow-gradient-light.css`, `css/rainbow-gradient-dark.css`)**:
   - Added a dedicated **`Syntax`** component pill in the Status Bar Gradient Studio to toggle or customize code syntax gradients independently.
-  - **Per-Token Semantic Gradients (`Semantic Blend` Mode)**: Dynamically reads Monaco's `.vscode-tokens-styles` `.mtk*` token colors and builds high-contrast 2-stop analogous hue gradients blended in perceptual `oklch` space with the active 4-color palette while keeping plain identifiers (`.mtk1`), punctuation, and comments 100% solid native CoreText-antialiased text.
-  - **Active 4-Color Palette Syntax (`Palette Prism` Mode & `Alt + Shift + C`)**: Paints colored syntax tokens directly with luminance-clamped, high-contrast stops from the active Studio palette, plus `.hljs-*` fenced code blocks and inline `code` pills in Markdown/AI Chat.
-  - **Gradient Editor Highlight Boxes**: Styled `.wordHighlight`, `.wordHighlightStrong`, `.findMatch`, `.currentFindMatch`, and `.bracket-match` with translucent gradient washes and frames.
-- **Seamless Unified Full-Window Gradient Canvas (`css/rainbow-gradient-dark.css`, `css/rainbow-gradient-light.css`)**:
-  - Replaced separate per-panel gradients (`--g-bar`, `--g-side`, `--g-panel` restarting inside each box) with a **single continuous full-window gradient** across the Title Bar, Activity Bar, Left Sidebar, Right AI Chat Bar, Editor Tabs, Code Editor, Integrated Terminal, and Status Bar (`Seamless` mode on by default; optional split-panel mode via toggle).
-- **Surface Scope Controls (`js/gradient-randomizer.js`, `css/`)**:
-  - Added `Seamless`, `Editor`, `Sidebar`, `Terminal`, `Bars`, and `Select` toggle chips in Gradient Studio to control gradient visibility per surface in `0ms`.
-- **Gradient Studio QoL Suite (`js/gradient-randomizer.js`)**:
-  - **Undo / Previous Roll (`←` & `Alt + Shift + Z`)**: Added a 30-step roll history stack so you can step backward to any previous procedural or curated gradient.
-  - **Favorites-Only Roll Lock (`★`) & Live Tab Counts**: Added a `★` header lock button to restrict `Roll` and `Auto-Morph` exclusively to starred favorites, plus live counts on `All`, `Favs`, and `Custom` tabs.
-  - **Restore Hidden Built-In Palettes (`↺`)**: Added a dynamic `↺ (N)` chip in the category bar whenever built-in palettes are removed.
-  - **Rotate Stops (`⇄ Rotate` & `Alt + Shift + R`), `Copy Hex` & `Paste Hex` / Coolors URL**: Added 1-click stop rotation/reversal, clipboard hex copy/paste, smart hex/Coolors parsing in the input box, and in-place custom palette editing.
-- **Golden Favorite Star (`★`) in Gradient Studio (`css/`, `js/gradient-randomizer.js`)**:
-  - Changed the favorite star (`★` / `.pp-star.fav` and `:hover`) color from black/inherited foreground to golden amber (`#F59E0B` in Light mode, `#FBBF24` in Dark mode) with a soft golden glow.
+  - **Per-Token Semantic Gradients (`Semantic Blend` Mode)**: Dynamically observes Monaco's `.vscode-tokens-styles` `.mtk*` token colors and builds high-contrast 2-stop analogous hue gradients blended in perceptual `oklch` space with the active 4-color palette while keeping plain identifiers (`.mtk1`), punctuation, and comments (`s < 28%`) as 100% solid native CoreText-antialiased text.
+  - **Active 4-Color Palette Syntax (`Palette Prism` Mode & `Alt + Shift + C`)**: Paints colored syntax tokens directly with luminance-clamped, high-contrast stops (`74%–86%` L on Dark, `20%–36%` L on Light) from the active Studio palette, plus `.hljs-*` fenced code blocks and inline `code` pills in Markdown/AI Chat.
+  - **Gradient Editor Highlight Boxes**: Styled `.wordHighlight`, `.wordHighlightStrong`, `.findMatch`, `.currentFindMatch`, and `.bracket-match` with multi-stop gradient washes and crisp accent rings.
+- **Seamless Full-Window Mode & Classic Split-Panel Toggle (`Seamless: ON / OFF` & `Alt + Shift + S`)**:
+  - **Seamless Mode (`ON` by default)**: Unifies the Title Bar, Activity Bar, Left File Explorer, Right AI Chat Bar, Editor Tabs, Code Canvas, Integrated Terminal, and Status Bar into **one single unbroken full-window gradient canvas** (`background-attachment: fixed`).
+  - **Split-Panel Mode (`Seamless: OFF`)**: Restores classic `v36.67.69` per-panel directional gradients (`--g-editor`, `--g-side`, `--g-chat`, `--g-panel`, `--g-bar`) and the glowing `2.5px` 4-color terminal header separator strip.
+- **8-Component Independent Gradient Sculpting (`All`, `Editor`, `Explorer`, `Chat`, `Terminal`, `Bars`, `Select`, `Syntax`)**:
+  - Split `Sidebar` into independent **`Explorer`** (left file tree & Activity Bar) and **`Chat`** (right AI Chat panel) scopes.
+  - Click any component pill in Gradient Studio to assign it a dedicated 4-color palette (indicated by a glowing colored dot on the pill) or toggle its gradient on/off (`Shift + Click` or click the status dot) in `0ms`.
+- **Sticky Scroll & Floating Widgets in a 4-Color Gradient Frame (`css/`)**:
+  - Styled Editor Sticky Scroll, Tree/Explorer Sticky Scroll, Find/Replace widgets, Hover popups, Suggest menus, and AI Chat prompt boxes with an opaque base layer + translucent gradient wash inside a 4-color gradient border (`background-clip: padding-box, padding-box, border-box`) so scrolling code never bleeds through.
+- **Active Activity Bar, Explorer Row & Terminal Tab Gradient Pills (`css/`)**:
+  - Restored vivid 4-color gradient highlights on the active Activity Bar icon indicator, selected File Explorer row, active Editor Tab, and active Terminal tab.
+- **Decluttered Gradient Studio, Golden Favorites (`★`) & Runtime Performance (`js/gradient-randomizer.js`, `css/`)**:
+  - Streamlined the Gradient Studio popover by removing redundant preset/toolbar buttons while keeping smart 4-hex / Coolors URL pasting directly in the `Name or paste 4 #hex colors...` input, 30-step roll undo (`Alt + Shift + Z`), stop rotation (`Alt + Shift + R`), and live category counts (`All`, `Favs`, `Custom`).
+  - Updated favorite stars (`★` / `.pp-star.fav`) from black/inherited foreground to golden amber (`#F59E0B` / `#FBBF24`) with a soft golden glow.
+  - Optimized runtime CPU/GPU performance by isolating per-component CSS variable updates, smoothing `Breathing Aurora` pause/resume transitions, and replacing broad DOM observers with targeted listeners.
+- **Renewed `README.md` & 8 High-DPI `@2x` Visual Showcases (`media/screenshots/*.png`)**:
+  - Updated all screenshots and tables in `README.md` to showcase `v67.67.67` Gradient Studio, Seamless vs Split-Panel modes, OKLCH Gradient Code Highlighting, the 12 Core Themes, and all 30 Curated Studio Palettes.
 
 ## [36.67.69] - 2026-11-06
 

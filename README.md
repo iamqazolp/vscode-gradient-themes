@@ -82,8 +82,8 @@ Inside **Gradient Studio**, click any pill in the **Component Bar** to toggle th
 | **Toggle Breathing Aurora** | **Click `Breathe`** or **`Alt + Shift + B`** | Starts/pauses the 4-mode Breathing Aurora animation engine |
 | **Toggle Seamless Mode** | **Click `Seamless: ON`** or **`Alt + Shift + S`** | Switches between **Unified Full-Window Canvas** and **Per-Panel Split Gradients** |
 | **Toggle Syntax Mode** | **Click Syntax Mode Card** or **`Alt + Shift + C`** | Switches code syntax between **Semantic Blend (OKLCH)** and **4-Color Palette Prism** |
-| **Undo / Previous Roll** | **Click `←`** in Studio or **`Alt + Shift + Z`** | Steps backward through your last 30 rolled palettes |
-| **Rotate 4 Color Stops** | **Click `⇄ Rotate`** or **`Alt + Shift + R`** | Rotates the 4 active colors around the corners (`Shift+Click` to reverse) |
+| **Undo / Previous Roll** | **`Alt + Shift + Z`** | Steps backward through your last 30 rolled palettes |
+| **Rotate 4 Color Stops** | **`Alt + Shift + R`** | Rotates the 4 active colors around the corners |
 | **Adjust Intensity** | **Drag Slider** or **`Alt + Shift + Up / Down`** | Scales gradient intensity from whisper-soft (`40%`) to neon (`180%`) |
 | **Reset / Toggle Off** | **Right-Click `↻`** or **`Alt + Shift + 0`** | Cycles between **Prism Classic** and **Theme Native (Overlay Off)** |
 | **Auto-Roll on Startup** | **`Cmd/Ctrl + Click`** on `↻` | Toggles `• Auto` to roll a fresh palette every time VSCode opens |
