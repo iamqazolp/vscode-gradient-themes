@@ -1117,6 +1117,9 @@
       const star = document.createElement("span");
       star.className = `pp-star${isFav ? " fav" : ""}`;
       star.textContent = isFav ? "★" : "☆";
+      if (isFav) {
+        star.style.color = "#f59e0b";
+      }
       star.title = isFav ? "Remove from Favorites" : "Pin to Favorites";
       star.addEventListener("click", (e) => {
         e.stopPropagation();

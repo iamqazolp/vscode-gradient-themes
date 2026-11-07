@@ -2,6 +2,12 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
+## [67.67.67] - 2026-11-07
+
+### Changed
+- **Golden Favorite Star (`★`) in Gradient Studio (`css/`, `js/gradient-randomizer.js`)**:
+  - Changed the favorite star (`★` / `.pp-star.fav` and `:hover`) color from black/inherited foreground to golden amber (`#F59E0B` in Light mode, `#FBBF24` in Dark mode) with a soft golden glow.
+
 ## [36.67.69] - 2026-11-06
 
 ![36.67.69](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-36.67.69.jpg)

@@ -811,11 +811,13 @@
   opacity: 0.48;
   cursor: pointer;
   padding: 0 1px;
-  transition: transform 0.14s ease, opacity 0.14s ease;
+  transition: transform 0.14s ease, opacity 0.14s ease, color 0.14s ease, text-shadow 0.14s ease;
 }
 #prism-palette-popover .pp-star:hover,
 #prism-palette-popover .pp-star.fav {
   opacity: 1;
+  color: #fbbf24 !important;
+  text-shadow: 0 0 6px rgba(251, 191, 36, 0.45);
   transform: scale(1.15);
 }
 #prism-palette-popover .pp-del {
