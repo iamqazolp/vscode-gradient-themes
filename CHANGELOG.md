@@ -2,11 +2,13 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
-## [6767.6767.6767] - 2026-11-08
+## [676767.676767.676767] - 2026-11-08
 
-![6767.6767.6767](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-6767.6767.6767.png)
+![676767.676767.676767](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-6767.6767.6767.png)
 
 ### Changed & Fixed
+- **Animated 6-Scene Gradient Logo & Light-Theme Living Aurora Overview GIFs (`media/icon-animated.gif`, `media/screenshots/rainbow-overview.gif`, `README.md`)**:
+  - Added a 6-scene continuous-morph animated VS Code logo (`Original VS Code` → `Prism Classic` → `Matcha Yuzu` → `Sunset Lagoon` → `Amalfi Citrus` → `Arctic Sunbeam`) with authentic 3D ribbon facet shading over 20%+ lighter pastel aurora squircle tiles, plus a zero-jitter 80-frame Light Theme `Gradient Studio` + `Palette Prism` continuous-morph overview loop.
 - **Zero-Subtree-Walk `Breathing Aurora` Engine (`js/gradient-randomizer.js`, `css/rainbow-gradient-dark.css`, `css/rainbow-gradient-light.css`)**:
   - Registered `--prism-local-bg`, `--prism-local-bar`, and `--prism-local-border` via `CSS.registerProperty` with `inherits: false` so live breathing updates on Split-Panel containers (`.part.editor`, `.part.sidebar`, `.part.panel`, etc.) and UI chrome elements (`.sticky-widget`, `.terminal-sticky-scroll`, `.tab.active`, `.monaco-list-row.selected`, `.current-line`, `.selected-text`, `#prism-randomizer-swatch`) trigger `kLocalStyleChange` on only the target element (`0` child nodes traversed) without mutating `.monaco-workbench` custom properties during 100ms ticks.
   - Eliminated `#prism-syntax-style.textContent` stylesheet re-parsing during breathing ticks and scoped `::selection` to `:is(input, textarea)::selection`, removing 10,000-node `SubtreeStyleChange` walks and Oilpan `CSSGradientValue` GC sawtooth churn.

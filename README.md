@@ -8,7 +8,7 @@
 
 > **Turn your code editor into living aurora glass.** Seamless full-window 4-color gradients, rainbow code highlighting, breathing animations, and a live Status Bar **`Gradient Studio`** with **30+ hand-crafted moods** for **VSCode, Cursor, Windsurf, and Antigravity**.
 
-![Prism Rainbow Seamless Full-Window Mesh](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/rainbow-overview.png)
+![Prism Rainbow Seamless Full-Window Mesh](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/rainbow-overview.gif)
 
 | 🌸 Gradient Studio — *Sakura Horizon (Light)* | 🌌 Gradient Studio — *Antarctic Borealis (Dark)* |
 | :---: | :---: |
