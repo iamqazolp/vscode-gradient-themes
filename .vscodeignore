@@ -12,4 +12,5 @@ install.py
 add_color.py
 COLOR_GUIDE.md
 media/screenshots/**
+media/icon-animated.gif
 node_modules/**

@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/icon.png" width="38" height="38" align="top" alt="VSCode Gradient Themes Logo" /> VSCode Gradient Themes
+# <img src="https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/icon-animated.gif" width="38" height="38" align="top" alt="VSCode Gradient Themes Animated Logo" /> VSCode Gradient Themes
 
 [![VSCode Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/iamqazolp.vscode-gradient-themes?label=VSCode%20Marketplace&logo=visual-studio-code&color=22c55e)](https://marketplace.visualstudio.com/items?itemName=iamqazolp.vscode-gradient-themes)
 [![VSCode Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/iamqazolp.vscode-gradient-themes?label=Downloads&color=38bdf8)](https://marketplace.visualstudio.com/items?itemName=iamqazolp.vscode-gradient-themes)
