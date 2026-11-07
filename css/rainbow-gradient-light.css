@@ -924,26 +924,26 @@
   display: flex;
   flex-direction: column;
   border-radius: 22px;
-  background-color: color-mix(in srgb, var(--vscode-editorWidget-background, var(--vscode-editor-background)) 86%, transparent) !important;
+  background-color: color-mix(in srgb, var(--vscode-editorWidget-background, var(--vscode-editor-background)) 96%, transparent) !important;
   background-image:
     radial-gradient(ellipse 90% 75% at 12% 12%, var(--g-r1) 0%, transparent 76%),
     radial-gradient(ellipse 85% 75% at 88% 18%, var(--g-r2) 0%, transparent 76%),
     radial-gradient(ellipse 90% 75% at 18% 88%, var(--g-r3) 0%, transparent 76%),
     radial-gradient(ellipse 85% 80% at 88% 88%, var(--g-r4) 0%, transparent 78%),
     var(--g-base) !important;
-  backdrop-filter: blur(36px) saturate(145%) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(145%) !important;
   border: 1.5px solid rgba(128, 128, 128, 0.28);
   box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.22),
-    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 20px 48px rgba(0, 0, 0, 0.22),
+    0 4px 14px rgba(0, 0, 0, 0.08),
     inset 0 1px 1px rgba(255, 255, 255, 0.22);
   color: var(--vscode-foreground);
   font-family: "Comfortaa", -apple-system, BlinkMacSystemFont, "SF Pro Rounded", sans-serif !important;
   font-size: 12px;
   user-select: none;
   overflow: hidden;
-  animation: prismPopIn 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  contain: layout paint style;
+  transform: translateZ(0);
+  animation: prismPopIn 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @keyframes prismPopIn {
   from { opacity: 0; transform: translateY(10px) scale(0.975); }
@@ -1243,6 +1243,9 @@
   grid-auto-rows: max-content;
   align-content: start;
   gap: 8px;
+  contain: strict;
+  will-change: scroll-position;
+  transform: translateZ(0);
 }
 /* In-Style Gradient Pill Scrollbar */
 #prism-palette-popover .pp-grid::-webkit-scrollbar {
@@ -1275,20 +1278,17 @@
   padding: 8px 10px;
   border-radius: 13px;
   border: 1.5px solid rgba(128, 128, 128, 0.25);
-  background-color: color-mix(in srgb, var(--vscode-editor-background) 58%, transparent);
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 65%, transparent);
   cursor: pointer;
-  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.16s ease, box-shadow 0.16s ease;
+  contain: layout paint style;
+  transition: border-color 0.12s ease;
 }
 #prism-palette-popover .pp-card:hover {
-  border-color: rgba(128, 128, 128, 0.48);
-  transform: translateY(-1.5px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.09);
+  border-color: rgba(128, 128, 128, 0.55);
 }
 #prism-palette-popover .pp-card.selected {
-  border-color: rgba(59, 130, 246, 0.80);
-  box-shadow:
-    0 0 0 1px rgba(59, 130, 246, 0.35),
-    0 6px 16px rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.85);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35);
 }
 #prism-palette-popover .pp-swatch {
   height: 8px;

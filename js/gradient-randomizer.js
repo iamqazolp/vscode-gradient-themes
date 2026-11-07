@@ -2965,9 +2965,24 @@
     layer.appendChild(frag);
   }
 
-  document.addEventListener("selectionchange", scheduleDomSelectionUpdate, true);
-  window.addEventListener("scroll", scheduleDomSelectionUpdate, true);
-  window.addEventListener("resize", scheduleDomSelectionUpdate, true);
+  document.addEventListener("selectionchange", scheduleDomSelectionUpdate, {
+    capture: true,
+    passive: true,
+  });
+  window.addEventListener(
+    "scroll",
+    (e) => {
+      if (e && e.target && e.target.closest && e.target.closest("#prism-palette-popover")) {
+        return;
+      }
+      scheduleDomSelectionUpdate();
+    },
+    { capture: true, passive: true }
+  );
+  window.addEventListener("resize", scheduleDomSelectionUpdate, {
+    capture: true,
+    passive: true,
+  });
 
   // Global keyboard shortcuts:
   //   Alt + Shift + G -> Roll new random gradient
