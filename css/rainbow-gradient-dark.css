@@ -100,14 +100,19 @@
   --g-workbench-mesh: var(--g-default-mesh);
   --g-editor-mesh: var(--g-default-mesh);
   --g-editor-bar: var(--g-bar);
+  --g-editor-frame: var(--g-border);
   --g-explorer-mesh: var(--g-default-mesh);
   --g-explorer-bar: var(--g-bar);
+  --g-explorer-frame: var(--g-border);
   --g-chat-mesh: var(--g-default-mesh);
   --g-chat-bar: var(--g-bar);
+  --g-chat-frame: var(--g-border);
   --g-terminal-mesh: var(--g-default-mesh);
   --g-terminal-bar: var(--g-bar);
+  --g-terminal-frame: var(--g-border);
   --g-bars-mesh: var(--g-default-mesh);
   --g-bars-bar: var(--g-bar);
+  --g-bars-frame: var(--g-border);
 }
 
 /* --------------------------------------------------------------------------
@@ -134,8 +139,8 @@
 .monaco-workbench .editor-group-container > .title .modern-ui-editor-tab-strip,
 .monaco-workbench .editor-group-container > .title .editor-toolbars,
 .monaco-workbench .editor-group-container > .title .tabs-container,
-.monaco-workbench .editor-group-container > .title .tabs-container > .tab,
-.monaco-workbench .editor-group-container > .title .tabs-container > .tab:not(.active) > .tab-fill,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab:not(.sticky),
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab:not(.active):not(.sticky) > .tab-fill,
 .monaco-workbench .editor-group-container > .title .tabs-container > .tab > .tab-connected-edge,
 .monaco-workbench .breadcrumbs-below-tabs,
 .monaco-workbench .breadcrumbs-control,
@@ -146,11 +151,8 @@
 .monaco-workbench .monaco-editor .margin,
 .monaco-workbench .monaco-editor .monaco-editor-background,
 .monaco-workbench .monaco-editor .inputarea.ime-input,
-.monaco-workbench .monaco-editor .sticky-widget,
 .monaco-workbench .monaco-editor .sticky-widget .monaco-editor-background,
 .monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines,
-.monaco-workbench .monaco-editor .sticky-widget .sticky-line-number,
-.monaco-workbench .monaco-editor .sticky-widget .sticky-line-content,
 .monaco-workbench .part.titlebar > .titlebar-container,
 .monaco-workbench .part.titlebar .command-center-center,
 .monaco-workbench .part.activitybar > .content,
@@ -163,7 +165,6 @@
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart, .part.panel) .monaco-pane-view,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart, .part.panel) .monaco-list,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart, .part.panel) .monaco-list .monaco-list-rows,
-.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart, .part.panel) .monaco-tree-sticky-container .monaco-tree-sticky-row,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart, .part.panel) .monaco-pane-view .pane,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart, .part.panel) .monaco-pane-view .pane > .pane-header,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart) > .title,
@@ -171,6 +172,9 @@
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart) > .header-or-footer,
 .monaco-workbench .interactive-session,
 .monaco-workbench .interactive-session .interactive-list,
+.monaco-workbench .interactive-list > .monaco-list > .monaco-scrollable-element > .monaco-tree-sticky-container,
+.monaco-workbench .interactive-list > .monaco-list > .monaco-scrollable-element > .monaco-tree-sticky-container .monaco-tree-sticky-row,
+.monaco-workbench .interactive-list > .monaco-list > .monaco-scrollable-element > .monaco-tree-sticky-container .monaco-tree-sticky-container-shadow:before,
 .monaco-workbench .pane-body.integrated-terminal,
 .monaco-workbench .pane-body.integrated-terminal .tabs-container,
 .monaco-workbench .pane-body.integrated-terminal .tabs-list-container,
@@ -329,30 +333,172 @@
   border-radius: 3px;
 }
 
-/* Sticky Scroll (Editor, Terminal & Explorer Tree): Seamless frosted glass that lets underlying gradient shine through */
-.monaco-workbench .monaco-editor .sticky-widget {
-  border-bottom: none !important;
-  box-shadow: none !important;
-}
+/* --------------------------------------------------------------------------
+ * 3. STICKY BOXES & FLOATING WIDGETS: GRADIENT INSIDE A GRADIENT FRAME
+ *    Opaque canvas base underneath the component's gradient ensures 100%
+ *    text readability over scrolling lines, framed by a 4-color gradient border.
+ * -------------------------------------------------------------------------- */
+
+/* A. Editor Sticky Scroll, Notebook Sticky Scroll & Coverage Summary */
+.monaco-workbench .monaco-editor .sticky-widget,
 .monaco-workbench .monaco-editor .sticky-widget .sticky-widget-line-numbers,
 .monaco-workbench .monaco-editor .sticky-widget .sticky-widget-lines-scrollable,
-.monaco-workbench .terminal-sticky-scroll,
-.monaco-workbench :is(.part.sidebar, .part.auxiliarybar) .monaco-tree-sticky-container {
-  background-color: color-mix(in srgb, var(--vscode-editor-background) 62%, transparent) !important;
-  background-image: none !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.12) !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03) !important;
+.monaco-workbench .monaco-editor .sticky-widget .sticky-line-number,
+.monaco-workbench .monaco-editor .sticky-widget .sticky-line-content,
+.monaco-workbench .notebookOverlay .notebook-sticky-scroll-container,
+.monaco-workbench .notebookOverlay .notebook-sticky-scroll-container .notebook-sticky-scroll-element,
+.monaco-workbench .coverage-summary-widget {
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
+  background-image: var(--g-editor-bar, none), var(--g-editor-mesh, none) !important;
+  background-attachment: fixed !important;
+}
+.monaco-workbench .monaco-editor .sticky-widget,
+.monaco-workbench .notebookOverlay .notebook-sticky-scroll-container,
+.monaco-workbench .coverage-summary-widget {
+  border: none !important;
+  border-radius: 0 0 8px 8px !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22) !important;
+}
+.monaco-workbench .monaco-editor .sticky-widget::after,
+.monaco-workbench .notebookOverlay .notebook-sticky-scroll-container::after,
+.monaco-workbench .coverage-summary-widget::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none !important;
+  z-index: 20;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--g-editor-frame, var(--g-border)) !important;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.monaco-workbench .monaco-editor .sticky-widget .sticky-line-content:hover,
+.monaco-workbench .notebookOverlay .notebook-sticky-scroll-container .notebook-sticky-scroll-element:hover {
+  filter: brightness(1.08);
 }
 
-/* Active Editor Tab Pill & Active Panel Tab Pill (Scoped to Component Bar Gradient) */
+/* B. Tree Sticky Scroll (Explorer, Settings, Quick Input, Bottom Panel & Non-Chat Trees) */
+.monaco-workbench .monaco-list:not(.interactive-list > .monaco-list) .monaco-tree-sticky-container:not(.empty) {
+  border: none !important;
+  border-radius: 0 0 8px 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.20) !important;
+}
+.monaco-workbench .monaco-list:not(.interactive-list > .monaco-list) .monaco-tree-sticky-container:not(.empty)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none !important;
+  z-index: 20;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--g-explorer-frame, var(--g-border)) !important;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.monaco-workbench .part.sidebar .monaco-tree-sticky-container:not(.empty),
+.monaco-workbench .part.sidebar .monaco-tree-sticky-container:not(.empty) .monaco-tree-sticky-row.monaco-list-row {
+  background-color: var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background))) !important;
+  background-image: var(--g-explorer-bar, none), var(--g-explorer-mesh, none) !important;
+  background-attachment: fixed !important;
+}
+.monaco-workbench :is(.part.editor, .quick-input-widget) .monaco-tree-sticky-container:not(.empty),
+.monaco-workbench :is(.part.editor, .quick-input-widget) .monaco-tree-sticky-container:not(.empty) .monaco-tree-sticky-row.monaco-list-row {
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
+  background-image: var(--g-editor-bar, none), var(--g-editor-mesh, none) !important;
+  background-attachment: fixed !important;
+}
+.monaco-workbench :is(.part.editor, .quick-input-widget) .monaco-tree-sticky-container:not(.empty)::after {
+  background: var(--g-editor-frame, var(--g-border)) !important;
+}
+.monaco-workbench .part.panel .monaco-tree-sticky-container:not(.empty),
+.monaco-workbench .part.panel .monaco-tree-sticky-container:not(.empty) .monaco-tree-sticky-row.monaco-list-row {
+  background-color: var(--g-canvas-bg, var(--vscode-panel-background, var(--vscode-editor-background))) !important;
+  background-image: var(--g-terminal-bar, none), var(--g-terminal-mesh, none) !important;
+  background-attachment: fixed !important;
+}
+.monaco-workbench .part.panel .monaco-tree-sticky-container:not(.empty)::after {
+  background: var(--g-terminal-frame, var(--g-border)) !important;
+}
+.monaco-workbench :is(.part.auxiliarybar, .part.sessionspart) .monaco-list:not(.interactive-list > .monaco-list) .monaco-tree-sticky-container:not(.empty),
+.monaco-workbench :is(.part.auxiliarybar, .part.sessionspart) .monaco-list:not(.interactive-list > .monaco-list) .monaco-tree-sticky-container:not(.empty) .monaco-tree-sticky-row.monaco-list-row {
+  background-color: var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background))) !important;
+  background-image: var(--g-chat-bar, none), var(--g-chat-mesh, none) !important;
+  background-attachment: fixed !important;
+}
+.monaco-workbench :is(.part.auxiliarybar, .part.sessionspart) .monaco-list:not(.interactive-list > .monaco-list) .monaco-tree-sticky-container:not(.empty)::after {
+  background: var(--g-chat-frame, var(--g-border)) !important;
+}
+
+/* C. Terminal Sticky Scroll & Output View Sticky Scroll */
+.monaco-workbench .terminal-sticky-scroll,
+.monaco-workbench .part.sidebar .output-view .sticky-widget,
+.monaco-workbench .part.panel > .content .pane-body.output-view .sticky-widget {
+  background-color: var(--g-canvas-bg, var(--vscode-panel-background, var(--vscode-editor-background))) !important;
+  background-image: var(--g-terminal-bar, none), var(--g-terminal-mesh, none) !important;
+  background-attachment: fixed !important;
+  border: none !important;
+  border-radius: 0 0 8px 8px !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22) !important;
+}
+.monaco-workbench .terminal-sticky-scroll::after,
+.monaco-workbench .part.sidebar .output-view .sticky-widget::after,
+.monaco-workbench .part.panel > .content .pane-body.output-view .sticky-widget::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none !important;
+  z-index: 20;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--g-terminal-frame, var(--g-border)) !important;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* D. Chat Sticky Prompt Bubbles, Prompt Timeline Sticky Band, Sticky Progress & Chat Input Boxes */
+.monaco-workbench .interactive-item-container.interactive-request .value .rendered-markdown,
+.monaco-workbench .monaco-tree-sticky-row .interactive-item-container.interactive-request .value .rendered-markdown,
+.monaco-workbench .prompt-timeline-sticky-band,
+.monaco-workbench .interactive-session .interactive-item-container.chat-sticky-progress:not(:empty),
+.monaco-workbench .interactive-session .chat-input-container,
+.monaco-workbench .interactive-session .chat-editing-session .chat-editing-session-container,
+.monaco-workbench .interactive-session .interactive-input-part .chat-todo-list-widget-container .chat-todo-list-widget {
+  border: 1.5px solid transparent !important;
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-image:
+    var(--g-chat-bar, none),
+    linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background)), var(--g-canvas-bg, var(--vscode-editor-background))),
+    var(--g-chat-frame, var(--g-border)) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
+}
+
+/* E. Pinned / Sticky Editor Tabs & Active Tab Pills (Scoped to Component Bar & Frame) */
+.monaco-workbench .editor-group-container > .title .sticky-tabs-background {
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
+  background-image: var(--g-bars-mesh, none) !important;
+  background-attachment: fixed !important;
+}
 .monaco-workbench:not(.modern-ui-tabs) .editor-group-container > .title .tabs-container > .tab.active,
-.monaco-workbench .editor-group-container > .title .tabs-container > .tab.active > .tab-fill {
-  background-color: var(--vscode-tab-activeBackground, var(--vscode-editor-background)) !important;
-  background-image: var(--g-bars-bar, none) !important;
+.monaco-workbench:not(.modern-ui-tabs) .editor-group-container > .title .tabs-container > .tab.sticky,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.active > .tab-fill,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill {
+  border: 1px solid transparent !important;
+  background-color: var(--g-canvas-bg, var(--vscode-tab-activeBackground, var(--vscode-editor-background))) !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-image:
+    var(--g-bars-bar, none),
+    linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background)), var(--g-canvas-bg, var(--vscode-editor-background))),
+    var(--g-bars-frame, var(--g-border)) !important;
   border-radius: 6px !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
 }
 .monaco-workbench .part.panel :is(.composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator,
 .monaco-workbench.modern-ui-tabs .part.panel > :is(.title, .header-or-footer) > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:not(.icon).checked > .active-item-indicator {
@@ -396,11 +542,20 @@
   border-radius: 6px !important;
 }
 
-/* Floating Popups (Command Palette, Autocomplete, Hover, Menus): Theme widget base + Prism tint */
+/* F. Sticky Find Widget & Floating Popups (Find, Parameter Hints, Command Palette, Suggest, Hover, Menus, Toasts) */
+.monaco-workbench .monaco-editor .find-widget,
+.monaco-workbench .monaco-editor .parameter-hints-widget,
 .monaco-workbench :is(.quick-input-widget, .editor-widget.suggest-widget, .monaco-hover, .context-view .monaco-menu, .notifications-toasts .notification-toast) {
-  background-color: var(--vscode-editorWidget-background, var(--vscode-editor-background)) !important;
-  background-image: var(--g-bars-mesh, var(--g-editor-mesh, none)) !important;
+  border: 1.5px solid transparent !important;
+  background-color: var(--g-canvas-bg, var(--vscode-editorWidget-background, var(--vscode-editor-background))) !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-image:
+    var(--g-editor-bar, var(--g-bars-bar, none)),
+    linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background)), var(--g-canvas-bg, var(--vscode-editor-background))),
+    var(--g-editor-frame, var(--g-bars-frame, var(--g-border))) !important;
   backdrop-filter: blur(18px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22) !important;
 }
 
 /* Scrollbar Slider & Editor Cursor */

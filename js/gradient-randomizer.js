@@ -802,6 +802,14 @@
     )} 33%, ${rgba(s3, 0.25 * kVal)} 66%, ${rgba(s4, 0.32 * kVal)} 100%)`;
   }
 
+  function buildFrameCss(cStops) {
+    const [s1, s2, s3, s4] = cStops;
+    return `linear-gradient(90deg, ${rgba(s1, 0.72)} 0%, ${rgba(
+      s2,
+      0.66
+    )} 33%, ${rgba(s3, 0.66)} 66%, ${rgba(s4, 0.76)} 100%)`;
+  }
+
   function writeGradientCssVars(wb, stops, angles, k) {
     const [c1, c2, c3, c4] = stops;
     wb.style.setProperty("--g-r1", rgba(c1, 0.18 * k));
@@ -856,6 +864,10 @@
           allSurfacesUnified = false;
           wb.style.setProperty(`--g-${key}-mesh`, "none");
           wb.style.setProperty(`--g-${key}-bar`, "none");
+          wb.style.setProperty(
+            `--g-${key}-frame`,
+            "linear-gradient(90deg, rgba(128, 128, 128, 0.22), rgba(128, 128, 128, 0.22))"
+          );
         } else {
           wb.classList.add("prism-no-selection");
           wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
@@ -887,6 +899,7 @@
       } else {
         wb.style.setProperty(`--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k));
         wb.style.setProperty(`--g-${key}-bar`, buildBarCss(compStops, compAngles, k));
+        wb.style.setProperty(`--g-${key}-frame`, buildFrameCss(compStops));
       }
     });
 
@@ -1192,6 +1205,10 @@
         if (def.key === "selection") return;
         wb.style.setProperty(`--g-${def.key}-mesh`, "none");
         wb.style.setProperty(`--g-${def.key}-bar`, "none");
+        wb.style.setProperty(
+          `--g-${def.key}-frame`,
+          "linear-gradient(90deg, rgba(128, 128, 128, 0.22), rgba(128, 128, 128, 0.22))"
+        );
       });
       wb.classList.add("prism-no-selection");
       wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
@@ -1393,7 +1410,7 @@
     COMPONENT_DEFS.forEach((def) => {
       const pill = document.getElementById(`pp-comp-${def.key}`);
       const dot = document.getElementById(`pp-comp-dot-${def.key}`);
-      const cState = comps[def.key] || { enabled: true, palette: null };
+      const cState = comps[def.key] || { enabled: true, customPalette: null };
       if (pill) {
         pill.classList.toggle("active", activeComponent === def.key);
         pill.classList.toggle("is-off", !cState.enabled);
@@ -1402,8 +1419,8 @@
         dot.classList.toggle("off", !cState.enabled);
         if (cState.enabled) {
           const hexes =
-            cState.palette && Array.isArray(cState.palette.stops) && cState.palette.stops.length === 4
-              ? cState.palette.stops.map(rgbToHex)
+            cState.customPalette && Array.isArray(cState.customPalette.stops) && cState.customPalette.stops.length === 4
+              ? cState.customPalette.stops.map(rgbToHex)
               : globalHexes;
           dot.style.background = `linear-gradient(135deg, ${hexes[0]} 0%, ${hexes[1]} 33%, ${hexes[2]} 66%, ${hexes[3]} 100%)`;
         } else {
@@ -1450,7 +1467,7 @@
     // When a specific component is selected, show quick On/Off and "Same as All" cards at the top of the grid
     if (activeComponent !== "all") {
       const compDef = COMPONENT_DEFS.find((d) => d.key === activeComponent);
-      const compState = comps[activeComponent] || { enabled: true, palette: null };
+      const compState = comps[activeComponent] || { enabled: true, customPalette: null };
       const compLabel = compDef ? compDef.label : activeComponent;
 
       // Card 1: Turn Component Gradient ON / OFF
@@ -1479,7 +1496,7 @@
 
       // Card 2: Reset Component to Unified "Same as All" Gradient
       const inheritCard = document.createElement("div");
-      inheritCard.className = `pp-card${compState.enabled && !compState.palette ? " selected" : ""}`;
+      inheritCard.className = `pp-card${compState.enabled && !compState.customPalette ? " selected" : ""}`;
       const globalStops = getActiveTargetPalette("all").stops || CURATED_PALETTES[0].stops;
       const gHexes = globalStops.map(rgbToHex);
       const inheritSwatch = document.createElement("div");
@@ -1517,7 +1534,12 @@
       const isSelected =
         activeComponent === "all"
           ? p.name === activeName
-          : Boolean(compState && compState.enabled && compState.palette && compState.palette.name === p.name);
+          : Boolean(
+              compState &&
+                compState.enabled &&
+                compState.customPalette &&
+                compState.customPalette.name === p.name
+            );
 
       const card = document.createElement("div");
       card.className = `pp-card${isSelected ? " selected" : ""}`;
