@@ -4,6 +4,8 @@ All notable changes to **VSCode Gradient Themes** will be documented in this fil
 
 ## [67.67.67] - 2026-11-07
 
+![67.67.67](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-67.67.67.png)
+
 ### Added, Changed & Fixed
 - **Gradient Code Highlighting & `Syntax` Component (`js/gradient-randomizer.js`, `css/rainbow-gradient-light.css`, `css/rainbow-gradient-dark.css`)**:
   - Added a dedicated **`Syntax`** component pill in the Status Bar Gradient Studio to toggle or customize code syntax gradients independently.
