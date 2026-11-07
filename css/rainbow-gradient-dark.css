@@ -679,24 +679,36 @@
   background-attachment: scroll !important;
 }
 .monaco-workbench:not(.modern-ui-tabs) .editor-group-container > .title .tabs-container > .tab.sticky,
-.monaco-workbench .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill {
-  border: 1px solid transparent !important;
-  background-color: var(--g-canvas-bg, var(--vscode-tab-activeBackground, var(--vscode-editor-background, #ffffff))) !important;
-  background-origin: padding-box, padding-box, border-box !important;
-  background-clip: padding-box, padding-box, border-box !important;
-  background-image:
-    var(--g-bars-bar, none),
-    linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))),
-    var(--g-bars-frame, var(--g-border)) !important;
-  border-radius: 6px !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10) !important;
-}
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill,
 .monaco-workbench:not(.modern-ui-tabs) .editor-group-container > .title .tabs-container > .tab.active:not(.sticky),
 .monaco-workbench .editor-group-container > .title .tabs-container > .tab.active:not(.sticky) > .tab-fill {
+  border: none !important;
   background-color: var(--g-canvas-bg, var(--vscode-tab-activeBackground, var(--vscode-editor-background, #ffffff))) !important;
   background-image: var(--g-bars-bar, none) !important;
   border-radius: 6px !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+.monaco-workbench:not(.modern-ui-tabs) .editor-group-container > .title .tabs-container > .tab.sticky::after,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill::after,
+.monaco-workbench:not(.modern-ui-tabs) .editor-group-container > .title .tabs-container > .tab.active:not(.sticky)::after,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.active:not(.sticky) > .tab-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none !important;
+  z-index: 20;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--g-bars-frame, var(--g-border)) !important;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.active > .tab-border-top-container,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.active > .tab-border-bottom-container,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.sticky > .tab-border-top-container,
+.monaco-workbench .editor-group-container > .title .tabs-container > .tab.sticky > .tab-border-bottom-container {
+  display: none !important;
 }
 /* Active Activity Bar Icon Pill (very left bar: Explorer, Search, Source Control, Extensions, etc.) */
 .monaco-workbench .part.activitybar .monaco-action-bar .action-item.checked .active-item-indicator,
