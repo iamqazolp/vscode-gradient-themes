@@ -474,17 +474,17 @@ async function autoSyncWorkbenchOnStartup(context) {
 
     // Already up-to-date with the exact current CSS + 30-palette JS hash across all workbench HTMLs
     if (allUpToDate) {
-      if (recentlyPatched) {
-        showReloadStatusBarPrompt(context);
-      }
       return;
     }
 
     const ok = await enableGradientOverlay(context, true);
-    if (ok && !hadPreviousPatch) {
+    if (ok) {
       showReloadStatusBarPrompt(context);
+      const promptMsg = hadPreviousPatch
+        ? `✨ VSCode Gradient Themes updated to v${EXTENSION_VERSION}! Click Reload Window to activate.`
+        : "✨ VSCode Gradient Themes: 4-Color Gradient Mesh & Live 🎲 Randomizer are ready! Click Reload Window to activate.";
       const choice = await vscode.window.showInformationMessage(
-        "✨ VSCode Gradient Themes: 4-Color Gradient Mesh & Live 🎲 Randomizer are ready! Click Reload Window to activate.",
+        promptMsg,
         "Reload Window",
         "Disable Overlay"
       );
