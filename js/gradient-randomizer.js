@@ -535,14 +535,38 @@
 
   let lastSyntaxSheetSig = "";
   let lastSyntaxThemeDark = null;
+  let lastSyntaxStops = null;
+  let lastSyntaxK = 1.0;
   let monacoColorsObserver = null;
   let observedMonacoStyleEl = null;
   let lastSyntaxHexSig = "";
-  let lastSyntaxUpdateTs = 0;
   let cachedComponentsConfig = null;
   let lastAppliedWbElement = null;
   const lastAppliedVars = new Map();
   let lastSwatchGrad = "";
+  let lastBackdropMesh = "";
+
+  function ensureAuroraBackdrop(wb) {
+    if (!wb) return null;
+    let el = document.getElementById("prism-aurora-backdrop");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "prism-aurora-backdrop";
+      wb.insertBefore(el, wb.firstChild);
+      lastBackdropMesh = "";
+    } else if (el.parentElement !== wb) {
+      wb.insertBefore(el, wb.firstChild);
+    }
+    return el;
+  }
+
+  function setBackdropMesh(wb, meshCss) {
+    const el = ensureAuroraBackdrop(wb);
+    if (!el) return;
+    if (lastBackdropMesh === meshCss) return;
+    lastBackdropMesh = meshCss;
+    el.style.backgroundImage = meshCss;
+  }
 
   function setWbProp(wb, prop, val) {
     if (!wb) return;
@@ -649,26 +673,33 @@
     return tokenMap;
   }
 
-  function ensureSyntaxStyleSheet(wb, force = false) {
+  function ensureSyntaxStyleSheet(wb, force = false, cStops = null, kVal = null) {
     if (!wb) return;
+    const stops =
+      cStops && cStops.length === 4
+        ? cStops
+        : lastSyntaxStops && lastSyntaxStops.length === 4
+        ? lastSyntaxStops
+        : lastLiveStops && lastLiveStops.length === 4
+        ? lastLiveStops
+        : CURATED_PALETTES[0].stops;
+    const effectiveK = typeof kVal === "number" ? kVal : lastSyntaxK;
+    lastSyntaxStops = stops.map((s) => [...s]);
+    lastSyntaxK = effectiveK;
+
     const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
+    const synRgbs = stops.map((s) => toReadableSyntaxRgb(s, isDark));
+    const synHexes = synRgbs.map(rgbToHex);
+    const mixRatio = Math.max(0.24, Math.min(0.76, 0.44 * effectiveK));
+    const mixKey = Math.round(mixRatio * 100);
+
     let styleEl = document.getElementById("prism-syntax-style");
-    if (
-      !force &&
-      styleEl &&
-      styleEl.isConnected &&
-      lastSyntaxThemeDark === isDark &&
-      observedMonacoStyleEl &&
-      observedMonacoStyleEl.isConnected
-    ) {
-      return;
-    }
     const tokenMap = extractMonacoTokenColors(isDark);
     const sigParts = [];
     tokenMap.forEach((rgb, idx) => {
       sigParts.push(`${idx}:${rgb[0]},${rgb[1]},${rgb[2]}`);
     });
-    const sig = `${isDark ? "d" : "l"}|${sigParts.join(";")}`;
+    const sig = `${isDark ? "d" : "l"}|${synHexes.join(",")}|${mixKey}|${sigParts.join(";")}`;
     if (!force && styleEl && styleEl.isConnected && sig === lastSyntaxSheetSig) {
       lastSyntaxThemeDark = isDark;
       return;
@@ -694,42 +725,52 @@
       const [h, s, l] = rgbToHsl(rgb);
       if (s < 28) return; // Keep muted comments & slate operators 100% solid native CoreText-antialiased text
 
-      const slot1 = (colorIdx % 4) + 1;
-      const slot2 = ((colorIdx + 1) % 4) + 1;
+      const slot1 = colorIdx % 4;
+      const slot2 = (colorIdx + 1) % 4;
       colorIdx += 1;
 
-      const hexA = rgbToHex(
-        hslToRgb(
-          h - 18,
-          Math.max(86, Math.min(98, s + 16)),
-          isDark ? Math.min(86, Math.max(75, l + 12)) : Math.max(20, Math.min(32, l - 10))
-        )
+      const rgbA = hslToRgb(
+        h - 18,
+        Math.max(86, Math.min(98, s + 16)),
+        isDark ? Math.min(86, Math.max(75, l + 12)) : Math.max(20, Math.min(32, l - 10))
       );
-      const hexB = rgbToHex(
-        hslToRgb(
-          h + 24,
-          Math.max(86, Math.min(98, s + 16)),
-          isDark ? Math.max(71, Math.min(83, l + 6)) : Math.min(36, Math.max(24, l - 5))
-        )
+      const rgbB = hslToRgb(
+        h + 24,
+        Math.max(86, Math.min(98, s + 16)),
+        isDark ? Math.max(71, Math.min(83, l + 6)) : Math.min(36, Math.max(24, l - 5))
       );
+
+      // Bake static hex colors directly into #prism-syntax-style (zero var() / color-mix() on span.mtk*
+      // so Blink caches 1 CSSLinearGradientValue per rule and skips all 2,000 token spans during style recalc)
+      const semHexA = rgbToHex(lerpRgb(rgbA, synRgbs[slot1], mixRatio));
+      const semHexB = rgbToHex(lerpRgb(rgbB, synRgbs[slot2], Math.min(0.82, mixRatio + 0.08)));
+      const palHexA = synHexes[slot1];
+      const palHexB = synHexes[slot2];
 
       rules.push(
         `.monaco-workbench:not(.prism-no-syntax):not(.prism-syntax-palette) ${scopeSel} span.mtk${n} {` +
-          `background-image: linear-gradient(var(--g-syn-angle, 95deg), ` +
-          `color-mix(in oklch, ${hexA}, var(--g-syn-${slot1}) var(--g-syn-mix, 42%)) 0%, ` +
-          `color-mix(in oklch, ${hexB}, var(--g-syn-${slot2}) var(--g-syn-mix, 52%)) 100%) !important;` +
+          `background-image: linear-gradient(95deg, ${semHexA} 0%, ${semHexB} 100%) !important;` +
           `-webkit-background-clip: text !important; background-clip: text !important;` +
           `-webkit-text-fill-color: transparent !important; ${strokeRule}` +
         `}`
       );
       rules.push(
         `.monaco-workbench:not(.prism-no-syntax).prism-syntax-palette ${scopeSel} span.mtk${n} {` +
-          `background-image: linear-gradient(var(--g-syn-angle, 95deg), var(--g-syn-${slot1}) 0%, var(--g-syn-${slot2}) 100%) !important;` +
+          `background-image: linear-gradient(95deg, ${palHexA} 0%, ${palHexB} 100%) !important;` +
           `-webkit-background-clip: text !important; background-clip: text !important;` +
           `-webkit-text-fill-color: transparent !important; ${strokeRule}` +
         `}`
       );
     });
+
+    const [h1, h2, h3, h4] = synHexes;
+    rules.push(
+      `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-keyword, .hljs-selector-tag, .hljs-meta, .hljs-doctag) { background-image: linear-gradient(95deg, ${h1} 0%, ${h2} 100%) !important; }`,
+      `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-string, .hljs-regexp, .hljs-addition) { background-image: linear-gradient(95deg, ${h3} 0%, ${h4} 100%) !important; }`,
+      `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-title, .hljs-function, .hljs-section, .hljs-built_in) { background-image: linear-gradient(95deg, ${h4} 0%, ${h1} 100%) !important; }`,
+      `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-type, .hljs-class, .hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-params) { background-image: linear-gradient(95deg, ${h2} 0%, ${h3} 100%) !important; }`,
+      `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-number, .hljs-literal, .hljs-symbol, .hljs-bullet) { background-image: linear-gradient(95deg, ${h1} 0%, ${h4} 100%) !important; }`
+    );
 
     styleEl.textContent = rules.join("\n");
   }
@@ -754,21 +795,13 @@
     const h4 = rgbToHex(toReadableSyntaxRgb(s4, isDark));
     const mixPct = `${Math.round(Math.max(24, Math.min(76, 44 * effectiveK)))}%`;
     const hexSig = `${h1}|${h2}|${h3}|${h4}|${mixPct}`;
-    const now = performance.now();
-    if (hexSig !== lastSyntaxHexSig && (!breatheTimer || now - lastSyntaxUpdateTs >= 240)) {
+    if (hexSig !== lastSyntaxHexSig) {
       lastSyntaxHexSig = hexSig;
-      lastSyntaxUpdateTs = now;
-      setWbProp(wb, "--g-syn-1", h1);
-      setWbProp(wb, "--g-syn-2", h2);
-      setWbProp(wb, "--g-syn-3", h3);
-      setWbProp(wb, "--g-syn-4", h4);
-      setWbProp(wb, "--g-syn-angle", "95deg");
-      setWbProp(wb, "--g-syn-mix", mixPct);
       setWbProp(wb, "--g-syntax-bar", buildBarCss(compStops, compAngles, effectiveK * 0.72));
       setWbProp(wb, "--g-syntax-strong", buildSelectionCss(compStops, compAngles, effectiveK * 0.85));
       setWbProp(wb, "--g-syntax-frame", buildFrameCss(compStops));
     }
-    ensureSyntaxStyleSheet(wb, false);
+    ensureSyntaxStyleSheet(wb, false, compStops, effectiveK);
   }
 
   function getComponentsConfig() {
@@ -843,6 +876,15 @@
     const shimmerOn = breatheOn && breatheCfg.shimmer;
     const waveOn = breatheOn && breatheCfg.wave;
 
+    const hasCustom =
+      cfg.customPalette &&
+      Array.isArray(cfg.customPalette.stops) &&
+      cfg.customPalette.stops.length === 4;
+
+    if (compKey !== "selection" && compKey !== "syntax") {
+      wb.classList.toggle(`prism-custom-${compKey}`, !cfg.enabled || Boolean(hasCustom));
+    }
+
     if (!cfg.enabled) {
       if (compKey === "selection") {
         wb.classList.add("prism-no-selection");
@@ -882,10 +924,6 @@
 
     let compStops = fallbackStops;
     let compAngles = fallbackAngles;
-    const hasCustom =
-      cfg.customPalette &&
-      Array.isArray(cfg.customPalette.stops) &&
-      cfg.customPalette.stops.length === 4;
 
     if (hasCustom) {
       const phaseDelta = Math.max(0, breathePhase - (Number(cfg.customPalette.phaseOffset) || 0));
@@ -1239,28 +1277,36 @@
     return out;
   }
 
-  function buildMeshCss(cStops, cAngles, kVal) {
+  function buildMeshCss(cStops, cAngles, kVal, coords) {
     const [s1, s2, s3, s4] = cStops;
     const r1 = rgba(s1, 0.18 * kVal);
     const r2 = rgba(s2, 0.18 * kVal);
     const r3 = rgba(s3, 0.18 * kVal);
     const r4 = rgba(s4, 0.22 * kVal);
-    const base = `linear-gradient(${cAngles.base}deg, ${rgba(s1, 0.14 * kVal)} 0%, ${rgba(
+    const p1x = coords ? coords.p1x : 15;
+    const p1y = coords ? coords.p1y : 15;
+    const p2x = coords ? coords.p2x : 85;
+    const p2y = coords ? coords.p2y : 25;
+    const p3x = coords ? coords.p3x : 25;
+    const p3y = coords ? coords.p3y : 85;
+    const p4x = coords ? coords.p4x : 85;
+    const p4y = coords ? coords.p4y : 85;
+    const base = `linear-gradient(${Math.round(cAngles.base)}deg, ${rgba(s1, 0.14 * kVal)} 0%, ${rgba(
       s2,
       0.11 * kVal
     )} 33%, ${rgba(s3, 0.11 * kVal)} 66%, ${rgba(s4, 0.16 * kVal)} 100%)`;
     return [
-      `radial-gradient(ellipse 75% 55% at var(--g-p1x, 15%) var(--g-p1y, 15%), ${r1} 0%, transparent 70%)`,
-      `radial-gradient(ellipse 65% 75% at var(--g-p2x, 85%) var(--g-p2y, 25%), ${r2} 0%, transparent 72%)`,
-      `radial-gradient(ellipse 75% 60% at var(--g-p3x, 25%) var(--g-p3y, 85%), ${r3} 0%, transparent 72%)`,
-      `radial-gradient(ellipse 70% 70% at var(--g-p4x, 85%) var(--g-p4y, 85%), ${r4} 0%, transparent 75%)`,
+      `radial-gradient(ellipse 75% 55% at ${p1x}% ${p1y}%, ${r1} 0%, transparent 70%)`,
+      `radial-gradient(ellipse 65% 75% at ${p2x}% ${p2y}%, ${r2} 0%, transparent 72%)`,
+      `radial-gradient(ellipse 75% 60% at ${p3x}% ${p3y}%, ${r3} 0%, transparent 72%)`,
+      `radial-gradient(ellipse 70% 70% at ${p4x}% ${p4y}%, ${r4} 0%, transparent 75%)`,
       base,
     ].join(", ");
   }
 
   function buildBarCss(cStops, cAngles, kVal) {
     const [s1, s2, s3, s4] = cStops;
-    return `linear-gradient(${cAngles.bar}deg, ${rgba(s1, 0.20 * kVal)} 0%, ${rgba(
+    return `linear-gradient(${Math.round(cAngles.bar)}deg, ${rgba(s1, 0.20 * kVal)} 0%, ${rgba(
       s2,
       0.15 * kVal
     )} 33%, ${rgba(s3, 0.15 * kVal)} 66%, ${rgba(s4, 0.22 * kVal)} 100%)`;
@@ -1268,7 +1314,7 @@
 
   function buildSideCss(cStops, cAngles, kVal) {
     const [s1, s2, s3, s4] = cStops;
-    return `linear-gradient(${cAngles.side}deg, ${rgba(s1, 0.16 * kVal)} 0%, ${rgba(
+    return `linear-gradient(${Math.round(cAngles.side)}deg, ${rgba(s1, 0.16 * kVal)} 0%, ${rgba(
       s2,
       0.13 * kVal
     )} 33%, ${rgba(s3, 0.13 * kVal)} 66%, ${rgba(s4, 0.16 * kVal)} 100%)`;
@@ -1279,7 +1325,7 @@
     const r1 = rgba(s1, 0.18 * kVal);
     const r2 = rgba(s2, 0.18 * kVal);
     const r3 = rgba(s3, 0.18 * kVal);
-    const panel = `linear-gradient(${cAngles.panel}deg, ${rgba(s2, 0.07 * kVal)} 0%, ${rgba(
+    const panel = `linear-gradient(${Math.round(cAngles.panel)}deg, ${rgba(s2, 0.07 * kVal)} 0%, ${rgba(
       s3,
       0.13 * kVal
     )} 50%, ${rgba(s4, 0.18 * kVal)} 100%)`;
@@ -1293,7 +1339,7 @@
 
   function buildSelectionCss(cStops, cAngles, kVal) {
     const [s1, s2, s3, s4] = cStops;
-    return `linear-gradient(${cAngles.bar}deg, ${rgba(s1, 0.30 * kVal)} 0%, ${rgba(
+    return `linear-gradient(${Math.round(cAngles.bar)}deg, ${rgba(s1, 0.30 * kVal)} 0%, ${rgba(
       s2,
       0.25 * kVal
     )} 33%, ${rgba(s3, 0.25 * kVal)} 66%, ${rgba(s4, 0.32 * kVal)} 100%)`;
@@ -1307,8 +1353,11 @@
     )} 33%, ${rgba(s3, 0.66)} 66%, ${rgba(s4, 0.76)} 100%)`;
   }
 
-  function writeGradientCssVars(wb, stops, angles, k) {
+  function writeGradientCssVars(wb, stops, angles, k, coords) {
     const [c1, c2, c3, c4] = stops;
+    const defaultMeshCss = buildMeshCss(stops, angles, k, coords);
+    setBackdropMesh(wb, defaultMeshCss);
+
     setWbProp(wb, "--g-r1", rgba(c1, 0.18 * k));
     setWbProp(wb, "--g-r2", rgba(c2, 0.18 * k));
     setWbProp(wb, "--g-r3", rgba(c3, 0.18 * k));
@@ -1348,8 +1397,6 @@
       )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`
     );
 
-    // Apply per-component gradients & Off toggles (use CSS variable indirection for unified components
-    // so Blink reuses root variables without allocating new CSSRadialGradientValue objects on every tick)
     const compMap = getComponentsConfig();
     const breatheOn = isBreathingEnabled();
     const breatheCfg = getBreatheConfig();
@@ -1359,6 +1406,15 @@
     COMPONENT_DEFS.forEach((def) => {
       const key = def.key;
       const cfg = compMap[key] || { enabled: true, customPalette: null };
+      const hasCustom =
+        cfg.customPalette &&
+        Array.isArray(cfg.customPalette.stops) &&
+        cfg.customPalette.stops.length === 4;
+
+      if (key !== "selection" && key !== "syntax") {
+        wb.classList.toggle(`prism-custom-${key}`, !cfg.enabled || Boolean(hasCustom));
+      }
+
       if (!cfg.enabled) {
         if (key === "selection") {
           wb.classList.add("prism-no-selection");
@@ -1387,11 +1443,6 @@
         }
         return;
       }
-
-      const hasCustom =
-        cfg.customPalette &&
-        Array.isArray(cfg.customPalette.stops) &&
-        cfg.customPalette.stops.length === 4;
 
       if (!hasCustom) {
         if (key === "selection") {
@@ -1439,7 +1490,7 @@
       } else if (key === "syntax") {
         applySyntaxCssVars(wb, compStops, compAngles, k);
       } else {
-        setWbProp(wb, `--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k));
+        setWbProp(wb, `--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k, coords));
         setWbProp(wb, `--g-${key}-bar`, buildBarCss(compStops, compAngles, k));
         setWbProp(wb, `--g-${key}-frame`, buildFrameCss(compStops));
         if (key === "explorer" || key === "chat") {
@@ -1454,8 +1505,6 @@
       }
     });
 
-    // Keep .monaco-workbench mesh synced via CSS variable indirection so floating-panel gaps
-    // never show a white separator and zero extra radial-gradient strings are allocated
     setWbProp(wb, "--g-workbench-mesh", "var(--g-default-mesh)");
     syncSeamlessClass(wb);
 
@@ -1508,7 +1557,7 @@
       const cfg = getBreatheConfig();
       const speedMult = (cfg.speedPct || 100) / 100;
 
-      // 100ms tick interval (10 FPS): 2x step size preserves identical visual speed at half the style/GC rate
+      // 100ms tick interval (10 FPS)
       breathePhase += 0.036 * speedMult;
 
       const activePalette =
@@ -1523,6 +1572,8 @@
         side: 165,
         panel: 105,
       };
+
+      let morphCompleted = false;
 
       // 1. Auto-Morph Between Palettes (Smooth RGB crossfade starting at 0.0)
       if (cfg.morph) {
@@ -1548,6 +1599,7 @@
           morphTargetPalette = rollRandomPalette(completed.name);
           morphProgress = 0;
           baseStops = morphSourceStops.map((s) => [...s]);
+          morphCompleted = true;
         } else {
           const smoothT =
             morphProgress * morphProgress * (3 - 2 * morphProgress);
@@ -1572,39 +1624,56 @@
         ? Math.max(0.25, Math.min(2.2, baseK * (1 + Math.sin(breathePhase * 0.78) * 0.24)))
         : baseK;
 
-      // 4. Full-Workbench Wave (All Math.sin centered on resting coordinates & angles -> 0 jump at start)
+      // 4. Full-Workbench Wave (Update leaf #prism-aurora-backdrop directly with zero .monaco-workbench
+      //    inherited CSS variable mutations -> 0 DOM tree RecalcStyle walks and 0 Oilpan GC churn!)
       let liveAngles = baseAngles;
+      let waveCoords = null;
       if (cfg.wave) {
-        const p1x = Math.round(15 + Math.sin(breathePhase * 0.9) * 14);
-        const p1y = Math.round(15 + Math.sin(breathePhase * 0.75) * 13);
-        const p2x = Math.round(85 - Math.sin(breathePhase * 0.85) * 14);
-        const p2y = Math.round(25 + Math.sin(breathePhase * 1.05) * 14);
-        const p3x = Math.round(25 + Math.sin(breathePhase * 0.7) * 14);
-        const p3y = Math.round(85 - Math.sin(breathePhase * 0.8) * 13);
-        const p4x = Math.round(85 - Math.sin(breathePhase * 0.65) * 14);
-        const p4y = Math.round(85 - Math.sin(breathePhase * 0.95) * 13);
-        setWbProp(targetWb, "--g-p1x", `${p1x}%`);
-        setWbProp(targetWb, "--g-p1y", `${p1y}%`);
-        setWbProp(targetWb, "--g-p2x", `${p2x}%`);
-        setWbProp(targetWb, "--g-p2y", `${p2y}%`);
-        setWbProp(targetWb, "--g-p3x", `${p3x}%`);
-        setWbProp(targetWb, "--g-p3y", `${p3y}%`);
-        setWbProp(targetWb, "--g-p4x", `${p4x}%`);
-        setWbProp(targetWb, "--g-p4y", `${p4y}%`);
-
+        waveCoords = {
+          p1x: Math.round(15 + Math.sin(breathePhase * 0.9) * 14),
+          p1y: Math.round(15 + Math.sin(breathePhase * 0.75) * 13),
+          p2x: Math.round(85 - Math.sin(breathePhase * 0.85) * 14),
+          p2y: Math.round(25 + Math.sin(breathePhase * 1.05) * 14),
+          p3x: Math.round(25 + Math.sin(breathePhase * 0.7) * 14),
+          p3y: Math.round(85 - Math.sin(breathePhase * 0.8) * 13),
+          p4x: Math.round(85 - Math.sin(breathePhase * 0.65) * 14),
+          p4y: Math.round(85 - Math.sin(breathePhase * 0.95) * 13),
+        };
         liveAngles = {
           base: Math.round(baseAngles.base + Math.sin(breathePhase * 0.65) * 32),
           bar: Math.round(baseAngles.bar + Math.sin(breathePhase * 0.8) * 24),
           side: Math.round(baseAngles.side + Math.sin(breathePhase * 0.55) * 28),
           panel: Math.round(baseAngles.panel + Math.sin(breathePhase * 0.7) * 28),
         };
-      } else {
-        ["--g-p1x", "--g-p1y", "--g-p2x", "--g-p2y", "--g-p3x", "--g-p3y", "--g-p4x", "--g-p4y"].forEach(
-          (p) => removeWbProp(targetWb, p)
-        );
       }
 
-      writeGradientCssVars(targetWb, animatedStops, liveAngles, effectiveK);
+      if (morphCompleted) {
+        writeGradientCssVars(targetWb, animatedStops, liveAngles, effectiveK, waveCoords);
+        return;
+      }
+
+      // Fast-path leaf update: only touch childless #prism-aurora-backdrop and #prism-randomizer-swatch
+      setBackdropMesh(targetWb, buildMeshCss(animatedStops, liveAngles, effectiveK, waveCoords));
+      lastLiveStops = animatedStops.map((s) => [...s]);
+      lastLiveAngles = { ...liveAngles };
+
+      const [c1, c2, c3, c4] = animatedStops;
+      const liveGrad = `linear-gradient(90deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
+        c2
+      )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`;
+      if (liveGrad !== lastSwatchGrad) {
+        lastSwatchGrad = liveGrad;
+        const swatchEl = document.getElementById("prism-randomizer-swatch");
+        if (swatchEl) {
+          swatchEl.style.background = liveGrad;
+        }
+      }
+      if (isPopoverOpen() && (!activeComponent || activeComponent === "all")) {
+        const previewBar = document.getElementById("pp-builder-preview-bar");
+        if (previewBar) {
+          previewBar.style.background = liveGrad;
+        }
+      }
     }, 100);
   }
 
@@ -1722,14 +1791,10 @@
     morphTargetPalette = null;
     morphProgress = 0;
     breathePhase = 0;
-    if (!isBreathingEnabled()) {
-      ["--g-p1x", "--g-p1y", "--g-p2x", "--g-p2y", "--g-p3x", "--g-p3y", "--g-p4x", "--g-p4y"].forEach(
-        (p) => removeWbProp(wb, p)
-      );
-    }
 
     if (palette && palette.isNativeOff) {
       // Turn off the 4-color overlay so the pure single-color theme shines through natively
+      setBackdropMesh(wb, "none");
       ["--g-r1", "--g-r2", "--g-r3", "--g-r4"].forEach((prop) =>
         setWbProp(wb, prop, "transparent")
       );
@@ -1746,6 +1811,7 @@
       ].forEach((prop) => setWbProp(wb, prop, "none"));
       COMPONENT_DEFS.forEach((def) => {
         if (def.key === "selection" || def.key === "syntax") return;
+        wb.classList.remove(`prism-custom-${def.key}`);
         setWbProp(wb, `--g-${def.key}-mesh`, "none");
         setWbProp(wb, `--g-${def.key}-bar`, "none");
         setWbProp(
