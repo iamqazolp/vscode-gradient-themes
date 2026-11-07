@@ -1652,26 +1652,23 @@
         return;
       }
 
-      // Fast-path leaf update: only touch childless #prism-aurora-backdrop and #prism-randomizer-swatch
+      // Fast-path leaf update: only touch childless #prism-aurora-backdrop (3 DOM levels deep, contain: strict)
+      // Do not mutate #prism-randomizer-swatch (~14 levels deep inside .part.statusbar) on 100ms ticks
       setBackdropMesh(targetWb, buildMeshCss(animatedStops, liveAngles, effectiveK, waveCoords));
       lastLiveStops = animatedStops.map((s) => [...s]);
       lastLiveAngles = { ...liveAngles };
 
-      const [c1, c2, c3, c4] = animatedStops;
-      const liveGrad = `linear-gradient(90deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
-        c2
-      )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`;
-      if (liveGrad !== lastSwatchGrad) {
-        lastSwatchGrad = liveGrad;
-        const swatchEl = document.getElementById("prism-randomizer-swatch");
-        if (swatchEl) {
-          swatchEl.style.background = liveGrad;
-        }
-      }
       if (isPopoverOpen() && (!activeComponent || activeComponent === "all")) {
-        const previewBar = document.getElementById("pp-builder-preview-bar");
-        if (previewBar) {
-          previewBar.style.background = liveGrad;
+        const [c1, c2, c3, c4] = animatedStops;
+        const liveGrad = `linear-gradient(90deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
+          c2
+        )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`;
+        if (liveGrad !== lastSwatchGrad) {
+          lastSwatchGrad = liveGrad;
+          const previewBar = document.getElementById("pp-builder-preview-bar");
+          if (previewBar) {
+            previewBar.style.backgroundImage = liveGrad;
+          }
         }
       }
     }, 100);
