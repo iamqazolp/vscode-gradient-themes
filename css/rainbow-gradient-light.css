@@ -740,14 +740,22 @@
 .monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator,
 .monaco-workbench.modern-ui-tabs .part.panel > :is(.title, .composite.title, .header-or-footer) > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:not(.icon).checked > .active-item-indicator,
 .monaco-workbench.modern-ui-tabs:not(.hc-black):not(.hc-light) .part.panel > :is(.title, .composite.title, .header-or-footer) > .composite-bar-container:not(.dragged-over):not(.dragged-over-head):not(.dragged-over-tail) > .composite-bar > .monaco-action-bar .action-item.icon.checked:not(:active) > .active-item-indicator {
+  box-sizing: border-box !important;
+  border: 1.5px solid transparent !important;
   background-color: var(--g-canvas-bg, var(--vscode-tab-activeBackground, var(--vscode-editor-background, #ffffff))) !important;
-  background-image: var(--g-terminal-bar, none) !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-image:
+    var(--g-terminal-bar, none),
+    linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))),
+    var(--g-terminal-frame, var(--g-border)) !important;
   border-radius: 6px !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10) !important;
 }
-.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked .active-item-indicator:before {
-  border-top-color: transparent !important;
-  border-bottom-color: transparent !important;
+.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked .active-item-indicator::before,
+.monaco-workbench :is(.part.auxiliarybar, .part.sessionspart) :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked .active-item-indicator::before {
+  content: none !important;
+  border: none !important;
 }
 .monaco-workbench .part.sidebar :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator,
 .monaco-workbench.modern-ui-tabs .part.sidebar > :is(.title, .composite.title, .header-or-footer) > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:not(.icon).checked > .active-item-indicator,
@@ -767,10 +775,17 @@
 .monaco-workbench :is(.part.auxiliarybar, .part.sessionspart) :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator,
 .monaco-workbench.modern-ui-tabs :is(.part.auxiliarybar, .part.sessionspart) > :is(.title, .composite.title, .header-or-footer) > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:not(.icon).checked > .active-item-indicator,
 .monaco-workbench.modern-ui-tabs:not(.hc-black):not(.hc-light) :is(.part.auxiliarybar, .part.sessionspart) > :is(.title, .composite.title, .header-or-footer) > .composite-bar-container:not(.dragged-over):not(.dragged-over-head):not(.dragged-over-tail) > .composite-bar > .monaco-action-bar .action-item.icon.checked:not(:active) > .active-item-indicator {
+  box-sizing: border-box !important;
+  border: 1.5px solid transparent !important;
   background-color: var(--g-canvas-bg, var(--vscode-tab-activeBackground, var(--vscode-editor-background, #ffffff))) !important;
-  background-image: var(--g-chat-bar, none) !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-image:
+    var(--g-chat-bar, none),
+    linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))),
+    var(--g-chat-frame, var(--g-border)) !important;
   border-radius: 6px !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10) !important;
 }
 
 /* Current Editor Line, Selected Explorer Files & Selected Terminal Tabs (Scoped per Component) */
