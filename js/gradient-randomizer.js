@@ -524,6 +524,11 @@
           `--g-${compKey}-frame`,
           "linear-gradient(90deg, rgba(128, 128, 128, 0.22), rgba(128, 128, 128, 0.22))"
         );
+        if (compKey === "explorer" || compKey === "chat") {
+          wb.style.setProperty(`--g-${compKey}-side`, "none");
+        } else if (compKey === "terminal") {
+          wb.style.setProperty("--g-terminal-panel", "none");
+        }
       } else {
         wb.classList.add("prism-no-selection");
         wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
@@ -585,6 +590,14 @@
       wb.style.setProperty(`--g-${compKey}-mesh`, buildMeshCss(compStops, compAngles, effectiveK));
       wb.style.setProperty(`--g-${compKey}-bar`, buildBarCss(compStops, compAngles, effectiveK));
       wb.style.setProperty(`--g-${compKey}-frame`, buildFrameCss(compStops));
+      if (compKey === "explorer" || compKey === "chat") {
+        wb.style.setProperty(`--g-${compKey}-side`, buildSideCss(compStops, compAngles, effectiveK));
+      } else if (compKey === "terminal") {
+        wb.style.setProperty(
+          "--g-terminal-panel",
+          buildTerminalPanelCss(compStops, compAngles, effectiveK)
+        );
+      }
     }
   }
 
@@ -894,10 +907,10 @@
       0.11 * kVal
     )} 33%, ${rgba(s3, 0.11 * kVal)} 66%, ${rgba(s4, 0.16 * kVal)} 100%)`;
     return [
-      `radial-gradient(ellipse 80% 62% at var(--g-p1x, 15%) var(--g-p1y, 15%), ${r1} 0%, transparent 74%)`,
-      `radial-gradient(ellipse 72% 78% at var(--g-p2x, 85%) var(--g-p2y, 25%), ${r2} 0%, transparent 74%)`,
-      `radial-gradient(ellipse 80% 65% at var(--g-p3x, 25%) var(--g-p3y, 85%), ${r3} 0%, transparent 74%)`,
-      `radial-gradient(ellipse 75% 75% at var(--g-p4x, 85%) var(--g-p4y, 85%), ${r4} 0%, transparent 76%)`,
+      `radial-gradient(ellipse 75% 55% at var(--g-p1x, 15%) var(--g-p1y, 15%), ${r1} 0%, transparent 70%)`,
+      `radial-gradient(ellipse 65% 75% at var(--g-p2x, 85%) var(--g-p2y, 25%), ${r2} 0%, transparent 72%)`,
+      `radial-gradient(ellipse 75% 60% at var(--g-p3x, 25%) var(--g-p3y, 85%), ${r3} 0%, transparent 72%)`,
+      `radial-gradient(ellipse 70% 70% at var(--g-p4x, 85%) var(--g-p4y, 85%), ${r4} 0%, transparent 75%)`,
       base,
     ].join(", ");
   }
@@ -908,6 +921,31 @@
       s2,
       0.15 * kVal
     )} 33%, ${rgba(s3, 0.15 * kVal)} 66%, ${rgba(s4, 0.22 * kVal)} 100%)`;
+  }
+
+  function buildSideCss(cStops, cAngles, kVal) {
+    const [s1, s2, s3, s4] = cStops;
+    return `linear-gradient(${cAngles.side}deg, ${rgba(s1, 0.16 * kVal)} 0%, ${rgba(
+      s2,
+      0.13 * kVal
+    )} 33%, ${rgba(s3, 0.13 * kVal)} 66%, ${rgba(s4, 0.16 * kVal)} 100%)`;
+  }
+
+  function buildTerminalPanelCss(cStops, cAngles, kVal) {
+    const [s1, s2, s3, s4] = cStops;
+    const r1 = rgba(s1, 0.18 * kVal);
+    const r2 = rgba(s2, 0.18 * kVal);
+    const r3 = rgba(s3, 0.18 * kVal);
+    const panel = `linear-gradient(${cAngles.panel}deg, ${rgba(s2, 0.07 * kVal)} 0%, ${rgba(
+      s3,
+      0.13 * kVal
+    )} 50%, ${rgba(s4, 0.18 * kVal)} 100%)`;
+    return [
+      `radial-gradient(ellipse 65% 85% at 12% 20%, ${r1} 0%, transparent 70%)`,
+      `radial-gradient(ellipse 60% 80% at 88% 80%, ${r2} 0%, transparent 70%)`,
+      `radial-gradient(ellipse 55% 65% at 50% 50%, ${r3} 0%, transparent 75%)`,
+      panel,
+    ].join(", ");
   }
 
   function buildSelectionCss(cStops, cAngles, kVal) {
@@ -941,15 +979,14 @@
       )} 33%, ${rgba(c3, 0.11 * k)} 66%, ${rgba(c4, 0.16 * k)} 100%)`
     );
 
-    wb.style.setProperty("--g-bar", buildBarCss(stops, angles, k));
+    const sharedMeshCss = buildMeshCss(stops, angles, k);
+    const sharedBarCss = buildBarCss(stops, angles, k);
+    const sharedSideCss = buildSideCss(stops, angles, k);
+    const sharedTerminalPanelCss = buildTerminalPanelCss(stops, angles, k);
+    const sharedFrameCss = buildFrameCss(stops);
 
-    wb.style.setProperty(
-      "--g-side",
-      `linear-gradient(${angles.side}deg, ${rgba(c1, 0.16 * k)} 0%, ${rgba(
-        c2,
-        0.13 * k
-      )} 33%, ${rgba(c3, 0.13 * k)} 66%, ${rgba(c4, 0.16 * k)} 100%)`
-    );
+    wb.style.setProperty("--g-bar", sharedBarCss);
+    wb.style.setProperty("--g-side", sharedSideCss);
 
     wb.style.setProperty(
       "--g-panel",
@@ -973,10 +1010,6 @@
     const shimmerOn = breatheOn && breatheCfg.shimmer;
     const waveOn = breatheOn && breatheCfg.wave;
 
-    const sharedMeshCss = buildMeshCss(stops, angles, k);
-    const sharedBarCss = buildBarCss(stops, angles, k);
-    const sharedFrameCss = buildFrameCss(stops);
-
     COMPONENT_DEFS.forEach((def) => {
       const key = def.key;
       const cfg = compMap[key] || { enabled: true, customPalette: null };
@@ -988,6 +1021,11 @@
             `--g-${key}-frame`,
             "linear-gradient(90deg, rgba(128, 128, 128, 0.22), rgba(128, 128, 128, 0.22))"
           );
+          if (key === "explorer" || key === "chat") {
+            wb.style.setProperty(`--g-${key}-side`, "none");
+          } else if (key === "terminal") {
+            wb.style.setProperty("--g-terminal-panel", "none");
+          }
         } else {
           wb.classList.add("prism-no-selection");
           wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
@@ -1014,6 +1052,11 @@
           wb.style.setProperty(`--g-${key}-mesh`, sharedMeshCss);
           wb.style.setProperty(`--g-${key}-bar`, sharedBarCss);
           wb.style.setProperty(`--g-${key}-frame`, sharedFrameCss);
+          if (key === "explorer" || key === "chat") {
+            wb.style.setProperty(`--g-${key}-side`, sharedSideCss);
+          } else if (key === "terminal") {
+            wb.style.setProperty("--g-terminal-panel", sharedTerminalPanelCss);
+          }
         }
         return;
       }
@@ -1045,6 +1088,14 @@
         wb.style.setProperty(`--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k));
         wb.style.setProperty(`--g-${key}-bar`, buildBarCss(compStops, compAngles, k));
         wb.style.setProperty(`--g-${key}-frame`, buildFrameCss(compStops));
+        if (key === "explorer" || key === "chat") {
+          wb.style.setProperty(`--g-${key}-side`, buildSideCss(compStops, compAngles, k));
+        } else if (key === "terminal") {
+          wb.style.setProperty(
+            "--g-terminal-panel",
+            buildTerminalPanelCss(compStops, compAngles, k)
+          );
+        }
       }
     });
 
@@ -1319,9 +1370,16 @@
       ["--g-r1", "--g-r2", "--g-r3", "--g-r4"].forEach((prop) =>
         wb.style.setProperty(prop, "transparent")
       );
-      ["--g-base", "--g-bar", "--g-side", "--g-panel", "--g-workbench-mesh"].forEach((prop) =>
-        wb.style.setProperty(prop, "none")
-      );
+      [
+        "--g-base",
+        "--g-bar",
+        "--g-side",
+        "--g-panel",
+        "--g-workbench-mesh",
+        "--g-explorer-side",
+        "--g-chat-side",
+        "--g-terminal-panel",
+      ].forEach((prop) => wb.style.setProperty(prop, "none"));
       COMPONENT_DEFS.forEach((def) => {
         if (def.key === "selection") return;
         wb.style.setProperty(`--g-${def.key}-mesh`, "none");
