@@ -798,7 +798,6 @@
     var(--g-editor-bar, none),
     linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))),
     var(--g-editor-frame, var(--g-border)) !important;
-  backdrop-filter: blur(18px) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
 }
 .monaco-workbench :is(.quick-input-widget, .context-view .monaco-menu, .notifications-toasts .notification-toast) {
@@ -810,7 +809,6 @@
     var(--g-bars-bar, none),
     linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))),
     var(--g-bars-frame, var(--g-border)) !important;
-  backdrop-filter: blur(18px) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
 }
 

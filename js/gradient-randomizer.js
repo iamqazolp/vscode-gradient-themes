@@ -534,12 +534,19 @@
   }
 
   let lastSyntaxSheetSig = "";
+  let lastSyntaxThemeDark = null;
   let monacoColorsObserver = null;
   let observedMonacoStyleEl = null;
+  let lastSyntaxHexSig = "";
+  let lastSyntaxUpdateTs = 0;
+  let cachedComponentsConfig = null;
 
   function extractMonacoTokenColors(isDark) {
     const tokenMap = new Map();
-    const styles = document.querySelectorAll("style:not(#prism-syntax-style)");
+    const fastStyle = document.querySelector("style.vscode-tokens-styles, style.monaco-colors");
+    const styles = fastStyle
+      ? [fastStyle]
+      : document.querySelectorAll("style:not(#prism-syntax-style)");
     const mtkRegex = /\.mtk(\d+)\s*\{\s*color:\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi;
     for (let i = 0; i < styles.length; i++) {
       const st = styles[i];
@@ -609,17 +616,29 @@
   function ensureSyntaxStyleSheet(wb, force = false) {
     if (!wb) return;
     const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
+    let styleEl = document.getElementById("prism-syntax-style");
+    if (
+      !force &&
+      styleEl &&
+      styleEl.isConnected &&
+      lastSyntaxThemeDark === isDark &&
+      observedMonacoStyleEl &&
+      observedMonacoStyleEl.isConnected
+    ) {
+      return;
+    }
     const tokenMap = extractMonacoTokenColors(isDark);
     const sigParts = [];
     tokenMap.forEach((rgb, idx) => {
       sigParts.push(`${idx}:${rgb[0]},${rgb[1]},${rgb[2]}`);
     });
     const sig = `${isDark ? "d" : "l"}|${sigParts.join(";")}`;
-    let styleEl = document.getElementById("prism-syntax-style");
     if (!force && styleEl && styleEl.isConnected && sig === lastSyntaxSheetSig) {
+      lastSyntaxThemeDark = isDark;
       return;
     }
     lastSyntaxSheetSig = sig;
+    lastSyntaxThemeDark = isDark;
     if (!styleEl) {
       styleEl = document.createElement("style");
       styleEl.id = "prism-syntax-style";
@@ -693,22 +712,33 @@
     syncSyntaxModeClass(wb);
     const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
     const [s1, s2, s3, s4] = compStops;
-    wb.style.setProperty("--g-syn-1", rgbToHex(toReadableSyntaxRgb(s1, isDark)));
-    wb.style.setProperty("--g-syn-2", rgbToHex(toReadableSyntaxRgb(s2, isDark)));
-    wb.style.setProperty("--g-syn-3", rgbToHex(toReadableSyntaxRgb(s3, isDark)));
-    wb.style.setProperty("--g-syn-4", rgbToHex(toReadableSyntaxRgb(s4, isDark)));
-    wb.style.setProperty("--g-syn-angle", `${Math.round((compAngles.bar || 90) + 5)}deg`);
-    wb.style.setProperty(
-      "--g-syn-mix",
-      `${Math.round(Math.max(24, Math.min(76, 44 * effectiveK)))}%`
-    );
-    wb.style.setProperty("--g-syntax-bar", buildBarCss(compStops, compAngles, effectiveK * 0.72));
-    wb.style.setProperty("--g-syntax-strong", buildSelectionCss(compStops, compAngles, effectiveK * 0.85));
-    wb.style.setProperty("--g-syntax-frame", buildFrameCss(compStops));
+    const h1 = rgbToHex(toReadableSyntaxRgb(s1, isDark));
+    const h2 = rgbToHex(toReadableSyntaxRgb(s2, isDark));
+    const h3 = rgbToHex(toReadableSyntaxRgb(s3, isDark));
+    const h4 = rgbToHex(toReadableSyntaxRgb(s4, isDark));
+    const mixPct = `${Math.round(Math.max(24, Math.min(76, 44 * effectiveK)))}%`;
+    const hexSig = `${h1}|${h2}|${h3}|${h4}|${mixPct}`;
+    const now = performance.now();
+    if (hexSig !== lastSyntaxHexSig && (!breatheTimer || now - lastSyntaxUpdateTs >= 240)) {
+      lastSyntaxHexSig = hexSig;
+      lastSyntaxUpdateTs = now;
+      wb.style.setProperty("--g-syn-1", h1);
+      wb.style.setProperty("--g-syn-2", h2);
+      wb.style.setProperty("--g-syn-3", h3);
+      wb.style.setProperty("--g-syn-4", h4);
+      wb.style.setProperty("--g-syn-angle", "95deg");
+      wb.style.setProperty("--g-syn-mix", mixPct);
+      wb.style.setProperty("--g-syntax-bar", buildBarCss(compStops, compAngles, effectiveK * 0.72));
+      wb.style.setProperty("--g-syntax-strong", buildSelectionCss(compStops, compAngles, effectiveK * 0.85));
+      wb.style.setProperty("--g-syntax-frame", buildFrameCss(compStops));
+    }
     ensureSyntaxStyleSheet(wb, false);
   }
 
   function getComponentsConfig() {
+    if (cachedComponentsConfig) {
+      return cachedComponentsConfig;
+    }
     const out = {};
     let legacyScope = null;
     try {
@@ -756,10 +786,12 @@
       }
       out[k] = { enabled, customPalette };
     });
+    cachedComponentsConfig = out;
     return out;
   }
 
   function saveComponentsConfig(nextMap) {
+    cachedComponentsConfig = nextMap;
     try {
       localStorage.setItem(STORAGE_KEY_COMPONENTS, JSON.stringify(nextMap));
     } catch (_) {}

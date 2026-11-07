@@ -9,4 +9,7 @@ __pycache__/**
 *.vsix
 build_themes.py
 install.py
+add_color.py
+COLOR_GUIDE.md
+media/screenshots/**
 node_modules/**
