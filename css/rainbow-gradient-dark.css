@@ -84,30 +84,34 @@
   --g-p3y: 85%;
   --g-p4x: 85%;
   --g-p4y: 85%;
+
+  /* Master base canvas color for unified window gradient & surface scope masks */
+  --g-canvas-bg: var(--vscode-editor-background);
 }
 
 /* --------------------------------------------------------------------------
- * 2. BLEND GEMINI RAINBOW OVER THE ACTIVE THEME'S NATIVE BACKGROUND COLORS
+ * 2. SEAMLESS UNIFIED FULL-WINDOW GRADIENT CANVAS (Default) + SPLIT MODE
  * -------------------------------------------------------------------------- */
 
-/* Main Workbench & Grid View: Uses active theme's editor background + Prism mesh */
-.monaco-workbench,
-.monaco-workbench > .monaco-grid-view,
-.monaco-workbench.floating-panels > .monaco-grid-view {
-  background-color: var(--vscode-editor-background) !important;
+/* Main Workbench: Single continuous full-viewport 4-color gradient mesh across everything */
+.monaco-workbench {
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
   background-image:
-    radial-gradient(ellipse 75% 55% at var(--g-p1x, 15%) var(--g-p1y, 15%), var(--g-r1) 0%, transparent 70%),
-    radial-gradient(ellipse 65% 75% at var(--g-p2x, 85%) var(--g-p2y, 25%), var(--g-r2) 0%, transparent 72%),
-    radial-gradient(ellipse 75% 60% at var(--g-p3x, 25%) var(--g-p3y, 85%), var(--g-r3) 0%, transparent 72%),
-    radial-gradient(ellipse 70% 70% at var(--g-p4x, 85%) var(--g-p4y, 85%), var(--g-r4) 0%, transparent 75%),
+    radial-gradient(ellipse 80% 62% at var(--g-p1x, 15%) var(--g-p1y, 15%), var(--g-r1) 0%, transparent 74%),
+    radial-gradient(ellipse 72% 78% at var(--g-p2x, 85%) var(--g-p2y, 25%), var(--g-r2) 0%, transparent 74%),
+    radial-gradient(ellipse 80% 65% at var(--g-p3x, 25%) var(--g-p3y, 85%), var(--g-r3) 0%, transparent 74%),
+    radial-gradient(ellipse 75% 75% at var(--g-p4x, 85%) var(--g-p4y, 85%), var(--g-r4) 0%, transparent 76%),
     var(--g-base) !important;
   background-attachment: fixed !important;
 }
 
-/* Make inner editor/list wrappers transparent so the combined theme + Prism canvas shines through */
+/* Make inner editor/list/panel wrappers transparent so the single unified canvas shines through */
+.monaco-workbench > .monaco-grid-view,
+.monaco-workbench.floating-panels > .monaco-grid-view,
 .monaco-workbench .part.editor,
 .monaco-workbench .part.editor > .content,
 .monaco-workbench .editor-group-container,
+.monaco-workbench .editor-group-container > .editor-group-watermark,
 .monaco-workbench .editor-container,
 .monaco-workbench .editor-instance,
 .monaco-workbench .editor-group-container > .title,
@@ -135,12 +139,19 @@
 .monaco-workbench .monaco-editor .sticky-widget .sticky-line-content,
 .monaco-workbench .part.panel :is(.composite.title, .header-or-footer) .monaco-action-bar .action-item,
 .monaco-workbench .part.panel :is(.composite.title, .header-or-footer) .monaco-action-bar .action-item .action-label,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) > .content,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .pane-body,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-pane-view,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-list,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-list .monaco-list-rows,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-tree-sticky-container .monaco-tree-sticky-row,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-pane-view .pane,
 .monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.panel) .monaco-pane-view .pane > .pane-header,
-.monaco-workbench .part.sidebar > .title,
-.monaco-workbench .part.sidebar > .composite.title,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar) > .title,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar) > .composite.title,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar) > .header-or-footer,
+.monaco-workbench .interactive-session,
+.monaco-workbench .interactive-session .interactive-list,
 .monaco-workbench .pane-body.integrated-terminal,
 .monaco-workbench .pane-body.integrated-terminal .tabs-container,
 .monaco-workbench .pane-body.integrated-terminal .tabs-list-container,
@@ -170,6 +181,31 @@
   background-image: none !important;
 }
 
+/* Seamless Unified Mode (Default): All major layout panels share the single unbroken window gradient */
+.monaco-workbench:not(.prism-split-panels) .editor-group-container > .title > .tabs-and-actions-container,
+.monaco-workbench:not(.prism-split-panels) .part.titlebar,
+.monaco-workbench:not(.prism-split-panels) .part.titlebar > .titlebar-container,
+.monaco-workbench:not(.prism-split-panels) .part.titlebar .command-center-center,
+.monaco-workbench:not(.prism-split-panels) .part.statusbar,
+.monaco-workbench:not(.prism-split-panels) .part.activitybar,
+.monaco-workbench:not(.prism-split-panels) .part.activitybar > .content,
+.monaco-workbench:not(.prism-split-panels) .part.sidebar,
+.monaco-workbench:not(.prism-split-panels).floating-panels .part.sidebar,
+.monaco-workbench:not(.prism-split-panels).modern-ui.floating-panels .part.sidebar,
+.monaco-workbench:not(.prism-split-panels) .part.auxiliarybar,
+.monaco-workbench:not(.prism-split-panels).floating-panels .part.auxiliarybar,
+.monaco-workbench:not(.prism-split-panels).modern-ui.floating-panels .part.auxiliarybar,
+.monaco-workbench:not(.prism-split-panels) .part.panel,
+.monaco-workbench:not(.prism-split-panels).floating-panels .part.panel,
+.monaco-workbench:not(.prism-split-panels) .part.panel > .composite.title,
+.monaco-workbench:not(.prism-split-panels) .part.panel > .header-or-footer,
+.monaco-workbench:not(.prism-split-panels) .part.editor .editor-instance .terminal-outer-container,
+.monaco-workbench:not(.prism-split-panels) .chat-terminal-output-terminal {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
 /* Blend Minimap & Scrollbar Overview Ruler <canvas> bitmaps transparently into the Editor Gradient */
 .monaco-workbench:not(.vs-dark):not(.hc-black) .monaco-editor .minimap,
 .monaco-workbench:not(.vs-dark):not(.hc-black) .monaco-editor .decorationsOverviewRuler {
@@ -182,46 +218,36 @@
   opacity: 0.85 !important;
 }
 
-/* Full Editor Tab Bar Strip: Continuous horizontal Prism gradient across all tabs & right toolbar */
-.monaco-workbench .editor-group-container > .title > .tabs-and-actions-container {
+/* Optional Split-Panels Mode (.prism-split-panels): Individual per-panel gradient washes */
+.monaco-workbench.prism-split-panels .editor-group-container > .title > .tabs-and-actions-container {
   background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background)) !important;
   background-image: var(--g-bar) !important;
 }
-
-/* Title Bar & Command Center Search Box: Active theme's titleBar background + Prism horizontal rainbow wash */
-.monaco-workbench .part.titlebar,
-.monaco-workbench .part.titlebar .command-center-center {
+.monaco-workbench.prism-split-panels .part.titlebar,
+.monaco-workbench.prism-split-panels .part.titlebar .command-center-center {
   background-color: var(--vscode-titleBar-activeBackground, var(--vscode-editor-background)) !important;
   background-image: var(--g-bar) !important;
   backdrop-filter: blur(12px) !important;
 }
-
-/* Status Bar: Active theme's statusBar background + Prism horizontal rainbow wash */
-.monaco-workbench .part.statusbar {
+.monaco-workbench.prism-split-panels .part.statusbar {
   background-color: var(--vscode-statusBar-background, var(--vscode-editor-background)) !important;
   background-image: var(--g-bar) !important;
   backdrop-filter: blur(12px) !important;
 }
-
-/* Activity Bar & Sidebars: Active theme's sideBar background + Prism diagonal wash */
-.monaco-workbench .part.activitybar,
-.monaco-workbench .part.sidebar,
-.monaco-workbench.floating-panels .part.sidebar,
-.monaco-workbench.modern-ui.floating-panels .part.sidebar,
-.monaco-workbench .part.auxiliarybar,
-.monaco-workbench.floating-panels .part.auxiliarybar,
-.monaco-workbench.modern-ui.floating-panels .part.auxiliarybar {
+.monaco-workbench.prism-split-panels .part.activitybar,
+.monaco-workbench.prism-split-panels .part.sidebar,
+.monaco-workbench.prism-split-panels.floating-panels .part.sidebar,
+.monaco-workbench.prism-split-panels.modern-ui.floating-panels .part.sidebar,
+.monaco-workbench.prism-split-panels .part.auxiliarybar,
+.monaco-workbench.prism-split-panels.floating-panels .part.auxiliarybar,
+.monaco-workbench.prism-split-panels.modern-ui.floating-panels .part.auxiliarybar {
   background-color: var(--vscode-sideBar-background, var(--vscode-editor-background)) !important;
   background-image: var(--g-side) !important;
 }
-
-/* --------------------------------------------------------------------------
- * 3. GRADIENT INTEGRATED TERMINAL (Theme Panel Base + Prism Rainbow Aurora)
- * -------------------------------------------------------------------------- */
-.monaco-workbench .part.panel,
-.monaco-workbench.floating-panels .part.panel,
-.monaco-workbench .part.editor .editor-instance .terminal-outer-container,
-.monaco-workbench .chat-terminal-output-terminal {
+.monaco-workbench.prism-split-panels .part.panel,
+.monaco-workbench.prism-split-panels.floating-panels .part.panel,
+.monaco-workbench.prism-split-panels .part.editor .editor-instance .terminal-outer-container,
+.monaco-workbench.prism-split-panels .chat-terminal-output-terminal {
   background-color: var(--vscode-panel-background, var(--vscode-editor-background)) !important;
   background-image:
     radial-gradient(ellipse 65% 85% at 12% 20%, var(--g-r1) 0%, transparent 70%),
@@ -229,12 +255,28 @@
     radial-gradient(ellipse 55% 65% at 50% 50%, var(--g-r3) 0%, transparent 75%),
     var(--g-panel) !important;
 }
-
-/* Terminal Panel Header Ribbon */
-.monaco-workbench .part.panel > .composite.title,
-.monaco-workbench .part.panel > .header-or-footer {
+.monaco-workbench.prism-split-panels .part.panel > .composite.title,
+.monaco-workbench.prism-split-panels .part.panel > .header-or-footer {
   background-color: var(--vscode-panel-background, var(--vscode-editor-background)) !important;
   background-image: var(--g-bar) !important;
+}
+
+/* Surface Scope Toggles: Allow masking out individual workbench regions on demand */
+.monaco-workbench.prism-no-editor .part.editor > .content {
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
+  background-image: none !important;
+}
+.monaco-workbench.prism-no-sidebar :is(.part.activitybar, .part.sidebar, .part.auxiliarybar) {
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
+  background-image: none !important;
+}
+.monaco-workbench.prism-no-terminal :is(.part.panel, .part.panel > .composite.title, .part.panel > .header-or-footer) {
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
+  background-image: none !important;
+}
+.monaco-workbench.prism-no-bars :is(.part.titlebar, .part.statusbar, .editor-group-container > .title > .tabs-and-actions-container) {
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
+  background-image: none !important;
 }
 
 /* Gradient Terminal Cursor */
@@ -248,34 +290,37 @@
 }
 
 /* Universal Gradient Text Selection: Code Editor, Diff, Peek, Notebook, Output, Debug, Terminal & DOM */
-.monaco-workbench .monaco-editor .selected-text,
-.monaco-workbench .monaco-editor .focused .selected-text,
-.monaco-workbench .xterm .xterm-selection div {
+.monaco-workbench:not(.prism-no-selection) .monaco-editor .selected-text,
+.monaco-workbench:not(.prism-no-selection) .monaco-editor .focused .selected-text,
+.monaco-workbench:not(.prism-no-selection) .xterm .xterm-selection div {
   background: var(--g-selection, var(--g-bar)) !important;
   background-color: transparent !important;
   background-image: var(--g-selection, var(--g-bar)) !important;
   border-radius: 3px !important;
 }
-.monaco-workbench .monaco-editor:not(.focused) .selected-text {
+.monaco-workbench:not(.prism-no-selection) .monaco-editor:not(.focused) .selected-text {
   opacity: 0.72 !important;
 }
-.monaco-workbench .monaco-editor .selectionHighlight,
-.monaco-workbench .monaco-editor .focused .selectionHighlight {
+.monaco-workbench:not(.prism-no-selection) .monaco-editor .selectionHighlight,
+.monaco-workbench:not(.prism-no-selection) .monaco-editor .focused .selectionHighlight {
   background-color: transparent !important;
   background-image: var(--g-bar) !important;
   border-radius: 3px !important;
 }
-.monaco-workbench .xterm .xterm-rows span.xterm-decoration-top,
-.monaco-workbench .monaco-editor .view-line span.inline-selected-text {
+.monaco-workbench:not(.prism-no-selection) .xterm .xterm-rows span.xterm-decoration-top,
+.monaco-workbench:not(.prism-no-selection) .monaco-editor .view-line span.inline-selected-text {
   background-color: transparent !important;
 }
 
 /* Native DOM Text Selection Overlay (AI Chat, Markdown, Hover Popups, Settings, Problems, Inputs) */
-.monaco-workbench ::selection {
+.monaco-workbench:not(.prism-no-selection) ::selection {
   background-color: var(--g-sel-tint, rgba(66, 133, 244, 0.28)) !important;
 }
-.monaco-workbench.prism-dom-sel-active :not(input):not(textarea)::selection {
+.monaco-workbench:not(.prism-no-selection).prism-dom-sel-active :not(input):not(textarea)::selection {
   background-color: transparent !important;
+}
+.monaco-workbench.prism-no-selection #prism-dom-selection-layer {
+  display: none !important;
 }
 #prism-dom-selection-layer {
   position: fixed;
@@ -492,7 +537,7 @@
   gap: 8px;
   padding: 12px 16px;
   border-bottom: 1.5px solid rgba(128, 128, 128, 0.16);
-  background-image: var(--g-bar);
+  background: transparent;
   flex-shrink: 0;
 }
 #prism-palette-popover .pp-title {
@@ -519,12 +564,12 @@
 #prism-palette-popover .pp-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   flex-shrink: 0;
 }
 #prism-palette-popover .pp-btn {
-  height: 27px;
-  padding: 0 11px;
+  height: 26px;
+  padding: 0 9px;
   border-radius: 999px;
   border: 1.5px solid rgba(128, 128, 128, 0.28);
   background-color: color-mix(in srgb, var(--vscode-editor-background) 62%, transparent);
@@ -540,8 +585,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
   transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#prism-palette-popover .pp-btn-icon {
+  padding: 0 7.5px;
+}
+#prism-palette-popover .pp-btn:disabled {
+  opacity: 0.38;
+  cursor: default;
+  pointer-events: none;
 }
 #prism-palette-popover .pp-btn:hover {
   border-color: rgba(128, 128, 128, 0.48);
@@ -553,6 +606,11 @@
   background-image: var(--g-selection, var(--g-bar));
   border-color: rgba(59, 130, 246, 0.78);
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35), 0 3px 10px rgba(59, 130, 246, 0.14);
+}
+#prism-palette-popover .pp-btn.fav-active {
+  border-color: rgba(251, 191, 36, 0.85);
+  color: #fbbf24;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.32), 0 2px 8px rgba(251, 191, 36, 0.18);
 }
 #prism-palette-popover .pp-btn-primary {
   background-image: var(--g-selection, var(--g-bar)) !important;
@@ -615,11 +673,21 @@
   padding: 10px 12px;
   border-radius: 14px;
   border: 1.5px solid rgba(128, 128, 128, 0.22);
-  background-color: color-mix(in srgb, var(--vscode-editor-background) 48%, transparent);
-  background-image: var(--g-side);
+  background-color: color-mix(in srgb, var(--vscode-editor-background) 38%, transparent);
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+#prism-palette-popover .pp-scope-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+  width: 100%;
+}
+#prism-palette-popover .pp-scope-row .pp-chip {
+  height: 23px;
+  font-size: 9.8px;
+  padding: 0 4px;
 }
 #prism-palette-popover .pp-breathe-header {
   display: flex;
@@ -837,7 +905,7 @@
 #prism-palette-popover .pp-builder {
   padding: 11px 16px 14px;
   border-top: 1.5px solid rgba(128, 128, 128, 0.16);
-  background-image: var(--g-bar);
+  background: transparent;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -847,11 +915,38 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
 }
 #prism-palette-popover .pp-builder-title {
   font-size: 11px;
   font-weight: 700;
   opacity: 0.9;
+}
+#prism-palette-popover .pp-builder-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+#prism-palette-popover .pp-mini-btn {
+  height: 21px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(128, 128, 128, 0.28);
+  background: color-mix(in srgb, var(--vscode-editor-background) 55%, transparent);
+  color: var(--vscode-foreground);
+  font-size: 9.8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  transition: all 0.15s ease;
+}
+#prism-palette-popover .pp-mini-btn:hover {
+  border-color: rgba(128, 128, 128, 0.48);
+  background-image: var(--g-selection, var(--g-bar));
+  transform: translateY(-0.5px);
 }
 #prism-palette-popover .pp-builder-preview {
   height: 6px;

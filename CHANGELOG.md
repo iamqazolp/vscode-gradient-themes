@@ -4,7 +4,16 @@ All notable changes to **VSCode Gradient Themes** will be documented in this fil
 
 ## [67.67.67] - 2026-11-07
 
-### Changed
+### Added & Changed
+- **Seamless Unified Full-Window Gradient Canvas (`css/rainbow-gradient-dark.css`, `css/rainbow-gradient-light.css`)**:
+  - Replaced separate per-panel gradients (`--g-bar`, `--g-side`, `--g-panel` restarting inside each box) with a **single continuous full-window gradient** across the Title Bar, Activity Bar, Left Sidebar, Right AI Chat Bar, Editor Tabs, Code Editor, Integrated Terminal, and Status Bar (`Seamless` mode on by default; optional split-panel mode via toggle).
+- **Surface Scope Controls (`js/gradient-randomizer.js`, `css/`)**:
+  - Added `Seamless`, `Editor`, `Sidebar`, `Terminal`, `Bars`, and `Select` toggle chips in Gradient Studio to control gradient visibility per surface in `0ms`.
+- **Gradient Studio QoL Suite (`js/gradient-randomizer.js`)**:
+  - **Undo / Previous Roll (`←` & `Alt + Shift + Z`)**: Added a 30-step roll history stack so you can step backward to any previous procedural or curated gradient.
+  - **Favorites-Only Roll Lock (`★`) & Live Tab Counts**: Added a `★` header lock button to restrict `Roll` and `Auto-Morph` exclusively to starred favorites, plus live counts on `All`, `Favs`, and `Custom` tabs.
+  - **Restore Hidden Built-In Palettes (`↺`)**: Added a dynamic `↺ (N)` chip in the category bar whenever built-in palettes are removed.
+  - **Rotate Stops (`⇄ Rotate` & `Alt + Shift + R`), `Copy Hex` & `Paste Hex` / Coolors URL**: Added 1-click stop rotation/reversal, clipboard hex copy/paste, smart hex/Coolors parsing in the input box, and in-place custom palette editing.
 - **Golden Favorite Star (`★`) in Gradient Studio (`css/`, `js/gradient-randomizer.js`)**:
   - Changed the favorite star (`★` / `.pp-star.fav` and `:hover`) color from black/inherited foreground to golden amber (`#F59E0B` in Light mode, `#FBBF24` in Dark mode) with a soft golden glow.
 

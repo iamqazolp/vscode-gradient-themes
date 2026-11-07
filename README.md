@@ -26,14 +26,15 @@
 
 Click **`Studio ▴`** in the bottom-right Status Bar (or press **`Alt + Shift + P`**) to open the frosted-glass **Gradient Studio**:
 
+* **Seamless Unified Full-Window Gradient & Surface Scope Toggles**: By default (`Seamless` mode), the entire VSCode window—Title Bar, Activity Bar, Left Sidebar, Right AI Chat Bar, Editor Tabs, Code Editor, Integrated Terminal, and Status Bar—shares **one single unbroken gradient canvas** from corner to corner instead of restarting inside each panel. Toggle `Seamless`, `Editor`, `Sidebar`, `Terminal`, `Bars`, or `Select` individually at any time.
 * **Intensity Slider (`40%` – `180%`)**: Dial the gradient mesh opacity from whisper-soft (`60%`) to vivid neon (`150%`) in `0ms`.
 * **4-Mode `Breathing Aurora` Engine (`Alt + Shift + B`)**: Mix and match four organic animation behaviors with a continuous **`Speed` (`25%` – `250%`)** slider:
   * **`Full Wave`**: Smoothly rotates linear gradient angles and corner focal points across your Editor, Title Bar, Status Bar, Tabs, Sidebar, and Terminal.
   * **`Pulse`**: Gently inhales and exhales gradient intensity like a calm heartbeat.
   * **`Shimmer`**: Continuously rotates and interpolates the 4 color stops around the workbench.
   * **`Auto-Morph`**: Cross-fades RGB values into new palettes automatically with zero abrupt jumps.
-* **30+ Palettes & Favorites (`★`)**: Filter by `All`, `Favs`, `Prism`, `Pastel`, `Pure`, or `Custom` and pin your favorite palettes so random rolls prioritize them.
-* **`Pick your own color` (4-Stop Live Sculptor)**: Drag 4 circular color orbs for `0ms` live preview, generate procedural HSL harmonies with **`Harmony`**, and save custom named palettes.
+* **30+ Palettes, Golden Favorites (`★`), Favs-Only Lock & Undo (`←`)**: Filter by `All`, `Favs`, `Prism`, `Pastel`, `Pure`, or `Custom` with live count badges, lock random rolls exclusively to your starred favorites (`★`), step back through your 30-item roll history (`←` or `Alt + Shift + Z`), and restore any hidden built-in palettes with 1 click (`↺`).
+* **`Pick your own color` (4-Stop Live Sculptor)**: Drag 4 color pills for `0ms` live preview, rotate/reverse corner stops (`⇄ Rotate` or `Alt + Shift + R`), copy/paste 4 hex colors or Coolors URLs (`Copy Hex` / `Paste Hex`), generate procedural HSL harmonies with **`Harmony`**, and save or update custom palettes in place.
 
 ---
 
@@ -43,6 +44,8 @@ Click **`Studio ▴`** in the bottom-right Status Bar (or press **`Alt + Shift +
 | Action | Click / Shortcut | What It Does |
 | :--- | :--- | :--- |
 | **Roll New Mood** | **Left-Click `↻`** or **`Alt + Shift + G`** | Instantly blends a new 4-color gradient & mesh angle |
+| **Undo / Previous Roll** | **Click `←`** in Studio or **`Alt + Shift + Z`** | Steps backward through your last 30 rolled palettes |
+| **Rotate 4 Color Stops** | **Click `⇄ Rotate`** in Studio or **`Alt + Shift + R`** | Rotates the 4 active colors around the corners (`Shift+Click` to reverse) |
 | **Open Gradient Studio** | **Click `Studio ▴`**, **`Alt + Click`**, or **`Alt + Shift + P`** | Opens the interactive Gradient Studio & Color Picker window |
 | **Toggle Breathing Aurora** | **Click `Breathe`** in Studio or **`Alt + Shift + B`** | Starts/pauses the multi-mode Breathing Aurora engine |
 | **Adjust Intensity** | **Drag Slider** in Studio or **`Alt + Shift + Up / Down`** | Increases or decreases gradient intensity (`40%`–`180%`) |

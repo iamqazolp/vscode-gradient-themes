@@ -19,11 +19,14 @@
   const STORAGE_KEY_STATE = "gradientThemes.randomizer.state.v1";
   const STORAGE_KEY_AUTO = "gradientThemes.randomizer.autoOnStartup.v1";
   const STORAGE_KEY_FAVS = "gradientThemes.randomizer.favorites.v1";
+  const STORAGE_KEY_FAV_ONLY = "gradientThemes.randomizer.favOnly.v1";
   const STORAGE_KEY_CUSTOM = "gradientThemes.randomizer.customPalettes.v1";
   const STORAGE_KEY_REMOVED = "gradientThemes.randomizer.removedPalettes.v1";
   const STORAGE_KEY_INTENSITY = "gradientThemes.randomizer.intensity.v1";
   const STORAGE_KEY_BREATHE = "gradientThemes.randomizer.breathe.v1";
   const STORAGE_KEY_BREATHE_CFG = "gradientThemes.randomizer.breatheCfg.v1";
+  const STORAGE_KEY_SCOPE = "gradientThemes.randomizer.scope.v1";
+  const STORAGE_KEY_HISTORY = "gradientThemes.randomizer.history.v1";
 
   // Curated 4-stop palettes (RGB tuples; alpha is strictly clamped to 7%–22%)
   const CURATED_PALETTES = [
@@ -399,6 +402,80 @@
       localStorage.setItem(STORAGE_KEY_FAVS, JSON.stringify(favs));
     } catch (_) {}
     renderPaletteGrid();
+    refreshPopoverHeaderAndIntensity();
+  }
+
+  function isFavOnlyEnabled() {
+    return localStorage.getItem(STORAGE_KEY_FAV_ONLY) === "true";
+  }
+
+  function toggleFavOnly() {
+    const next = !isFavOnlyEnabled();
+    try {
+      localStorage.setItem(STORAGE_KEY_FAV_ONLY, String(next));
+    } catch (_) {}
+    refreshPopoverHeaderAndIntensity();
+    renderPaletteGrid();
+  }
+
+  function getScopeConfig() {
+    const defaults = {
+      seamless: true,
+      editor: true,
+      sidebar: true,
+      terminal: true,
+      bars: true,
+      selection: true,
+    };
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_SCOPE);
+      if (!raw) return defaults;
+      const parsed = JSON.parse(raw);
+      return {
+        seamless: parsed.seamless !== false,
+        editor: parsed.editor !== false,
+        sidebar: parsed.sidebar !== false,
+        terminal: parsed.terminal !== false,
+        bars: parsed.bars !== false,
+        selection: parsed.selection !== false,
+      };
+    } catch (_) {
+      return defaults;
+    }
+  }
+
+  function applyScopeClasses(wb) {
+    const target = wb || document.querySelector(".monaco-workbench");
+    if (!target) return;
+    const scope = getScopeConfig();
+    target.classList.toggle("prism-split-panels", !scope.seamless);
+    target.classList.toggle("prism-no-editor", !scope.editor);
+    target.classList.toggle("prism-no-sidebar", !scope.sidebar);
+    target.classList.toggle("prism-no-terminal", !scope.terminal);
+    target.classList.toggle("prism-no-bars", !scope.bars);
+    target.classList.toggle("prism-no-selection", !scope.selection);
+    if (!scope.selection) {
+      clearDomSelectionOverlay();
+    }
+  }
+
+  function saveScopeConfig(nextPatch) {
+    const merged = Object.assign(getScopeConfig(), nextPatch);
+    try {
+      localStorage.setItem(STORAGE_KEY_SCOPE, JSON.stringify(merged));
+    } catch (_) {}
+    applyScopeClasses();
+    refreshPopoverHeaderAndIntensity();
+    return merged;
+  }
+
+  function parseFourHexStops(str) {
+    if (!str) return null;
+    const text = String(str).trim();
+    // Support Coolors URLs like coolors.co/ea4335-fbbc04-34a853-4285f4 or standard hex lists
+    const matches = text.match(/(?:#|\b)([0-9a-fA-F]{6})\b/g);
+    if (!matches || matches.length < 4) return null;
+    return matches.slice(0, 4).map((m) => hexToRgb(m.replace("#", "")));
   }
 
   function getCustomPalettes() {
@@ -498,6 +575,7 @@
   }
 
   const recentNames = [];
+  const rollHistory = [];
   let activeCategory = "all";
   let breatheTimer = null;
   let breathePhase = 0;
@@ -506,6 +584,49 @@
   let morphProgress = 0;
   let lastLiveStops = null;
   let lastLiveAngles = null;
+
+  function pushRollHistory(entry) {
+    if (!entry) return;
+    const prev = rollHistory[rollHistory.length - 1];
+    if (prev && prev.name === entry.name && Boolean(prev.isNativeOff) === Boolean(entry.isNativeOff)) {
+      if (!entry.stops || (prev.stops && JSON.stringify(prev.stops) === JSON.stringify(entry.stops))) {
+        return;
+      }
+    }
+    rollHistory.push(JSON.parse(JSON.stringify(entry)));
+    if (rollHistory.length > 30) {
+      rollHistory.shift();
+    }
+  }
+
+  function undoPreviousRoll() {
+    if (rollHistory.length === 0) return;
+    const prev = rollHistory.pop();
+    if (!prev || prev.isDefault) {
+      applyPaletteToWorkbench(null, { skipHistory: true });
+    } else {
+      applyPaletteToWorkbench(prev, { skipHistory: true });
+    }
+  }
+
+  function rotateActiveStops(reverse = false) {
+    const saved = getSavedPalette();
+    const currentStops =
+      lastLiveStops && lastLiveStops.length === 4
+        ? lastLiveStops.map((s) => [...s])
+        : saved && saved.stops && saved.stops.length === 4
+        ? saved.stops.map((s) => [...s])
+        : CURATED_PALETTES[0].stops.map((s) => [...s]);
+    const rotated = reverse
+      ? [currentStops[3], currentStops[2], currentStops[1], currentStops[0]]
+      : [currentStops[1], currentStops[2], currentStops[3], currentStops[0]];
+    const currentName = (saved && !saved.isNativeOff && saved.name) || "Prism Classic";
+    applyPaletteToWorkbench({
+      name: currentName.endsWith(" ⇄") ? currentName : `${currentName} ⇄`,
+      stops: rotated,
+      angles: (saved && saved.angles) || { base: 135, bar: 90, side: 165, panel: 105 },
+    });
+  }
 
   function isBreathingEnabled() {
     return localStorage.getItem(STORAGE_KEY_BREATHE) === "true";
@@ -810,12 +931,16 @@
   function rollRandomPalette(currentName) {
     const allPresets = getAllPalettes();
     const favNames = getFavorites();
+    const favOnly = isFavOnlyEnabled();
 
-    // If user has favorites, 35% chance to roll from favorites
-    if (favNames.length > 1 && Math.random() < 0.35) {
-      const favPool = allPresets.filter(
+    // If Favs-Only lock is active (or 35% favorite boost when user has multiple favorites)
+    if (favNames.length > 0 && (favOnly || (favNames.length > 1 && Math.random() < 0.35))) {
+      let favPool = allPresets.filter(
         (p) => favNames.includes(p.name) && p.name !== currentName
       );
+      if (favPool.length === 0 && favOnly) {
+        favPool = allPresets.filter((p) => favNames.includes(p.name));
+      }
       if (favPool.length > 0) {
         const picked = favPool[randInt(0, favPool.length - 1)];
         return {
@@ -866,10 +991,26 @@
     return generateProceduralPalette();
   }
 
-  function applyPaletteToWorkbench(palette) {
+  function applyPaletteToWorkbench(palette, opts) {
     const wb = document.querySelector(".monaco-workbench");
     if (!wb) return;
+    applyScopeClasses(wb);
     const k = getIntensity();
+
+    if (!opts || !opts.skipHistory) {
+      const currentSaved = getSavedPalette();
+      const targetName = !palette || palette.isDefault ? "Prism Classic" : palette.name;
+      const currentName = currentSaved ? currentSaved.name : "Prism Classic";
+      if (targetName !== currentName || (palette && palette.stops && currentSaved && currentSaved.stops && JSON.stringify(palette.stops) !== JSON.stringify(currentSaved.stops))) {
+        pushRollHistory(
+          currentSaved || {
+            name: "Prism Classic",
+            isDefault: true,
+            stops: CURATED_PALETTES[0].stops,
+          }
+        );
+      }
+    }
 
     // Reset any in-flight morph transition when user explicitly picks/rolls a palette
     morphSourceStops = null;
@@ -1014,6 +1155,52 @@
     }
   }
 
+  function refreshPopoverTabs() {
+    const tabsBar = document.getElementById("prism-popover-tabs");
+    if (!tabsBar) return;
+    const all = getAllPalettes();
+    const favs = getFavorites();
+    const favCount = all.filter((p) => favs.includes(p.name)).length;
+    const customCount = all.filter((p) => p.category === "custom").length;
+    const removedCount = getRemovedPalettes().length;
+
+    const labelMap = {
+      all: `All (${all.length})`,
+      favs: favCount > 0 ? `Favs (${favCount})` : "Favs",
+      prism: "Prism",
+      pastel: "Pastel",
+      pure: "Pure",
+      custom: customCount > 0 ? `Custom (${customCount})` : "Custom",
+    };
+
+    tabsBar.querySelectorAll(".pp-tab[data-cat]").forEach((el) => {
+      const cat = el.getAttribute("data-cat");
+      if (cat && labelMap[cat]) {
+        el.textContent = labelMap[cat];
+      }
+      el.classList.toggle("active", cat === activeCategory);
+    });
+
+    let restoreBtn = document.getElementById("pp-btn-restore-removed");
+    if (removedCount > 0) {
+      if (!restoreBtn) {
+        restoreBtn = document.createElement("button");
+        restoreBtn.id = "pp-btn-restore-removed";
+        restoreBtn.className = "pp-tab";
+        restoreBtn.style.flex = "0 0 auto";
+        restoreBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          restoreRemovedPalettes();
+        });
+        tabsBar.appendChild(restoreBtn);
+      }
+      restoreBtn.textContent = `↺ (${removedCount})`;
+      restoreBtn.title = `Restore ${removedCount} hidden built-in palette${removedCount > 1 ? "s" : ""}`;
+    } else if (restoreBtn) {
+      restoreBtn.remove();
+    }
+  }
+
   function refreshPopoverHeaderAndIntensity() {
     const pop = document.getElementById("prism-palette-popover");
     if (!pop) return;
@@ -1028,6 +1215,26 @@
     const breatheBtn = document.getElementById("pp-btn-breathe");
     if (breatheBtn) {
       breatheBtn.classList.toggle("active", breatheOn);
+    }
+
+    const undoBtn = document.getElementById("pp-btn-undo");
+    if (undoBtn) {
+      const hasPrev = rollHistory.length > 0;
+      undoBtn.disabled = !hasPrev;
+      const prevItem = hasPrev ? rollHistory[rollHistory.length - 1] : null;
+      undoBtn.title = hasPrev
+        ? `Previous Roll: ${prevItem.name || "Prism Classic"} (Alt+Shift+Z)`
+        : "No previous roll in history yet (Alt+Shift+Z)";
+    }
+
+    const favLockBtn = document.getElementById("pp-btn-fav-lock");
+    if (favLockBtn) {
+      const favOn = isFavOnlyEnabled();
+      favLockBtn.classList.toggle("fav-active", favOn);
+      favLockBtn.textContent = favOn ? "★" : "☆";
+      favLockBtn.title = favOn
+        ? "Locked to Favorites Only — click to roll from all palettes"
+        : "Lock Roll & Auto-Morph to Favorites Only (★)";
     }
 
     const breatheStatus = document.getElementById("pp-breathe-status");
@@ -1045,9 +1252,16 @@
     const speedVal = document.getElementById("pp-breathe-speed-val");
     if (speedSlider) speedSlider.value = String(cfg.speedPct || 100);
     if (speedVal) speedVal.textContent = `${cfg.speedPct || 100}%`;
+
+    const scope = getScopeConfig();
+    ["seamless", "editor", "sidebar", "terminal", "bars", "selection"].forEach((sKey) => {
+      const sChip = document.getElementById(`pp-scope-${sKey}`);
+      if (sChip) sChip.classList.toggle("active", Boolean(scope[sKey]));
+    });
   }
 
   function renderPaletteGrid() {
+    refreshPopoverTabs();
     const grid = document.getElementById("prism-popover-grid");
     if (!grid) return;
 
@@ -1144,6 +1358,10 @@
 
       card.addEventListener("click", (e) => {
         e.stopPropagation();
+        const nameInp = document.getElementById("pp-custom-name-input");
+        if (nameInp && p.isCustom) {
+          nameInp.value = p.name;
+        }
         if (p.isDefault) {
           applyPaletteToWorkbench(null);
         } else {
@@ -1307,6 +1525,17 @@
     breatheBtn.title = "Toggle Breathing Aurora Engine (Alt+Shift+B)";
     breatheBtn.addEventListener("click", () => toggleBreathing());
 
+    const undoBtn = document.createElement("button");
+    undoBtn.id = "pp-btn-undo";
+    undoBtn.className = "pp-btn pp-btn-icon";
+    undoBtn.textContent = "←";
+    undoBtn.disabled = rollHistory.length === 0;
+    undoBtn.title =
+      rollHistory.length > 0
+        ? `Previous Roll: ${rollHistory[rollHistory.length - 1].name || "Prism Classic"} (Alt+Shift+Z)`
+        : "No previous roll in history yet (Alt+Shift+Z)";
+    undoBtn.addEventListener("click", () => undoPreviousRoll());
+
     const rollBtn = document.createElement("button");
     rollBtn.className = "pp-btn pp-btn-primary";
     rollBtn.appendChild(createCycleArrowsSvg(12));
@@ -1319,6 +1548,15 @@
       applyPaletteToWorkbench(rollRandomPalette(saved ? saved.name : ""));
     });
 
+    const favLockBtn = document.createElement("button");
+    favLockBtn.id = "pp-btn-fav-lock";
+    favLockBtn.className = `pp-btn pp-btn-icon${isFavOnlyEnabled() ? " fav-active" : ""}`;
+    favLockBtn.textContent = isFavOnlyEnabled() ? "★" : "☆";
+    favLockBtn.title = isFavOnlyEnabled()
+      ? "Locked to Favorites Only — click to roll from all palettes"
+      : "Lock Roll & Auto-Morph to Favorites Only (★)";
+    favLockBtn.addEventListener("click", () => toggleFavOnly());
+
     const nativeBtn = document.createElement("button");
     nativeBtn.className = "pp-btn";
     nativeBtn.textContent = "Mode";
@@ -1326,13 +1564,15 @@
     nativeBtn.addEventListener("click", () => toggleResetOrNative());
 
     const closeBtn = document.createElement("button");
-    closeBtn.className = "pp-btn";
+    closeBtn.className = "pp-btn pp-btn-icon";
     closeBtn.textContent = "✕";
     closeBtn.title = "Close Studio (Esc)";
     closeBtn.addEventListener("click", () => pop.remove());
 
     actions.appendChild(breatheBtn);
+    actions.appendChild(undoBtn);
     actions.appendChild(rollBtn);
+    actions.appendChild(favLockBtn);
     actions.appendChild(nativeBtn);
     actions.appendChild(closeBtn);
     header.appendChild(titleWrap);
@@ -1495,8 +1735,59 @@
     breatheDrawer.appendChild(speedRow);
     intSec.appendChild(breatheDrawer);
 
+    // 2C. Surface & Unified Canvas Scope Row
+    const scopeCfg = getScopeConfig();
+    const scopeRow = document.createElement("div");
+    scopeRow.className = "pp-scope-row";
+    const scopeDefs = [
+      {
+        key: "seamless",
+        label: "Seamless",
+        tip: "Same continuous gradient across the entire VSCode window (uncheck for split per-panel gradients)",
+      },
+      {
+        key: "editor",
+        label: "Editor",
+        tip: "Show gradient on Code Editor canvas",
+      },
+      {
+        key: "sidebar",
+        label: "Sidebar",
+        tip: "Show gradient on Activity Bar, Left Sidebar & Right Chat Sidebar",
+      },
+      {
+        key: "terminal",
+        label: "Terminal",
+        tip: "Show gradient on Bottom Terminal / Output Panel",
+      },
+      {
+        key: "bars",
+        label: "Bars",
+        tip: "Show gradient on Title Bar, Tab Bar & Status Bar",
+      },
+      {
+        key: "selection",
+        label: "Select",
+        tip: "Enable 4-color gradient text selection highlight",
+      },
+    ];
+    scopeDefs.forEach((s) => {
+      const sChip = document.createElement("button");
+      sChip.id = `pp-scope-${s.key}`;
+      sChip.className = `pp-chip${scopeCfg[s.key] ? " active" : ""}`;
+      sChip.textContent = s.label;
+      sChip.title = s.tip;
+      sChip.addEventListener("click", () => {
+        const cur = getScopeConfig();
+        saveScopeConfig({ [s.key]: !cur[s.key] });
+      });
+      scopeRow.appendChild(sChip);
+    });
+    intSec.appendChild(scopeRow);
+
     // 3. Category Filter Tabs
     const tabsBar = document.createElement("div");
+    tabsBar.id = "prism-popover-tabs";
     tabsBar.className = "pp-tabs";
     const categories = [
       { id: "all", label: "All" },
@@ -1508,12 +1799,11 @@
     ];
     categories.forEach((cat) => {
       const t = document.createElement("button");
+      t.setAttribute("data-cat", cat.id);
       t.className = `pp-tab${activeCategory === cat.id ? " active" : ""}`;
       t.textContent = cat.label;
       t.addEventListener("click", () => {
         activeCategory = cat.id;
-        tabsBar.querySelectorAll(".pp-tab").forEach((el) => el.classList.remove("active"));
-        t.classList.add("active");
         renderPaletteGrid();
       });
       tabsBar.appendChild(t);
@@ -1535,6 +1825,73 @@
     bTitle.className = "pp-builder-title";
     bTitle.textContent = "Pick your own color";
 
+    const bTools = document.createElement("div");
+    bTools.className = "pp-builder-tools";
+
+    const rotateBtn = document.createElement("button");
+    rotateBtn.id = "pp-btn-rotate";
+    rotateBtn.className = "pp-mini-btn";
+    rotateBtn.textContent = "⇄ Rotate";
+    rotateBtn.title = "Rotate 4 color stops around corners (Shift+Click to reverse)";
+    rotateBtn.addEventListener("click", (e) => {
+      rotateActiveStops(Boolean(e.shiftKey));
+    });
+
+    const copyHexBtn = document.createElement("button");
+    copyHexBtn.id = "pp-btn-copy-hex";
+    copyHexBtn.className = "pp-mini-btn";
+    copyHexBtn.textContent = "Copy Hex";
+    copyHexBtn.title = "Copy active 4 hex colors (#C1, #C2, #C3, #C4) to clipboard";
+    copyHexBtn.addEventListener("click", () => {
+      const hexStr = colorInputs.map((inp) => inp.value.toUpperCase()).join(", ");
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(hexStr).catch(() => {});
+      }
+      copyHexBtn.textContent = "✓ Copied";
+      setTimeout(() => {
+        copyHexBtn.textContent = "Copy Hex";
+      }, 1200);
+    });
+
+    const pasteHexBtn = document.createElement("button");
+    pasteHexBtn.id = "pp-btn-paste-hex";
+    pasteHexBtn.className = "pp-mini-btn";
+    pasteHexBtn.textContent = "Paste Hex";
+    pasteHexBtn.title =
+      "Paste 4 hex colors (#RRGGBB) or a Coolors URL from clipboard (or paste into the input box below)";
+    pasteHexBtn.addEventListener("click", async () => {
+      let rawText = "";
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          rawText = await navigator.clipboard.readText();
+        }
+      } catch (_) {}
+      if (!rawText && nameInput.value) {
+        rawText = nameInput.value;
+      }
+      const parsedStops = parseFourHexStops(rawText);
+      if (parsedStops) {
+        applyPaletteToWorkbench({
+          name: "Pasted Harmony",
+          stops: parsedStops,
+          angles: { base: 135, bar: 90, side: 165, panel: 105 },
+        });
+        pasteHexBtn.textContent = "✓ Applied";
+        setTimeout(() => {
+          pasteHexBtn.textContent = "Paste Hex";
+        }, 1200);
+      } else {
+        pasteHexBtn.textContent = "No 4 Hex";
+        setTimeout(() => {
+          pasteHexBtn.textContent = "Paste Hex";
+        }, 1200);
+      }
+    });
+
+    bTools.appendChild(rotateBtn);
+    bTools.appendChild(copyHexBtn);
+    bTools.appendChild(pasteHexBtn);
+
     const randFourBtn = document.createElement("button");
     randFourBtn.className = "pp-btn";
     randFourBtn.textContent = "Harmony";
@@ -1545,6 +1902,7 @@
     });
 
     bHead.appendChild(bTitle);
+    bHead.appendChild(bTools);
 
     const saved = getSavedPalette();
     const initialStops =
@@ -1586,14 +1944,26 @@
     }
 
     const nameInput = document.createElement("input");
+    nameInput.id = "pp-custom-name-input";
     nameInput.type = "text";
     nameInput.className = "pp-text-input";
-    nameInput.placeholder = "Name custom palette...";
+    nameInput.placeholder = "Name or paste 4 #hex colors...";
+    nameInput.addEventListener("input", () => {
+      const parsed = parseFourHexStops(nameInput.value);
+      if (parsed) {
+        nameInput.value = "";
+        applyPaletteToWorkbench({
+          name: "Custom Hex",
+          stops: parsed,
+          angles: { base: 135, bar: 90, side: 165, panel: 105 },
+        });
+      }
+    });
 
     const saveBtn = document.createElement("button");
     saveBtn.className = "pp-btn pp-btn-primary";
     saveBtn.textContent = "+ Save";
-    saveBtn.title = "Save to Custom Palettes";
+    saveBtn.title = "Save or Update Custom Palette";
     saveBtn.addEventListener("click", () => {
       const stops = colorInputs.map((inp) => hexToRgb(inp.value));
       const cname =
@@ -1788,7 +2158,7 @@
 
   function renderDomSelectionGradient() {
     const saved = getSavedPalette();
-    if (saved && saved.isNativeOff) {
+    if ((saved && saved.isNativeOff) || !getScopeConfig().selection) {
       clearDomSelectionOverlay();
       return;
     }
@@ -1854,6 +2224,8 @@
 
   // Global keyboard shortcuts:
   //   Alt + Shift + G -> Roll new random gradient
+  //   Alt + Shift + Z -> Undo / Previous rolled gradient
+  //   Alt + Shift + R -> Rotate 4 color stops around corners
   //   Alt + Shift + 0 -> Cycle Prism Classic / Theme Native (Off)
   //   Alt + Shift + P -> Toggle Gradient Studio Popover
   //   Alt + Shift + B -> Toggle 🌊 Breathing Aurora animation
@@ -1874,6 +2246,12 @@
         const saved = getSavedPalette();
         const next = rollRandomPalette(saved ? saved.name : "");
         applyPaletteToWorkbench(next);
+      } else if (e.code === "KeyZ" || e.key === "Z" || e.key === "z") {
+        e.preventDefault();
+        undoPreviousRoll();
+      } else if (e.code === "KeyR" || e.key === "R" || e.key === "r") {
+        e.preventDefault();
+        rotateActiveStops(false);
       } else if (e.code === "Digit0" || e.key === ")" || e.key === "0") {
         e.preventDefault();
         toggleResetOrNative();
@@ -1905,12 +2283,13 @@
     }
     const wb = document.querySelector(".monaco-workbench");
     if (!wb) return;
+    applyScopeClasses(wb);
     const saved = getSavedPalette();
     if (saved) {
       if (saved.isNativeOff && wb.style.getPropertyValue("--g-base") !== "none") {
-        applyPaletteToWorkbench(saved);
+        applyPaletteToWorkbench(saved, { skipHistory: true });
       } else if (!saved.isNativeOff && saved.stops && !wb.style.getPropertyValue("--g-base")) {
-        applyPaletteToWorkbench(saved);
+        applyPaletteToWorkbench(saved, { skipHistory: true });
       }
     }
   }
