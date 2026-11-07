@@ -471,6 +471,7 @@
             side: 165,
             panel: 105,
           },
+          phaseOffset: Number(entry.customPalette.phaseOffset) || 0,
         };
       }
       out[k] = { enabled, customPalette };
@@ -484,7 +485,100 @@
     } catch (_) {}
   }
 
-  function reapplyCurrentWorkbench() {
+  function applySingleComponentCssVars(wb, compKey) {
+    if (!wb || !compKey || compKey === "all") return;
+    const compMap = getComponentsConfig();
+    const cfg = compMap[compKey] || { enabled: true, customPalette: null };
+    const k = getIntensity();
+    const breatheOn = isBreathingEnabled();
+    const breatheCfg = getBreatheConfig();
+    const shimmerOn = breatheOn && breatheCfg.shimmer;
+    const waveOn = breatheOn && breatheCfg.wave;
+
+    if (!cfg.enabled) {
+      if (compKey !== "selection") {
+        wb.style.setProperty(`--g-${compKey}-mesh`, "none");
+        wb.style.setProperty(`--g-${compKey}-bar`, "none");
+        wb.style.setProperty(
+          `--g-${compKey}-frame`,
+          "linear-gradient(90deg, rgba(128, 128, 128, 0.22), rgba(128, 128, 128, 0.22))"
+        );
+      } else {
+        wb.classList.add("prism-no-selection");
+        wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
+        wb.style.setProperty(
+          "--g-sel-tint",
+          "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
+        );
+        clearDomSelectionOverlay();
+      }
+      return;
+    }
+
+    const globalPal = getActiveTargetPalette("all");
+    const fallbackStops =
+      lastLiveStops && lastLiveStops.length === 4
+        ? lastLiveStops
+        : globalPal.stops || CURATED_PALETTES[0].stops;
+    const fallbackAngles = lastLiveAngles ||
+      globalPal.angles || { base: 135, bar: 90, side: 165, panel: 105 };
+
+    let compStops = fallbackStops;
+    let compAngles = fallbackAngles;
+
+    if (
+      cfg.customPalette &&
+      Array.isArray(cfg.customPalette.stops) &&
+      cfg.customPalette.stops.length === 4
+    ) {
+      const phaseDelta = Math.max(0, breathePhase - (Number(cfg.customPalette.phaseOffset) || 0));
+      compStops = shimmerOn
+        ? getShiftedStops(cfg.customPalette.stops, phaseDelta * 0.16)
+        : cfg.customPalette.stops;
+      const baseA = cfg.customPalette.angles || {
+        base: 135,
+        bar: 90,
+        side: 165,
+        panel: 105,
+      };
+      compAngles = waveOn
+        ? {
+            base: Math.round(baseA.base + Math.sin(breathePhase * 0.65) * 32),
+            bar: Math.round(baseA.bar + Math.sin(breathePhase * 0.8) * 24),
+            side: Math.round(baseA.side + Math.sin(breathePhase * 0.55) * 28),
+            panel: Math.round(baseA.panel + Math.sin(breathePhase * 0.7) * 28),
+          }
+        : baseA;
+    }
+
+    const effectiveK =
+      breatheOn && breatheCfg.pulse
+        ? Math.max(0.25, Math.min(2.2, k * (1 + Math.sin(breathePhase * 0.78) * 0.24)))
+        : k;
+
+    if (compKey === "selection") {
+      wb.classList.remove("prism-no-selection");
+      wb.style.setProperty("--g-selection", buildSelectionCss(compStops, compAngles, effectiveK));
+      wb.style.setProperty("--g-sel-tint", rgba(compStops[0], 0.28 * effectiveK));
+    } else {
+      wb.style.setProperty(`--g-${compKey}-mesh`, buildMeshCss(compStops, compAngles, effectiveK));
+      wb.style.setProperty(`--g-${compKey}-bar`, buildBarCss(compStops, compAngles, effectiveK));
+      wb.style.setProperty(`--g-${compKey}-frame`, buildFrameCss(compStops));
+    }
+  }
+
+  function reapplyCurrentWorkbench(onlyCompKey) {
+    const wb = document.querySelector(".monaco-workbench");
+    if (onlyCompKey && onlyCompKey !== "all" && wb) {
+      applySingleComponentCssVars(wb, onlyCompKey);
+      const targetPal = getActiveTargetPalette(activeComponent);
+      if (targetPal && targetPal.stops) {
+        syncBuilderPickers(targetPal.stops);
+      }
+      renderPaletteGrid();
+      refreshPopoverHeaderAndIntensity();
+      return;
+    }
     const saved = getSavedPalette();
     applyPaletteToWorkbench(saved || null, { skipHistory: true });
   }
@@ -494,7 +588,7 @@
     if (!map[compKey]) return;
     map[compKey].enabled = !map[compKey].enabled;
     saveComponentsConfig(map);
-    reapplyCurrentWorkbench();
+    reapplyCurrentWorkbench(compKey);
   }
 
   function setComponentPalette(compKey, palette) {
@@ -506,10 +600,11 @@
           name: palette.name || "Custom",
           stops: palette.stops.map((s) => [...s]),
           angles: palette.angles || { base: 135, bar: 90, side: 165, panel: 105 },
+          phaseOffset: breathePhase,
         }
       : null;
     saveComponentsConfig(map);
-    reapplyCurrentWorkbench();
+    reapplyCurrentWorkbench(compKey);
   }
 
   function resetAllComponentCustomPalettes() {
@@ -853,15 +948,15 @@
     // Apply per-component gradients & Off toggles
     const compMap = getComponentsConfig();
     const breatheOn = isBreathingEnabled();
-    const shimmerOn = breatheOn && getBreatheConfig().shimmer;
-    let allSurfacesUnified = true;
+    const breatheCfg = getBreatheConfig();
+    const shimmerOn = breatheOn && breatheCfg.shimmer;
+    const waveOn = breatheOn && breatheCfg.wave;
 
     COMPONENT_DEFS.forEach((def) => {
       const key = def.key;
       const cfg = compMap[key] || { enabled: true, customPalette: null };
       if (!cfg.enabled) {
         if (key !== "selection") {
-          allSurfacesUnified = false;
           wb.style.setProperty(`--g-${key}-mesh`, "none");
           wb.style.setProperty(`--g-${key}-bar`, "none");
           wb.style.setProperty(
@@ -883,13 +978,24 @@
       let compStops = stops;
       let compAngles = angles;
       if (cfg.customPalette && Array.isArray(cfg.customPalette.stops) && cfg.customPalette.stops.length === 4) {
-        if (key !== "selection") {
-          allSurfacesUnified = false;
-        }
+        const phaseDelta = Math.max(0, breathePhase - (Number(cfg.customPalette.phaseOffset) || 0));
         compStops = shimmerOn
-          ? getShiftedStops(cfg.customPalette.stops, breathePhase * 0.22)
+          ? getShiftedStops(cfg.customPalette.stops, phaseDelta * 0.16)
           : cfg.customPalette.stops;
-        compAngles = cfg.customPalette.angles || angles;
+        const baseA = cfg.customPalette.angles || {
+          base: 135,
+          bar: 90,
+          side: 165,
+          panel: 105,
+        };
+        compAngles = waveOn
+          ? {
+              base: Math.round(baseA.base + Math.sin(breathePhase * 0.65) * 32),
+              bar: Math.round(baseA.bar + Math.sin(breathePhase * 0.8) * 24),
+              side: Math.round(baseA.side + Math.sin(breathePhase * 0.55) * 28),
+              panel: Math.round(baseA.panel + Math.sin(breathePhase * 0.7) * 28),
+            }
+          : baseA;
       }
 
       if (key === "selection") {
@@ -903,10 +1009,8 @@
       }
     });
 
-    wb.style.setProperty(
-      "--g-workbench-mesh",
-      allSurfacesUnified ? buildMeshCss(stops, angles, k) : "none"
-    );
+    // Always keep .monaco-workbench mesh "none" so customizing one component never flips the root canvas
+    wb.style.setProperty("--g-workbench-mesh", "none");
 
     lastLiveStops = stops.map((s) => [...s]);
     lastLiveAngles = { ...angles };
@@ -930,13 +1034,6 @@
     if (previewBar) {
       previewBar.style.background = targetGrad;
     }
-    const hexes = [rgbToHex(tc1), rgbToHex(tc2), rgbToHex(tc3), rgbToHex(tc4)];
-    for (let i = 0; i < 4; i++) {
-      const inp = document.getElementById(`pp-stop-${i}`);
-      if (inp && inp.value.toUpperCase() !== hexes[i]) {
-        inp.value = hexes[i];
-      }
-    }
   }
 
   function startOrStopBreathingAurora() {
@@ -944,35 +1041,8 @@
       clearInterval(breatheTimer);
       breatheTimer = null;
     }
-    const wb = document.querySelector(".monaco-workbench");
     if (!isBreathingEnabled()) {
-      morphSourceStops = null;
-      morphTargetPalette = null;
-      morphProgress = 0;
-      breathePhase = 0;
-      const saved = getSavedPalette();
-      if (saved && saved.isNativeOff) {
-        applyPaletteToWorkbench(saved);
-        return;
-      }
-      if (lastLiveStops && lastLiveStops.length === 4) {
-        const frozenPalette = {
-          name: (saved && saved.name) || "Prism Classic",
-          stops: lastLiveStops.map((s) => [...s]),
-          angles: lastLiveAngles || { base: 135, bar: 90, side: 165, panel: 105 },
-        };
-        try {
-          localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(frozenPalette));
-        } catch (_) {}
-        if (wb) {
-          writeGradientCssVars(wb, frozenPalette.stops, frozenPalette.angles, getIntensity());
-        }
-        updateStatusBarPill(frozenPalette.name, frozenPalette.stops, false);
-        syncBuilderPickers(frozenPalette.stops);
-        refreshPopoverHeaderAndIntensity();
-      } else {
-        applyPaletteToWorkbench(saved || null);
-      }
+      // Freeze smoothly in place without snapping coordinates or overwriting saved palettes
       return;
     }
 
@@ -985,7 +1055,7 @@
       const cfg = getBreatheConfig();
       const speedMult = (cfg.speedPct || 100) / 100;
 
-      breathePhase += 0.042 * speedMult;
+      breathePhase += 0.018 * speedMult;
 
       const activePalette =
         saved && saved.stops && saved.stops.length === 4
@@ -1000,14 +1070,14 @@
         panel: 105,
       };
 
-      // 1. Auto-Morph Between Palettes (Smooth RGB crossfade)
+      // 1. Auto-Morph Between Palettes (Smooth RGB crossfade starting at 0.0)
       if (cfg.morph) {
         if (!morphSourceStops || !morphTargetPalette) {
           morphSourceStops = baseStops.map((s) => [...s]);
           morphTargetPalette = rollRandomPalette(activePalette.name);
           morphProgress = 0;
         }
-        morphProgress += 0.0055 * speedMult;
+        morphProgress += 0.0028 * speedMult;
         if (morphProgress >= 1) {
           const completed = morphTargetPalette;
           morphSourceStops = completed.stops.map((s) => [...s]);
@@ -1015,7 +1085,9 @@
             localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(completed));
           } catch (_) {}
           updateStatusBarPill(completed.name, completed.stops);
-          syncBuilderPickers(completed.stops);
+          if (activeComponent === "all") {
+            syncBuilderPickers(completed.stops);
+          }
           renderPaletteGrid();
           morphTargetPalette = rollRandomPalette(completed.name);
           morphProgress = 0;
@@ -1033,28 +1105,28 @@
         morphProgress = 0;
       }
 
-      // 2. Color Stop Rotation / Shimmer (Flow the 4 stops around the corners & bars)
+      // 2. Color Stop Rotation / Shimmer (Flow the 4 stops smoothly from 0 offset)
       const animatedStops = cfg.shimmer
-        ? getShiftedStops(baseStops, breathePhase * 0.22)
+        ? getShiftedStops(baseStops, breathePhase * 0.16)
         : baseStops;
 
-      // 3. Inhale / Exhale Opacity Pulse (Gentle heartbeat intensity modulation)
+      // 3. Inhale / Exhale Opacity Pulse (Zero offset at breathePhase = 0)
       const baseK = getIntensity();
       const effectiveK = cfg.pulse
-        ? Math.max(0.25, Math.min(2.2, baseK * (1 + Math.sin(breathePhase * 0.78) * 0.28)))
+        ? Math.max(0.25, Math.min(2.2, baseK * (1 + Math.sin(breathePhase * 0.78) * 0.24)))
         : baseK;
 
-      // 4. Full-Workbench Wave (Corner focal points + rotating angles across all bars/panels)
+      // 4. Full-Workbench Wave (All Math.sin centered on resting coordinates & angles -> 0 jump at start)
       let liveAngles = baseAngles;
       if (cfg.wave) {
-        const p1x = 18 + Math.sin(breathePhase) * 16;
-        const p1y = 18 + Math.cos(breathePhase * 0.8) * 14;
-        const p2x = 82 + Math.cos(breathePhase * 0.9) * 16;
-        const p2y = 26 + Math.sin(breathePhase * 1.1) * 15;
-        const p3x = 26 + Math.cos(breathePhase * 0.7) * 16;
-        const p3y = 82 + Math.sin(breathePhase * 0.85) * 14;
-        const p4x = 82 + Math.sin(breathePhase * 0.75) * 15;
-        const p4y = 82 + Math.cos(breathePhase * 0.95) * 15;
+        const p1x = 15 + Math.sin(breathePhase * 0.9) * 14;
+        const p1y = 15 + Math.sin(breathePhase * 0.75) * 13;
+        const p2x = 85 - Math.sin(breathePhase * 0.85) * 14;
+        const p2y = 25 + Math.sin(breathePhase * 1.05) * 14;
+        const p3x = 25 + Math.sin(breathePhase * 0.7) * 14;
+        const p3y = 85 - Math.sin(breathePhase * 0.8) * 13;
+        const p4x = 85 - Math.sin(breathePhase * 0.65) * 14;
+        const p4y = 85 - Math.sin(breathePhase * 0.95) * 13;
         targetWb.style.setProperty("--g-p1x", `${p1x.toFixed(1)}%`);
         targetWb.style.setProperty("--g-p1y", `${p1y.toFixed(1)}%`);
         targetWb.style.setProperty("--g-p2x", `${p2x.toFixed(1)}%`);
@@ -1065,10 +1137,10 @@
         targetWb.style.setProperty("--g-p4y", `${p4y.toFixed(1)}%`);
 
         liveAngles = {
-          base: Math.round(baseAngles.base + Math.sin(breathePhase * 0.65) * 36),
-          bar: Math.round(baseAngles.bar + Math.cos(breathePhase * 0.8) * 28),
-          side: Math.round(baseAngles.side + Math.sin(breathePhase * 0.55) * 30),
-          panel: Math.round(baseAngles.panel + Math.cos(breathePhase * 0.7) * 32),
+          base: Math.round(baseAngles.base + Math.sin(breathePhase * 0.65) * 32),
+          bar: Math.round(baseAngles.bar + Math.sin(breathePhase * 0.8) * 24),
+          side: Math.round(baseAngles.side + Math.sin(breathePhase * 0.55) * 28),
+          panel: Math.round(baseAngles.panel + Math.sin(breathePhase * 0.7) * 28),
         };
       } else {
         ["--g-p1x", "--g-p1y", "--g-p2x", "--g-p2y", "--g-p3x", "--g-p3y", "--g-p4x", "--g-p4y"].forEach(
@@ -1077,7 +1149,7 @@
       }
 
       writeGradientCssVars(targetWb, animatedStops, liveAngles, effectiveK);
-    }, 90);
+    }, 50);
   }
 
   function setBreathingEnabled(next) {
@@ -1188,10 +1260,16 @@
       }
     }
 
-    // Reset any in-flight morph transition when user explicitly picks/rolls a palette
+    // Reset any in-flight morph transition and phase offset when user explicitly picks/rolls a palette
     morphSourceStops = null;
     morphTargetPalette = null;
     morphProgress = 0;
+    breathePhase = 0;
+    if (!isBreathingEnabled()) {
+      ["--g-p1x", "--g-p1y", "--g-p2x", "--g-p2y", "--g-p3x", "--g-p3y", "--g-p4x", "--g-p4y"].forEach(
+        (p) => wb.style.removeProperty(p)
+      );
+    }
 
     if (palette && palette.isNativeOff) {
       // Turn off the 4-color overlay so the pure single-color theme shines through natively
