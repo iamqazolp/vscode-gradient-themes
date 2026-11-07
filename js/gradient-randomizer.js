@@ -26,7 +26,17 @@
   const STORAGE_KEY_BREATHE = "gradientThemes.randomizer.breathe.v1";
   const STORAGE_KEY_BREATHE_CFG = "gradientThemes.randomizer.breatheCfg.v1";
   const STORAGE_KEY_SCOPE = "gradientThemes.randomizer.scope.v1";
+  const STORAGE_KEY_COMPONENTS = "gradientThemes.randomizer.components.v1";
   const STORAGE_KEY_HISTORY = "gradientThemes.randomizer.history.v1";
+
+  const COMPONENT_DEFS = [
+    { key: "editor", label: "Editor", tip: "Code Editor Canvas & Current Line" },
+    { key: "explorer", label: "Explorer", tip: "Activity Bar & Left Explorer Sidebar" },
+    { key: "chat", label: "Chat", tip: "Right AI Chat / Secondary Sidebar" },
+    { key: "terminal", label: "Terminal", tip: "Bottom Terminal / Output Panel" },
+    { key: "bars", label: "Bars", tip: "Title Bar, Editor Tabs, Breadcrumbs & Status Bar" },
+    { key: "selection", label: "Select", tip: "Text Selection Highlight (Editor, Terminal & DOM)" },
+  ];
 
   // Curated 4-stop palettes (RGB tuples; alpha is strictly clamped to 7%–22%)
   const CURATED_PALETTES = [
@@ -418,55 +428,115 @@
     renderPaletteGrid();
   }
 
-  function getScopeConfig() {
-    const defaults = {
-      seamless: true,
-      editor: true,
-      sidebar: true,
-      terminal: true,
-      bars: true,
-      selection: true,
-    };
+  function getComponentsConfig() {
+    const out = {};
+    let legacyScope = null;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY_SCOPE);
-      if (!raw) return defaults;
-      const parsed = JSON.parse(raw);
-      return {
-        seamless: parsed.seamless !== false,
-        editor: parsed.editor !== false,
-        sidebar: parsed.sidebar !== false,
-        terminal: parsed.terminal !== false,
-        bars: parsed.bars !== false,
-        selection: parsed.selection !== false,
-      };
-    } catch (_) {
-      return defaults;
-    }
-  }
-
-  function applyScopeClasses(wb) {
-    const target = wb || document.querySelector(".monaco-workbench");
-    if (!target) return;
-    const scope = getScopeConfig();
-    target.classList.toggle("prism-split-panels", !scope.seamless);
-    target.classList.toggle("prism-no-editor", !scope.editor);
-    target.classList.toggle("prism-no-sidebar", !scope.sidebar);
-    target.classList.toggle("prism-no-terminal", !scope.terminal);
-    target.classList.toggle("prism-no-bars", !scope.bars);
-    target.classList.toggle("prism-no-selection", !scope.selection);
-    if (!scope.selection) {
-      clearDomSelectionOverlay();
-    }
-  }
-
-  function saveScopeConfig(nextPatch) {
-    const merged = Object.assign(getScopeConfig(), nextPatch);
-    try {
-      localStorage.setItem(STORAGE_KEY_SCOPE, JSON.stringify(merged));
+      const rawScope = localStorage.getItem(STORAGE_KEY_SCOPE);
+      if (rawScope) legacyScope = JSON.parse(rawScope);
     } catch (_) {}
-    applyScopeClasses();
-    refreshPopoverHeaderAndIntensity();
-    return merged;
+
+    let parsed = null;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_COMPONENTS);
+      if (raw) parsed = JSON.parse(raw);
+    } catch (_) {}
+
+    COMPONENT_DEFS.forEach((def) => {
+      const k = def.key;
+      const entry = parsed && typeof parsed[k] === "object" && parsed[k] ? parsed[k] : null;
+      let enabled = true;
+      if (entry && typeof entry.enabled === "boolean") {
+        enabled = entry.enabled;
+      } else if (legacyScope) {
+        if (k === "explorer" || k === "chat") {
+          enabled = legacyScope.sidebar !== false;
+        } else if (k in legacyScope) {
+          enabled = legacyScope[k] !== false;
+        }
+      }
+      let customPalette = null;
+      if (
+        entry &&
+        entry.customPalette &&
+        Array.isArray(entry.customPalette.stops) &&
+        entry.customPalette.stops.length === 4
+      ) {
+        customPalette = {
+          name: entry.customPalette.name || "Custom",
+          stops: entry.customPalette.stops,
+          angles: entry.customPalette.angles || {
+            base: 135,
+            bar: 90,
+            side: 165,
+            panel: 105,
+          },
+        };
+      }
+      out[k] = { enabled, customPalette };
+    });
+    return out;
+  }
+
+  function saveComponentsConfig(nextMap) {
+    try {
+      localStorage.setItem(STORAGE_KEY_COMPONENTS, JSON.stringify(nextMap));
+    } catch (_) {}
+  }
+
+  function reapplyCurrentWorkbench() {
+    const saved = getSavedPalette();
+    applyPaletteToWorkbench(saved || null, { skipHistory: true });
+  }
+
+  function toggleComponentEnabled(compKey) {
+    const map = getComponentsConfig();
+    if (!map[compKey]) return;
+    map[compKey].enabled = !map[compKey].enabled;
+    saveComponentsConfig(map);
+    reapplyCurrentWorkbench();
+  }
+
+  function setComponentPalette(compKey, palette) {
+    const map = getComponentsConfig();
+    if (!map[compKey]) return;
+    map[compKey].enabled = true;
+    map[compKey].customPalette = palette
+      ? {
+          name: palette.name || "Custom",
+          stops: palette.stops.map((s) => [...s]),
+          angles: palette.angles || { base: 135, bar: 90, side: 165, panel: 105 },
+        }
+      : null;
+    saveComponentsConfig(map);
+    reapplyCurrentWorkbench();
+  }
+
+  function resetAllComponentCustomPalettes() {
+    const map = getComponentsConfig();
+    COMPONENT_DEFS.forEach((def) => {
+      if (map[def.key]) {
+        map[def.key].customPalette = null;
+      }
+    });
+    saveComponentsConfig(map);
+  }
+
+  function getActiveTargetPalette(compKey) {
+    const saved = getSavedPalette();
+    const globalPalette =
+      saved && !saved.isNativeOff && saved.stops && saved.stops.length === 4
+        ? saved
+        : CURATED_PALETTES[0];
+    if (!compKey || compKey === "all") {
+      return globalPalette;
+    }
+    const map = getComponentsConfig();
+    const entry = map[compKey];
+    if (entry && entry.customPalette && entry.customPalette.stops) {
+      return entry.customPalette;
+    }
+    return globalPalette;
   }
 
   function parseFourHexStops(str) {
@@ -511,7 +581,12 @@
       localStorage.setItem(STORAGE_KEY_CUSTOM, JSON.stringify(customs));
       localStorage.setItem(STORAGE_KEY_REMOVED, JSON.stringify(removed));
     } catch (_) {}
-    applyPaletteToWorkbench(entry);
+    if (activeComponent && activeComponent !== "all") {
+      setComponentPalette(activeComponent, entry);
+    } else {
+      resetAllComponentCustomPalettes();
+      applyPaletteToWorkbench(entry);
+    }
     renderPaletteGrid();
   }
 
@@ -577,6 +652,7 @@
   const recentNames = [];
   const rollHistory = [];
   let activeCategory = "all";
+  let activeComponent = "all";
   let breatheTimer = null;
   let breathePhase = 0;
   let morphSourceStops = null;
@@ -610,22 +686,22 @@
   }
 
   function rotateActiveStops(reverse = false) {
-    const saved = getSavedPalette();
-    const currentStops =
-      lastLiveStops && lastLiveStops.length === 4
-        ? lastLiveStops.map((s) => [...s])
-        : saved && saved.stops && saved.stops.length === 4
-        ? saved.stops.map((s) => [...s])
-        : CURATED_PALETTES[0].stops.map((s) => [...s]);
+    const targetPalette = getActiveTargetPalette(activeComponent);
+    const currentStops = targetPalette.stops.map((s) => [...s]);
     const rotated = reverse
       ? [currentStops[3], currentStops[2], currentStops[1], currentStops[0]]
       : [currentStops[1], currentStops[2], currentStops[3], currentStops[0]];
-    const currentName = (saved && !saved.isNativeOff && saved.name) || "Prism Classic";
-    applyPaletteToWorkbench({
+    const currentName = targetPalette.name || "Prism Classic";
+    const nextEntry = {
       name: currentName.endsWith(" ⇄") ? currentName : `${currentName} ⇄`,
       stops: rotated,
-      angles: (saved && saved.angles) || { base: 135, bar: 90, side: 165, panel: 105 },
-    });
+      angles: targetPalette.angles || { base: 135, bar: 90, side: 165, panel: 105 },
+    };
+    if (activeComponent && activeComponent !== "all") {
+      setComponentPalette(activeComponent, nextEntry);
+    } else {
+      applyPaletteToWorkbench(nextEntry);
+    }
   }
 
   function isBreathingEnabled() {
@@ -691,6 +767,41 @@
     return out;
   }
 
+  function buildMeshCss(cStops, cAngles, kVal) {
+    const [s1, s2, s3, s4] = cStops;
+    const r1 = rgba(s1, 0.18 * kVal);
+    const r2 = rgba(s2, 0.18 * kVal);
+    const r3 = rgba(s3, 0.18 * kVal);
+    const r4 = rgba(s4, 0.22 * kVal);
+    const base = `linear-gradient(${cAngles.base}deg, ${rgba(s1, 0.14 * kVal)} 0%, ${rgba(
+      s2,
+      0.11 * kVal
+    )} 33%, ${rgba(s3, 0.11 * kVal)} 66%, ${rgba(s4, 0.16 * kVal)} 100%)`;
+    return [
+      `radial-gradient(ellipse 80% 62% at var(--g-p1x, 15%) var(--g-p1y, 15%), ${r1} 0%, transparent 74%)`,
+      `radial-gradient(ellipse 72% 78% at var(--g-p2x, 85%) var(--g-p2y, 25%), ${r2} 0%, transparent 74%)`,
+      `radial-gradient(ellipse 80% 65% at var(--g-p3x, 25%) var(--g-p3y, 85%), ${r3} 0%, transparent 74%)`,
+      `radial-gradient(ellipse 75% 75% at var(--g-p4x, 85%) var(--g-p4y, 85%), ${r4} 0%, transparent 76%)`,
+      base,
+    ].join(", ");
+  }
+
+  function buildBarCss(cStops, cAngles, kVal) {
+    const [s1, s2, s3, s4] = cStops;
+    return `linear-gradient(${cAngles.bar}deg, ${rgba(s1, 0.20 * kVal)} 0%, ${rgba(
+      s2,
+      0.15 * kVal
+    )} 33%, ${rgba(s3, 0.15 * kVal)} 66%, ${rgba(s4, 0.22 * kVal)} 100%)`;
+  }
+
+  function buildSelectionCss(cStops, cAngles, kVal) {
+    const [s1, s2, s3, s4] = cStops;
+    return `linear-gradient(${cAngles.bar}deg, ${rgba(s1, 0.30 * kVal)} 0%, ${rgba(
+      s2,
+      0.25 * kVal
+    )} 33%, ${rgba(s3, 0.25 * kVal)} 66%, ${rgba(s4, 0.32 * kVal)} 100%)`;
+  }
+
   function writeGradientCssVars(wb, stops, angles, k) {
     const [c1, c2, c3, c4] = stops;
     wb.style.setProperty("--g-r1", rgba(c1, 0.18 * k));
@@ -706,23 +817,7 @@
       )} 33%, ${rgba(c3, 0.11 * k)} 66%, ${rgba(c4, 0.16 * k)} 100%)`
     );
 
-    wb.style.setProperty(
-      "--g-bar",
-      `linear-gradient(${angles.bar}deg, ${rgba(c1, 0.20 * k)} 0%, ${rgba(
-        c2,
-        0.15 * k
-      )} 33%, ${rgba(c3, 0.15 * k)} 66%, ${rgba(c4, 0.22 * k)} 100%)`
-    );
-
-    wb.style.setProperty(
-      "--g-selection",
-      `linear-gradient(${angles.bar}deg, ${rgba(c1, 0.30 * k)} 0%, ${rgba(
-        c2,
-        0.25 * k
-      )} 33%, ${rgba(c3, 0.25 * k)} 66%, ${rgba(c4, 0.32 * k)} 100%)`
-    );
-
-    wb.style.setProperty("--g-sel-tint", rgba(c1, 0.28 * k));
+    wb.style.setProperty("--g-bar", buildBarCss(stops, angles, k));
 
     wb.style.setProperty(
       "--g-side",
@@ -747,6 +842,59 @@
       )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`
     );
 
+    // Apply per-component gradients & Off toggles
+    const compMap = getComponentsConfig();
+    const breatheOn = isBreathingEnabled();
+    const shimmerOn = breatheOn && getBreatheConfig().shimmer;
+    let allSurfacesUnified = true;
+
+    COMPONENT_DEFS.forEach((def) => {
+      const key = def.key;
+      const cfg = compMap[key] || { enabled: true, customPalette: null };
+      if (!cfg.enabled) {
+        if (key !== "selection") {
+          allSurfacesUnified = false;
+          wb.style.setProperty(`--g-${key}-mesh`, "none");
+          wb.style.setProperty(`--g-${key}-bar`, "none");
+        } else {
+          wb.classList.add("prism-no-selection");
+          wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
+          wb.style.setProperty(
+            "--g-sel-tint",
+            "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
+          );
+          clearDomSelectionOverlay();
+        }
+        return;
+      }
+
+      let compStops = stops;
+      let compAngles = angles;
+      if (cfg.customPalette && Array.isArray(cfg.customPalette.stops) && cfg.customPalette.stops.length === 4) {
+        if (key !== "selection") {
+          allSurfacesUnified = false;
+        }
+        compStops = shimmerOn
+          ? getShiftedStops(cfg.customPalette.stops, breathePhase * 0.22)
+          : cfg.customPalette.stops;
+        compAngles = cfg.customPalette.angles || angles;
+      }
+
+      if (key === "selection") {
+        wb.classList.remove("prism-no-selection");
+        wb.style.setProperty("--g-selection", buildSelectionCss(compStops, compAngles, k));
+        wb.style.setProperty("--g-sel-tint", rgba(compStops[0], 0.28 * k));
+      } else {
+        wb.style.setProperty(`--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k));
+        wb.style.setProperty(`--g-${key}-bar`, buildBarCss(compStops, compAngles, k));
+      }
+    });
+
+    wb.style.setProperty(
+      "--g-workbench-mesh",
+      allSurfacesUnified ? buildMeshCss(stops, angles, k) : "none"
+    );
+
     lastLiveStops = stops.map((s) => [...s]);
     lastLiveAngles = { ...angles };
     const liveGrad = `linear-gradient(90deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
@@ -756,11 +904,20 @@
     if (swatchEl) {
       swatchEl.style.background = liveGrad;
     }
+
+    const activeTargetStops =
+      activeComponent && activeComponent !== "all"
+        ? getActiveTargetPalette(activeComponent).stops
+        : stops;
+    const [tc1, tc2, tc3, tc4] = activeTargetStops;
+    const targetGrad = `linear-gradient(90deg, ${rgbToHex(tc1)} 0%, ${rgbToHex(
+      tc2
+    )} 33%, ${rgbToHex(tc3)} 66%, ${rgbToHex(tc4)} 100%)`;
     const previewBar = document.getElementById("pp-builder-preview-bar");
     if (previewBar) {
-      previewBar.style.background = liveGrad;
+      previewBar.style.background = targetGrad;
     }
-    const hexes = [rgbToHex(c1), rgbToHex(c2), rgbToHex(c3), rgbToHex(c4)];
+    const hexes = [rgbToHex(tc1), rgbToHex(tc2), rgbToHex(tc3), rgbToHex(tc4)];
     for (let i = 0; i < 4; i++) {
       const inp = document.getElementById(`pp-stop-${i}`);
       if (inp && inp.value.toUpperCase() !== hexes[i]) {
@@ -994,14 +1151,20 @@
   function applyPaletteToWorkbench(palette, opts) {
     const wb = document.querySelector(".monaco-workbench");
     if (!wb) return;
-    applyScopeClasses(wb);
     const k = getIntensity();
 
     if (!opts || !opts.skipHistory) {
       const currentSaved = getSavedPalette();
       const targetName = !palette || palette.isDefault ? "Prism Classic" : palette.name;
       const currentName = currentSaved ? currentSaved.name : "Prism Classic";
-      if (targetName !== currentName || (palette && palette.stops && currentSaved && currentSaved.stops && JSON.stringify(palette.stops) !== JSON.stringify(currentSaved.stops))) {
+      if (
+        targetName !== currentName ||
+        (palette &&
+          palette.stops &&
+          currentSaved &&
+          currentSaved.stops &&
+          JSON.stringify(palette.stops) !== JSON.stringify(currentSaved.stops))
+      ) {
         pushRollHistory(
           currentSaved || {
             name: "Prism Classic",
@@ -1022,9 +1185,15 @@
       ["--g-r1", "--g-r2", "--g-r3", "--g-r4"].forEach((prop) =>
         wb.style.setProperty(prop, "transparent")
       );
-      ["--g-base", "--g-bar", "--g-side", "--g-panel"].forEach((prop) =>
+      ["--g-base", "--g-bar", "--g-side", "--g-panel", "--g-workbench-mesh"].forEach((prop) =>
         wb.style.setProperty(prop, "none")
       );
+      COMPONENT_DEFS.forEach((def) => {
+        if (def.key === "selection") return;
+        wb.style.setProperty(`--g-${def.key}-mesh`, "none");
+        wb.style.setProperty(`--g-${def.key}-bar`, "none");
+      });
+      wb.classList.add("prism-no-selection");
       wb.style.setProperty("--g-selection", "var(--vscode-editor-selectionBackground)");
       wb.style.setProperty(
         "--g-sel-tint",
@@ -1047,28 +1216,6 @@
     const isDefaultPrism = !palette || palette.isDefault;
     if (isDefaultPrism) {
       localStorage.removeItem(STORAGE_KEY_STATE);
-      lastLiveStops = CURATED_PALETTES[0].stops.map((s) => [...s]);
-      lastLiveAngles = { base: 135, bar: 90, side: 165, panel: 105 };
-      if (Math.abs(k - 1.0) < 0.01 && !isBreathingEnabled()) {
-        [
-          "--g-r1",
-          "--g-r2",
-          "--g-r3",
-          "--g-r4",
-          "--g-base",
-          "--g-bar",
-          "--g-side",
-          "--g-panel",
-          "--g-border",
-          "--g-selection",
-          "--g-sel-tint",
-        ].forEach((prop) => wb.style.removeProperty(prop));
-        updateStatusBarPill("Prism Classic", CURATED_PALETTES[0].stops, false);
-        syncBuilderPickers(CURATED_PALETTES[0].stops);
-        renderPaletteGrid();
-        refreshPopoverHeaderAndIntensity();
-        return;
-      }
     }
 
     const activePalette = isDefaultPrism ? CURATED_PALETTES[0] : palette;
@@ -1087,8 +1234,9 @@
       } catch (_) {}
     }
 
-    updateStatusBarPill(activePalette.name, activePalette.stops);
-    syncBuilderPickers(activePalette.stops);
+    updateStatusBarPill(activePalette.name, activePalette.stops, false);
+    const targetPal = getActiveTargetPalette(activeComponent);
+    syncBuilderPickers(targetPal.stops);
     renderPaletteGrid();
     refreshPopoverHeaderAndIntensity();
   }
@@ -1217,26 +1365,6 @@
       breatheBtn.classList.toggle("active", breatheOn);
     }
 
-    const undoBtn = document.getElementById("pp-btn-undo");
-    if (undoBtn) {
-      const hasPrev = rollHistory.length > 0;
-      undoBtn.disabled = !hasPrev;
-      const prevItem = hasPrev ? rollHistory[rollHistory.length - 1] : null;
-      undoBtn.title = hasPrev
-        ? `Previous Roll: ${prevItem.name || "Prism Classic"} (Alt+Shift+Z)`
-        : "No previous roll in history yet (Alt+Shift+Z)";
-    }
-
-    const favLockBtn = document.getElementById("pp-btn-fav-lock");
-    if (favLockBtn) {
-      const favOn = isFavOnlyEnabled();
-      favLockBtn.classList.toggle("fav-active", favOn);
-      favLockBtn.textContent = favOn ? "★" : "☆";
-      favLockBtn.title = favOn
-        ? "Locked to Favorites Only — click to roll from all palettes"
-        : "Lock Roll & Auto-Morph to Favorites Only (★)";
-    }
-
     const breatheStatus = document.getElementById("pp-breathe-status");
     if (breatheStatus) {
       breatheStatus.textContent = breatheOn ? "ACTIVE" : "PAUSED";
@@ -1253,11 +1381,51 @@
     if (speedSlider) speedSlider.value = String(cfg.speedPct || 100);
     if (speedVal) speedVal.textContent = `${cfg.speedPct || 100}%`;
 
-    const scope = getScopeConfig();
-    ["seamless", "editor", "sidebar", "terminal", "bars", "selection"].forEach((sKey) => {
-      const sChip = document.getElementById(`pp-scope-${sKey}`);
-      if (sChip) sChip.classList.toggle("active", Boolean(scope[sKey]));
+    const comps = getComponentsConfig();
+    const globalPal = getActiveTargetPalette("all");
+    const globalHexes = (globalPal.stops || CURATED_PALETTES[0].stops).map(rgbToHex);
+
+    const allPill = document.getElementById("pp-comp-all");
+    if (allPill) {
+      allPill.classList.toggle("active", activeComponent === "all");
+    }
+
+    COMPONENT_DEFS.forEach((def) => {
+      const pill = document.getElementById(`pp-comp-${def.key}`);
+      const dot = document.getElementById(`pp-comp-dot-${def.key}`);
+      const cState = comps[def.key] || { enabled: true, palette: null };
+      if (pill) {
+        pill.classList.toggle("active", activeComponent === def.key);
+        pill.classList.toggle("is-off", !cState.enabled);
+      }
+      if (dot) {
+        dot.classList.toggle("off", !cState.enabled);
+        if (cState.enabled) {
+          const hexes =
+            cState.palette && Array.isArray(cState.palette.stops) && cState.palette.stops.length === 4
+              ? cState.palette.stops.map(rgbToHex)
+              : globalHexes;
+          dot.style.background = `linear-gradient(135deg, ${hexes[0]} 0%, ${hexes[1]} 33%, ${hexes[2]} 66%, ${hexes[3]} 100%)`;
+        } else {
+          dot.style.background = "transparent";
+        }
+      }
     });
+
+    const bTitle = document.getElementById("pp-builder-title");
+    if (bTitle) {
+      if (activeComponent === "all") {
+        bTitle.textContent = "Pick your own color";
+      } else {
+        const compDef = COMPONENT_DEFS.find((d) => d.key === activeComponent);
+        bTitle.textContent = `Pick your own color • ${compDef ? compDef.label : activeComponent}`;
+      }
+    }
+
+    const targetPal = getActiveTargetPalette(activeComponent);
+    if (targetPal && targetPal.stops) {
+      syncBuilderPickers(targetPal.stops);
+    }
   }
 
   function renderPaletteGrid() {
@@ -1265,8 +1433,9 @@
     const grid = document.getElementById("prism-popover-grid");
     if (!grid) return;
 
-    const saved = getSavedPalette();
-    const activeName = saved ? saved.name : "Prism Classic";
+    const comps = getComponentsConfig();
+    const targetPal = getActiveTargetPalette(activeComponent);
+    const activeName = targetPal ? targetPal.name : "Prism Classic";
     const favs = getFavorites();
     const all = getAllPalettes();
 
@@ -1277,6 +1446,60 @@
     });
 
     grid.textContent = "";
+
+    // When a specific component is selected, show quick On/Off and "Same as All" cards at the top of the grid
+    if (activeComponent !== "all") {
+      const compDef = COMPONENT_DEFS.find((d) => d.key === activeComponent);
+      const compState = comps[activeComponent] || { enabled: true, palette: null };
+      const compLabel = compDef ? compDef.label : activeComponent;
+
+      // Card 1: Turn Component Gradient ON / OFF
+      const toggleCard = document.createElement("div");
+      toggleCard.className = `pp-card${!compState.enabled ? " selected" : ""}`;
+      const toggleSwatch = document.createElement("div");
+      toggleSwatch.className = "pp-swatch";
+      toggleSwatch.style.background = compState.enabled
+        ? "linear-gradient(90deg, #22C55E 0%, #10B981 100%)"
+        : "rgba(128, 128, 128, 0.25)";
+      const toggleRow = document.createElement("div");
+      toggleRow.className = "pp-card-row";
+      const toggleName = document.createElement("span");
+      toggleName.className = "pp-card-name";
+      toggleName.textContent = compState.enabled
+        ? `● ${compLabel}: ON (Turn Off)`
+        : `○ ${compLabel}: OFF (Turn On)`;
+      toggleRow.appendChild(toggleName);
+      toggleCard.appendChild(toggleSwatch);
+      toggleCard.appendChild(toggleRow);
+      toggleCard.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleComponentEnabled(activeComponent);
+      });
+      grid.appendChild(toggleCard);
+
+      // Card 2: Reset Component to Unified "Same as All" Gradient
+      const inheritCard = document.createElement("div");
+      inheritCard.className = `pp-card${compState.enabled && !compState.palette ? " selected" : ""}`;
+      const globalStops = getActiveTargetPalette("all").stops || CURATED_PALETTES[0].stops;
+      const gHexes = globalStops.map(rgbToHex);
+      const inheritSwatch = document.createElement("div");
+      inheritSwatch.className = "pp-swatch";
+      inheritSwatch.style.background = `linear-gradient(90deg, ${gHexes[0]} 0%, ${gHexes[1]} 33%, ${gHexes[2]} 66%, ${gHexes[3]} 100%)`;
+      const inheritRow = document.createElement("div");
+      inheritRow.className = "pp-card-row";
+      const inheritName = document.createElement("span");
+      inheritName.className = "pp-card-name";
+      inheritName.textContent = "⇄ Same as All (Unified)";
+      inheritRow.appendChild(inheritName);
+      inheritCard.appendChild(inheritSwatch);
+      inheritCard.appendChild(inheritRow);
+      inheritCard.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setComponentPalette(activeComponent, null);
+      });
+      grid.appendChild(inheritCard);
+    }
+
     if (filtered.length === 0) {
       const empty = document.createElement("div");
       empty.style.cssText =
@@ -1290,8 +1513,14 @@
     }
 
     filtered.forEach((p) => {
+      const compState = activeComponent !== "all" ? comps[activeComponent] : null;
+      const isSelected =
+        activeComponent === "all"
+          ? p.name === activeName
+          : Boolean(compState && compState.enabled && compState.palette && compState.palette.name === p.name);
+
       const card = document.createElement("div");
-      card.className = `pp-card${p.name === activeName ? " selected" : ""}`;
+      card.className = `pp-card${isSelected ? " selected" : ""}`;
 
       // Tint each card with its own subtle 4-stop gradient mesh
       const [c1, c2, c3, c4] = p.stops;
@@ -1362,6 +1591,15 @@
         if (nameInp && p.isCustom) {
           nameInp.value = p.name;
         }
+        if (activeComponent !== "all") {
+          setComponentPalette(activeComponent, {
+            name: p.name,
+            stops: [...p.stops],
+            angles: { base: 135, bar: 90, side: 165, panel: 105 },
+          });
+          return;
+        }
+        resetAllComponentCustomPalettes();
         if (p.isDefault) {
           applyPaletteToWorkbench(null);
         } else {
@@ -1499,7 +1737,7 @@
     ribbon.className = "pp-top-ribbon";
     pop.appendChild(ribbon);
 
-    // 1. Luxury Header Bar
+    // 1. Luxury Header Bar (Clean: Studio title + Breathe, Roll, Mode, Close)
     const header = document.createElement("div");
     header.className = "pp-header";
 
@@ -1509,11 +1747,6 @@
     const titleText = document.createElement("span");
     titleText.textContent = "Gradient Studio";
     titleWrap.appendChild(titleText);
-
-    const badge = document.createElement("span");
-    badge.className = "pp-title-badge";
-    badge.textContent = "LIVE";
-    titleWrap.appendChild(badge);
 
     const actions = document.createElement("div");
     actions.className = "pp-actions";
@@ -1525,17 +1758,6 @@
     breatheBtn.title = "Toggle Breathing Aurora Engine (Alt+Shift+B)";
     breatheBtn.addEventListener("click", () => toggleBreathing());
 
-    const undoBtn = document.createElement("button");
-    undoBtn.id = "pp-btn-undo";
-    undoBtn.className = "pp-btn pp-btn-icon";
-    undoBtn.textContent = "←";
-    undoBtn.disabled = rollHistory.length === 0;
-    undoBtn.title =
-      rollHistory.length > 0
-        ? `Previous Roll: ${rollHistory[rollHistory.length - 1].name || "Prism Classic"} (Alt+Shift+Z)`
-        : "No previous roll in history yet (Alt+Shift+Z)";
-    undoBtn.addEventListener("click", () => undoPreviousRoll());
-
     const rollBtn = document.createElement("button");
     rollBtn.className = "pp-btn pp-btn-primary";
     rollBtn.appendChild(createCycleArrowsSvg(12));
@@ -1544,24 +1766,28 @@
     rollBtn.appendChild(rollText);
     rollBtn.title = "Roll random 4-color gradient (Alt+Shift+G)";
     rollBtn.addEventListener("click", () => {
-      const saved = getSavedPalette();
-      applyPaletteToWorkbench(rollRandomPalette(saved ? saved.name : ""));
+      const targetPal = getActiveTargetPalette(activeComponent);
+      const next = rollRandomPalette(targetPal ? targetPal.name : "");
+      if (activeComponent !== "all") {
+        setComponentPalette(activeComponent, next);
+      } else {
+        resetAllComponentCustomPalettes();
+        applyPaletteToWorkbench(next);
+      }
     });
 
-    const favLockBtn = document.createElement("button");
-    favLockBtn.id = "pp-btn-fav-lock";
-    favLockBtn.className = `pp-btn pp-btn-icon${isFavOnlyEnabled() ? " fav-active" : ""}`;
-    favLockBtn.textContent = isFavOnlyEnabled() ? "★" : "☆";
-    favLockBtn.title = isFavOnlyEnabled()
-      ? "Locked to Favorites Only — click to roll from all palettes"
-      : "Lock Roll & Auto-Morph to Favorites Only (★)";
-    favLockBtn.addEventListener("click", () => toggleFavOnly());
-
     const nativeBtn = document.createElement("button");
+    nativeBtn.id = "pp-btn-mode";
     nativeBtn.className = "pp-btn";
     nativeBtn.textContent = "Mode";
-    nativeBtn.title = "Cycle Prism Classic / Theme Native Off (Alt+Shift+0)";
-    nativeBtn.addEventListener("click", () => toggleResetOrNative());
+    nativeBtn.title = "Toggle Gradient On/Off or Cycle Prism Classic / Theme Native (Alt+Shift+0)";
+    nativeBtn.addEventListener("click", () => {
+      if (activeComponent !== "all") {
+        toggleComponentEnabled(activeComponent);
+      } else {
+        toggleResetOrNative();
+      }
+    });
 
     const closeBtn = document.createElement("button");
     closeBtn.className = "pp-btn pp-btn-icon";
@@ -1570,15 +1796,13 @@
     closeBtn.addEventListener("click", () => pop.remove());
 
     actions.appendChild(breatheBtn);
-    actions.appendChild(undoBtn);
     actions.appendChild(rollBtn);
-    actions.appendChild(favLockBtn);
     actions.appendChild(nativeBtn);
     actions.appendChild(closeBtn);
     header.appendChild(titleWrap);
     header.appendChild(actions);
 
-    // 2. Intensity / Opacity Slider + Breathing Aurora Studio Controls
+    // 2. Intensity / Opacity Slider + Breathing Aurora + Component Selector Bar
     const intSec = document.createElement("div");
     intSec.className = "pp-section";
 
@@ -1608,27 +1832,9 @@
       setIntensity(parseInt(slider.value, 10) / 100);
     });
 
-    const presetsWrap = document.createElement("div");
-    presetsWrap.style.cssText = "display:flex;gap:4px;";
-    [
-      { label: "60%", val: 0.6 },
-      { label: "100%", val: 1.0 },
-      { label: "150%", val: 1.5 },
-    ].forEach((preset) => {
-      const b = document.createElement("button");
-      b.className = "pp-btn";
-      b.style.height = "23px";
-      b.style.padding = "0 7px";
-      b.style.fontSize = "10px";
-      b.textContent = preset.label;
-      b.addEventListener("click", () => setIntensity(preset.val));
-      presetsWrap.appendChild(b);
-    });
-
     intRow.appendChild(intLabel);
     intRow.appendChild(slider);
     intRow.appendChild(valSpan);
-    intRow.appendChild(presetsWrap);
     intSec.appendChild(intRow);
 
     // 2B. Breathing Aurora Multi-Mode Studio Drawer
@@ -1660,7 +1866,7 @@
       {
         key: "wave",
         label: "Full Wave",
-        tip: "Rotate gradient angles & focal corners across Editor, Bars, Sidebar & Terminal",
+        tip: "Rotate gradient angles & focal corners across Editor, Bars, Explorer, Chat & Terminal",
       },
       {
         key: "pulse",
@@ -1735,55 +1941,56 @@
     breatheDrawer.appendChild(speedRow);
     intSec.appendChild(breatheDrawer);
 
-    // 2C. Surface & Unified Canvas Scope Row
-    const scopeCfg = getScopeConfig();
-    const scopeRow = document.createElement("div");
-    scopeRow.className = "pp-scope-row";
-    const scopeDefs = [
-      {
-        key: "seamless",
-        label: "Seamless",
-        tip: "Same continuous gradient across the entire VSCode window (uncheck for split per-panel gradients)",
-      },
-      {
-        key: "editor",
-        label: "Editor",
-        tip: "Show gradient on Code Editor canvas",
-      },
-      {
-        key: "sidebar",
-        label: "Sidebar",
-        tip: "Show gradient on Activity Bar, Left Sidebar & Right Chat Sidebar",
-      },
-      {
-        key: "terminal",
-        label: "Terminal",
-        tip: "Show gradient on Bottom Terminal / Output Panel",
-      },
-      {
-        key: "bars",
-        label: "Bars",
-        tip: "Show gradient on Title Bar, Tab Bar & Status Bar",
-      },
-      {
-        key: "selection",
-        label: "Select",
-        tip: "Enable 4-color gradient text selection highlight",
-      },
-    ];
-    scopeDefs.forEach((s) => {
-      const sChip = document.createElement("button");
-      sChip.id = `pp-scope-${s.key}`;
-      sChip.className = `pp-chip${scopeCfg[s.key] ? " active" : ""}`;
-      sChip.textContent = s.label;
-      sChip.title = s.tip;
-      sChip.addEventListener("click", () => {
-        const cur = getScopeConfig();
-        saveScopeConfig({ [s.key]: !cur[s.key] });
-      });
-      scopeRow.appendChild(sChip);
+    // 2C. Per-Component Selector & Gradient On/Off Bar
+    const compBar = document.createElement("div");
+    compBar.className = "pp-comp-bar";
+
+    const allPill = document.createElement("button");
+    allPill.id = "pp-comp-all";
+    allPill.className = `pp-comp-pill${activeComponent === "all" ? " active" : ""}`;
+    allPill.textContent = "All";
+    allPill.title = "Apply chosen gradient seamlessly across all enabled components";
+    allPill.addEventListener("click", () => {
+      activeComponent = "all";
+      renderPaletteGrid();
+      refreshPopoverHeaderAndIntensity();
     });
-    intSec.appendChild(scopeRow);
+    compBar.appendChild(allPill);
+
+    COMPONENT_DEFS.forEach((def) => {
+      const pill = document.createElement("button");
+      pill.id = `pp-comp-${def.key}`;
+      pill.className = `pp-comp-pill${activeComponent === def.key ? " active" : ""}`;
+      pill.title = `${def.tip}\n• Click pill to customize ${def.label} gradient color\n• Click dot (or click selected pill again) to turn ${def.label} gradient ON / OFF`;
+
+      const dot = document.createElement("span");
+      dot.id = `pp-comp-dot-${def.key}`;
+      dot.className = "pp-comp-dot";
+      dot.title = `Click to toggle ${def.label} gradient ON / OFF`;
+      dot.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleComponentEnabled(def.key);
+      });
+
+      const lbl = document.createElement("span");
+      lbl.textContent = def.label;
+
+      pill.appendChild(dot);
+      pill.appendChild(lbl);
+
+      pill.addEventListener("click", () => {
+        if (activeComponent === def.key) {
+          toggleComponentEnabled(def.key);
+        } else {
+          activeComponent = def.key;
+          renderPaletteGrid();
+          refreshPopoverHeaderAndIntensity();
+        }
+      });
+
+      compBar.appendChild(pill);
+    });
+    intSec.appendChild(compBar);
 
     // 3. Category Filter Tabs
     const tabsBar = document.createElement("div");
@@ -1822,92 +2029,16 @@
     bHead.className = "pp-builder-head";
 
     const bTitle = document.createElement("div");
+    bTitle.id = "pp-builder-title";
     bTitle.className = "pp-builder-title";
     bTitle.textContent = "Pick your own color";
 
-    const bTools = document.createElement("div");
-    bTools.className = "pp-builder-tools";
-
-    const rotateBtn = document.createElement("button");
-    rotateBtn.id = "pp-btn-rotate";
-    rotateBtn.className = "pp-mini-btn";
-    rotateBtn.textContent = "⇄ Rotate";
-    rotateBtn.title = "Rotate 4 color stops around corners (Shift+Click to reverse)";
-    rotateBtn.addEventListener("click", (e) => {
-      rotateActiveStops(Boolean(e.shiftKey));
-    });
-
-    const copyHexBtn = document.createElement("button");
-    copyHexBtn.id = "pp-btn-copy-hex";
-    copyHexBtn.className = "pp-mini-btn";
-    copyHexBtn.textContent = "Copy Hex";
-    copyHexBtn.title = "Copy active 4 hex colors (#C1, #C2, #C3, #C4) to clipboard";
-    copyHexBtn.addEventListener("click", () => {
-      const hexStr = colorInputs.map((inp) => inp.value.toUpperCase()).join(", ");
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(hexStr).catch(() => {});
-      }
-      copyHexBtn.textContent = "✓ Copied";
-      setTimeout(() => {
-        copyHexBtn.textContent = "Copy Hex";
-      }, 1200);
-    });
-
-    const pasteHexBtn = document.createElement("button");
-    pasteHexBtn.id = "pp-btn-paste-hex";
-    pasteHexBtn.className = "pp-mini-btn";
-    pasteHexBtn.textContent = "Paste Hex";
-    pasteHexBtn.title =
-      "Paste 4 hex colors (#RRGGBB) or a Coolors URL from clipboard (or paste into the input box below)";
-    pasteHexBtn.addEventListener("click", async () => {
-      let rawText = "";
-      try {
-        if (navigator.clipboard && navigator.clipboard.readText) {
-          rawText = await navigator.clipboard.readText();
-        }
-      } catch (_) {}
-      if (!rawText && nameInput.value) {
-        rawText = nameInput.value;
-      }
-      const parsedStops = parseFourHexStops(rawText);
-      if (parsedStops) {
-        applyPaletteToWorkbench({
-          name: "Pasted Harmony",
-          stops: parsedStops,
-          angles: { base: 135, bar: 90, side: 165, panel: 105 },
-        });
-        pasteHexBtn.textContent = "✓ Applied";
-        setTimeout(() => {
-          pasteHexBtn.textContent = "Paste Hex";
-        }, 1200);
-      } else {
-        pasteHexBtn.textContent = "No 4 Hex";
-        setTimeout(() => {
-          pasteHexBtn.textContent = "Paste Hex";
-        }, 1200);
-      }
-    });
-
-    bTools.appendChild(rotateBtn);
-    bTools.appendChild(copyHexBtn);
-    bTools.appendChild(pasteHexBtn);
-
-    const randFourBtn = document.createElement("button");
-    randFourBtn.className = "pp-btn";
-    randFourBtn.textContent = "Harmony";
-    randFourBtn.title = "Generate a fresh 4-stop procedural HSL harmony";
-    randFourBtn.addEventListener("click", () => {
-      const proc = generateProceduralPalette();
-      applyPaletteToWorkbench(proc);
-    });
-
     bHead.appendChild(bTitle);
-    bHead.appendChild(bTools);
 
-    const saved = getSavedPalette();
+    const targetPal = getActiveTargetPalette(activeComponent);
     const initialStops =
-      saved && saved.stops && saved.stops.length === 4
-        ? saved.stops
+      targetPal && targetPal.stops && targetPal.stops.length === 4
+        ? targetPal.stops
         : CURATED_PALETTES[0].stops;
     const initHexes = initialStops.map(rgbToHex);
 
@@ -1932,11 +2063,17 @@
         ci.title = `Pick Color ${i + 1} (${ci.value.toUpperCase()})`;
         const liveStops = colorInputs.map((inp) => hexToRgb(inp.value));
         const customName = (nameInput.value || "").trim() || "Custom Live";
-        applyPaletteToWorkbench({
+        const customPal = {
           name: customName,
           stops: liveStops,
           angles: { base: 135, bar: 90, side: 165, panel: 105 },
-        });
+        };
+        if (activeComponent !== "all") {
+          setComponentPalette(activeComponent, customPal);
+        } else {
+          resetAllComponentCustomPalettes();
+          applyPaletteToWorkbench(customPal);
+        }
       });
 
       colorInputs.push(ci);
@@ -1952,11 +2089,17 @@
       const parsed = parseFourHexStops(nameInput.value);
       if (parsed) {
         nameInput.value = "";
-        applyPaletteToWorkbench({
+        const hexPal = {
           name: "Custom Hex",
           stops: parsed,
           angles: { base: 135, bar: 90, side: 165, panel: 105 },
-        });
+        };
+        if (activeComponent !== "all") {
+          setComponentPalette(activeComponent, hexPal);
+        } else {
+          resetAllComponentCustomPalettes();
+          applyPaletteToWorkbench(hexPal);
+        }
       }
     });
 
@@ -1976,7 +2119,6 @@
     saveRow.className = "pp-row";
 
     saveRow.appendChild(nameInput);
-    saveRow.appendChild(randFourBtn);
     saveRow.appendChild(saveBtn);
 
     builder.appendChild(bHead);
@@ -1992,6 +2134,7 @@
     wb.appendChild(pop);
 
     renderPaletteGrid();
+    refreshPopoverHeaderAndIntensity();
   }
 
   // Close popover when clicking outside or pressing Escape
@@ -2158,7 +2301,8 @@
 
   function renderDomSelectionGradient() {
     const saved = getSavedPalette();
-    if ((saved && saved.isNativeOff) || !getScopeConfig().selection) {
+    const comps = getComponentsConfig();
+    if ((saved && saved.isNativeOff) || !comps.selection || !comps.selection.enabled) {
       clearDomSelectionOverlay();
       return;
     }
@@ -2283,7 +2427,6 @@
     }
     const wb = document.querySelector(".monaco-workbench");
     if (!wb) return;
-    applyScopeClasses(wb);
     const saved = getSavedPalette();
     if (saved) {
       if (saved.isNativeOff && wb.style.getPropertyValue("--g-base") !== "none") {
@@ -2291,6 +2434,8 @@
       } else if (!saved.isNativeOff && saved.stops && !wb.style.getPropertyValue("--g-base")) {
         applyPaletteToWorkbench(saved, { skipHistory: true });
       }
+    } else if (!wb.style.getPropertyValue("--g-editor-mesh")) {
+      applyPaletteToWorkbench(null, { skipHistory: true });
     }
   }
 
