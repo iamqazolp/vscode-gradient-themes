@@ -97,7 +97,7 @@
     var(--g-base);
 
   /* Per-Component Gradient Variables (Default: Same unified gradient across everything) */
-  --g-workbench-mesh: none;
+  --g-workbench-mesh: var(--g-default-mesh);
   --g-editor-mesh: var(--g-default-mesh);
   --g-editor-bar: var(--g-bar);
   --g-editor-frame: var(--g-border);
@@ -119,14 +119,16 @@
  * 2. UNIFIED VIEWPORT-FIXED & PER-COMPONENT GRADIENT ENGINE
  *    Every component uses `background-attachment: fixed` over `--g-canvas-bg`
  *    on its single top-level surface container (zero double-layering!).
- *    - When components share the same palette, they form 1 seamless window gradient.
- *    - When a component has its own palette or is turned OFF (`none`), it renders
- *      its own gradient or clean solid background with zero bleed into other panels!
+ *    - `.monaco-workbench` paints `--g-workbench-mesh` so floating-panel gaps
+ *      blend seamlessly with zero white separators.
+ *    - Each component has an opaque `background-color: var(--g-canvas-bg)` so
+ *      customizing or turning off one component never bleeds into any other!
  * -------------------------------------------------------------------------- */
 
 .monaco-workbench {
   background-color: var(--g-canvas-bg, var(--vscode-editor-background)) !important;
-  background-image: none !important;
+  background-image: var(--g-workbench-mesh, var(--g-default-mesh)) !important;
+  background-attachment: fixed !important;
 }
 
 /* Make inner wrappers transparent so each parent component's gradient shines through cleanly */

@@ -945,12 +945,16 @@
       )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`
     );
 
-    // Apply per-component gradients & Off toggles
+    // Apply per-component gradients & Off toggles (reuse shared strings when using unified palette)
     const compMap = getComponentsConfig();
     const breatheOn = isBreathingEnabled();
     const breatheCfg = getBreatheConfig();
     const shimmerOn = breatheOn && breatheCfg.shimmer;
     const waveOn = breatheOn && breatheCfg.wave;
+
+    const sharedMeshCss = buildMeshCss(stops, angles, k);
+    const sharedBarCss = buildBarCss(stops, angles, k);
+    const sharedFrameCss = buildFrameCss(stops);
 
     COMPONENT_DEFS.forEach((def) => {
       const key = def.key;
@@ -975,28 +979,42 @@
         return;
       }
 
-      let compStops = stops;
-      let compAngles = angles;
-      if (cfg.customPalette && Array.isArray(cfg.customPalette.stops) && cfg.customPalette.stops.length === 4) {
-        const phaseDelta = Math.max(0, breathePhase - (Number(cfg.customPalette.phaseOffset) || 0));
-        compStops = shimmerOn
-          ? getShiftedStops(cfg.customPalette.stops, phaseDelta * 0.16)
-          : cfg.customPalette.stops;
-        const baseA = cfg.customPalette.angles || {
-          base: 135,
-          bar: 90,
-          side: 165,
-          panel: 105,
-        };
-        compAngles = waveOn
-          ? {
-              base: Math.round(baseA.base + Math.sin(breathePhase * 0.65) * 32),
-              bar: Math.round(baseA.bar + Math.sin(breathePhase * 0.8) * 24),
-              side: Math.round(baseA.side + Math.sin(breathePhase * 0.55) * 28),
-              panel: Math.round(baseA.panel + Math.sin(breathePhase * 0.7) * 28),
-            }
-          : baseA;
+      const hasCustom =
+        cfg.customPalette &&
+        Array.isArray(cfg.customPalette.stops) &&
+        cfg.customPalette.stops.length === 4;
+
+      if (!hasCustom) {
+        if (key === "selection") {
+          wb.classList.remove("prism-no-selection");
+          wb.style.setProperty("--g-selection", buildSelectionCss(stops, angles, k));
+          wb.style.setProperty("--g-sel-tint", rgba(stops[0], 0.28 * k));
+        } else {
+          wb.style.setProperty(`--g-${key}-mesh`, sharedMeshCss);
+          wb.style.setProperty(`--g-${key}-bar`, sharedBarCss);
+          wb.style.setProperty(`--g-${key}-frame`, sharedFrameCss);
+        }
+        return;
       }
+
+      const phaseDelta = Math.max(0, breathePhase - (Number(cfg.customPalette.phaseOffset) || 0));
+      const compStops = shimmerOn
+        ? getShiftedStops(cfg.customPalette.stops, phaseDelta * 0.16)
+        : cfg.customPalette.stops;
+      const baseA = cfg.customPalette.angles || {
+        base: 135,
+        bar: 90,
+        side: 165,
+        panel: 105,
+      };
+      const compAngles = waveOn
+        ? {
+            base: Math.round(baseA.base + Math.sin(breathePhase * 0.65) * 32),
+            bar: Math.round(baseA.bar + Math.sin(breathePhase * 0.8) * 24),
+            side: Math.round(baseA.side + Math.sin(breathePhase * 0.55) * 28),
+            panel: Math.round(baseA.panel + Math.sin(breathePhase * 0.7) * 28),
+          }
+        : baseA;
 
       if (key === "selection") {
         wb.classList.remove("prism-no-selection");
@@ -1009,8 +1027,9 @@
       }
     });
 
-    // Always keep .monaco-workbench mesh "none" so customizing one component never flips the root canvas
-    wb.style.setProperty("--g-workbench-mesh", "none");
+    // Keep .monaco-workbench mesh synced with the global gradient so floating-panel gaps
+    // never show a white separator, while each component's opaque --g-canvas-bg isolates its own surface
+    wb.style.setProperty("--g-workbench-mesh", sharedMeshCss);
 
     lastLiveStops = stops.map((s) => [...s]);
     lastLiveAngles = { ...angles };
@@ -1047,6 +1066,7 @@
     }
 
     breatheTimer = setInterval(() => {
+      if (document.hidden) return;
       const targetWb = document.querySelector(".monaco-workbench");
       if (!targetWb) return;
       const saved = getSavedPalette();
@@ -2382,12 +2402,12 @@
   }
 
   function clearDomSelectionOverlay() {
-    const wb = document.querySelector(".monaco-workbench");
-    if (wb) wb.classList.remove("prism-dom-sel-active");
     const layer = document.getElementById("prism-dom-selection-layer");
     if (layer && layer.firstChild) {
       layer.textContent = "";
     }
+    const wb = document.querySelector(".monaco-workbench.prism-dom-sel-active");
+    if (wb) wb.classList.remove("prism-dom-sel-active");
   }
 
   let selRafId = 0;
@@ -2400,15 +2420,15 @@
   }
 
   function renderDomSelectionGradient() {
-    const saved = getSavedPalette();
-    const comps = getComponentsConfig();
-    if ((saved && saved.isNativeOff) || !comps.selection || !comps.selection.enabled) {
+    const sel = window.getSelection ? window.getSelection() : null;
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
       clearDomSelectionOverlay();
       return;
     }
 
-    const sel = window.getSelection ? window.getSelection() : null;
-    if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
+    const saved = getSavedPalette();
+    const comps = getComponentsConfig();
+    if ((saved && saved.isNativeOff) || !comps.selection || !comps.selection.enabled) {
       clearDomSelectionOverlay();
       return;
     }
