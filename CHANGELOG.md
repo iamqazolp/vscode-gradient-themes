@@ -1,5 +1,7 @@
 # Changelog
 
+> **TLDR: The more 67s the better.**
+
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
 ## [676767.676767.676767] - 2026-11-08
