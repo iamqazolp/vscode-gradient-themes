@@ -550,12 +550,83 @@
   let cachedMonacoTokenSig = "";
   let cachedMonacoTokenMap = null;
   let lastSyntaxHexSig = "";
-  let lastSyntaxSheetUpdateTs = 0;
   let cachedComponentsConfig = null;
   let lastAppliedWbElement = null;
   const lastAppliedVars = new Map();
   let lastSwatchGrad = "";
   let lastBackdropMesh = "";
+
+  // Non-inherited local CSS custom properties (`inherits: false` in Blink PropertyRegistry)
+  // Updating these on individual containers/elements triggers kLocalStyleChange (1 node)
+  // with ZERO descendant DOM tree walks (InheritedEqual() === true) and near-zero Oilpan GC!
+  const LOCAL_BREATHING_PROPS = [
+    "--prism-local-bg",
+    "--prism-local-bar",
+    "--prism-local-border",
+    "--prism-local-frame",
+  ];
+  const localStyledElements = new Set();
+  let lastLocalVars = new WeakMap();
+  let cachedBreathingTargets = null;
+  let cachedBreathingTargetsWb = null;
+  let cachedBreathingTargetsTs = 0;
+  let breatheTickCount = 0;
+
+  function registerNonInheritedCssProps() {
+    if (typeof CSS === "undefined" || typeof CSS.registerProperty !== "function") return;
+    const nonInherited = [
+      "--prism-local-bg",
+      "--prism-local-bar",
+      "--prism-local-border",
+    ];
+    for (let i = 0; i < nonInherited.length; i++) {
+      try {
+        CSS.registerProperty({
+          name: nonInherited[i],
+          syntax: "*",
+          inherits: false,
+        });
+      } catch (_) {
+        // Already registered in this window
+      }
+    }
+  }
+  registerNonInheritedCssProps();
+
+  function setLocalProp(el, prop, val) {
+    if (!el) return;
+    let map = lastLocalVars.get(el);
+    if (!map) {
+      map = new Map();
+      lastLocalVars.set(el, map);
+    }
+    if (map.get(prop) === val) return;
+    map.set(prop, val);
+    localStyledElements.add(el);
+    el.style.setProperty(prop, val);
+  }
+
+  function setLocalPropsOnList(list, propA, valA, propB, valB) {
+    if (!list || !list.length) return;
+    for (let i = 0; i < list.length; i++) {
+      const el = list[i];
+      if (!el || !el.isConnected) continue;
+      if (propA && valA) setLocalProp(el, propA, valA);
+      if (propB && valB) setLocalProp(el, propB, valB);
+    }
+  }
+
+  function clearLocalBreathingProps() {
+    if (localStyledElements.size === 0) return;
+    localStyledElements.forEach((el) => {
+      if (!el) return;
+      for (let i = 0; i < LOCAL_BREATHING_PROPS.length; i++) {
+        el.style.removeProperty(LOCAL_BREATHING_PROPS[i]);
+      }
+    });
+    localStyledElements.clear();
+    lastLocalVars = new WeakMap();
+  }
 
   function ensureAuroraBackdrop(wb) {
     if (!wb) return null;
@@ -826,9 +897,7 @@
       setWbProp(wb, "--g-syntax-strong", buildSelectionCss(compStops, compAngles, effectiveK * 0.85));
       setWbProp(wb, "--g-syntax-frame", buildFrameCss(compStops));
     }
-    const now = performance.now();
-    if (!fromBreatheTick || now - lastSyntaxSheetUpdateTs >= 240) {
-      lastSyntaxSheetUpdateTs = now;
+    if (!fromBreatheTick) {
       ensureSyntaxStyleSheet(wb, false, compStops, effectiveK);
     }
   }
@@ -1391,6 +1460,7 @@
 
   function writeGradientCssVars(wb, stops, angles, k, coords, opts) {
     const fromBreatheTick = Boolean(opts && opts.fromBreatheTick);
+    clearLocalBreathingProps();
     const [c1, c2, c3, c4] = stops;
     const defaultMeshCss = buildMeshCss(stops, angles, k, coords);
     const defaultTerminalPanelCss = buildTerminalPanelCss(stops, angles, k, coords);
@@ -1577,13 +1647,331 @@
     }
   }
 
+  function getBreathingTargets(wb) {
+    const now = performance.now();
+    if (
+      cachedBreathingTargets &&
+      cachedBreathingTargetsWb === wb &&
+      now - cachedBreathingTargetsTs < 900
+    ) {
+      return cachedBreathingTargets;
+    }
+    cachedBreathingTargetsWb = wb;
+    cachedBreathingTargetsTs = now;
+
+    const q = (sel) => Array.from(wb.querySelectorAll(sel));
+    const targets = {
+      // Split-Panel / Custom Component Container Elements
+      editorParts: q(".part.editor"),
+      explorerParts: q(".part.activitybar, .part.sidebar"),
+      chatParts: q(".part.auxiliarybar, .part.sessionspart"),
+      terminalParts: q(
+        ".part.panel, .part.editor .editor-instance .terminal-outer-container, .chat-terminal-output-terminal"
+      ),
+      terminalTitleParts: q(
+        ".part.panel > .title, .part.panel > .composite.title, .part.panel > .header-or-footer"
+      ),
+      barsParts: q(
+        ".part.titlebar, .part.titlebar .command-center-center, .part.banner, .part.statusbar, .editor-group-container > .title > .tabs-and-actions-container"
+      ),
+      // Active UI Chrome Elements (~8-12 nodes total across the window)
+      statusPills: q("#prism-randomizer-breathe, #prism-randomizer-chevron"),
+      editorBar: q(
+        ".monaco-editor .view-overlays .current-line, .monaco-editor .margin-view-overlays .current-line-margin"
+      ),
+      editorSticky: q(
+        ".monaco-editor .sticky-widget, .notebookOverlay .notebook-sticky-scroll-container, .coverage-summary-widget, .editor-instance .terminal-sticky-scroll, .part.editor .monaco-tree-sticky-container:not(.empty)"
+      ),
+      explorerBar: q(
+        ".part.activitybar .monaco-action-bar .action-item.checked .active-item-indicator, .part.sidebar :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator"
+      ),
+      explorerSticky: q(
+        ".part.sidebar .monaco-tree-sticky-container:not(.empty), .part.sidebar .terminal-sticky-scroll, .part.sidebar .output-view .sticky-widget, .part.sidebar .monaco-list .monaco-list-row.selected, .part.sidebar .monaco-list .monaco-list-row.focused"
+      ),
+      chatBar: q(
+        ".interactive-session .chat-input-container, .interactive-item-container.interactive-request .value .rendered-markdown, .prompt-timeline-sticky-band, .interactive-session .interactive-item-container.chat-sticky-progress:not(:empty), .interactive-session .chat-editing-session .chat-editing-session-container, .interactive-session .interactive-input-part .chat-todo-list-widget-container .chat-todo-list-widget, :is(.part.auxiliarybar, .part.sessionspart) :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator, :is(.part.auxiliarybar, .part.sessionspart) .monaco-list .monaco-list-row.selected, :is(.part.auxiliarybar, .part.sessionspart) .monaco-list .monaco-list-row.focused"
+      ),
+      chatSticky: q(
+        ":is(.part.auxiliarybar, .part.sessionspart) .monaco-tree-sticky-container:not(.empty), :is(.part.auxiliarybar, .part.sessionspart) .terminal-sticky-scroll"
+      ),
+      terminalBar: q(
+        ".part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator, .part.panel .monaco-list .monaco-list-row.selected, .part.panel .monaco-list .monaco-list-row.focused, .pane-body.integrated-terminal .tabs-list .monaco-list-row.selected, .pane-body.integrated-terminal .tabs-list .monaco-list-row.focused"
+      ),
+      terminalSticky: q(
+        ".part.panel .terminal-sticky-scroll, .part.panel > .content .pane-body.output-view .sticky-widget, .part.panel .monaco-tree-sticky-container:not(.empty)"
+      ),
+      barsBar: q(
+        ".editor-group-container > .title .sticky-tabs-background, .editor-group-container > .title .tabs-container > .tab.sticky, .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill, .editor-group-container > .title .tabs-container > .tab.active:not(.sticky), .editor-group-container > .title .tabs-container > .tab.active:not(.sticky) > .tab-fill"
+      ),
+      barsSticky: q(".quick-input-widget .monaco-tree-sticky-container:not(.empty)"),
+      selectionBar: q(
+        ".monaco-editor .selected-text, .monaco-editor .selectionHighlight, .xterm .xterm-selection div, #prism-dom-selection-layer .prism-dom-sel-rect"
+      ),
+    };
+
+    // Prune any element that is no longer active/selected so it reverts cleanly to workbench CSS
+    const activeSet = new Set();
+    Object.values(targets).forEach((arr) => {
+      for (let i = 0; i < arr.length; i++) activeSet.add(arr[i]);
+    });
+    localStyledElements.forEach((el) => {
+      if (!activeSet.has(el)) {
+        for (let i = 0; i < LOCAL_BREATHING_PROPS.length; i++) {
+          el.style.removeProperty(LOCAL_BREATHING_PROPS[i]);
+        }
+        localStyledElements.delete(el);
+        lastLocalVars.delete(el);
+      }
+    });
+
+    cachedBreathingTargets = targets;
+    return targets;
+  }
+
+  function updateBreathingTargets(wb, stops, angles, k, coords, tickCount) {
+    const [c1, c2, c3, c4] = stops;
+    const splitMode = !isSeamlessEnabled();
+    const defaultMeshCss = buildMeshCss(stops, angles, k, coords);
+
+    // 1. In Seamless Mode, update the single childless leaf #prism-aurora-backdrop every 100ms (10 FPS)
+    if (!splitMode) {
+      setBackdropMesh(wb, defaultMeshCss);
+    }
+
+    lastLiveStops = stops.map((s) => [...s]);
+    lastLiveAngles = { ...angles };
+
+    const compMap = getComponentsConfig();
+    const breatheCfg = getBreatheConfig();
+    const shimmerOn = breatheCfg.shimmer;
+    const waveOn = breatheCfg.wave;
+
+    const resolveCompSpec = (key, sharedBar, sharedFrame) => {
+      const cfg = compMap[key] || { enabled: true, customPalette: null };
+      if (!cfg.enabled) return null;
+      const hasCustom =
+        cfg.customPalette &&
+        Array.isArray(cfg.customPalette.stops) &&
+        cfg.customPalette.stops.length === 4;
+      if (!hasCustom) {
+        return {
+          hasCustom: false,
+          stops,
+          angles,
+          barCss: sharedBar,
+          frameCss: sharedFrame,
+        };
+      }
+      const phaseDelta = Math.max(0, breathePhase - (Number(cfg.customPalette.phaseOffset) || 0));
+      const cStops = shimmerOn
+        ? getShiftedStops(cfg.customPalette.stops, phaseDelta * 0.16)
+        : cfg.customPalette.stops;
+      const baseA = cfg.customPalette.angles || {
+        base: 135,
+        bar: 90,
+        side: 165,
+        panel: 105,
+      };
+      const cAngles = waveOn
+        ? {
+            base: Math.round(baseA.base + Math.sin(breathePhase * 0.65) * 32),
+            bar: Math.round(baseA.bar + Math.sin(breathePhase * 0.8) * 24),
+            side: Math.round(baseA.side + Math.sin(breathePhase * 0.55) * 28),
+            panel: Math.round(baseA.panel + Math.sin(breathePhase * 0.7) * 28),
+          }
+        : baseA;
+      return {
+        hasCustom: true,
+        stops: cStops,
+        angles: cAngles,
+        barCss: buildBarCss(cStops, cAngles, k),
+        frameCss: buildFrameCss(cStops),
+      };
+    };
+
+    const targets = getBreathingTargets(wb);
+    const sharedBarCss = buildBarCss(stops, angles, k);
+    const sharedFrameCss = buildFrameCss(stops);
+
+    const editorSpec = resolveCompSpec("editor", sharedBarCss, sharedFrameCss);
+    const explorerSpec = resolveCompSpec("explorer", sharedBarCss, sharedFrameCss);
+    const chatSpec = resolveCompSpec("chat", sharedBarCss, sharedFrameCss);
+    const terminalSpec = resolveCompSpec("terminal", sharedBarCss, sharedFrameCss);
+    const barsSpec = resolveCompSpec("bars", sharedBarCss, sharedFrameCss);
+    const selectionSpec = resolveCompSpec("selection", sharedBarCss, sharedFrameCss);
+
+    // 2. Update Split-Panel / Custom Component Container Backgrounds at 100ms via non-inherited --prism-local-bg
+    if (splitMode || (editorSpec && editorSpec.hasCustom)) {
+      if (editorSpec) {
+        const mesh = editorSpec.hasCustom
+          ? buildMeshCss(editorSpec.stops, editorSpec.angles, k, coords)
+          : defaultMeshCss;
+        setLocalPropsOnList(targets.editorParts, "--prism-local-bg", mesh);
+      }
+    }
+    if (splitMode || (explorerSpec && explorerSpec.hasCustom)) {
+      if (explorerSpec) {
+        const bg = splitMode
+          ? buildSideCss(explorerSpec.stops, explorerSpec.angles, k)
+          : buildMeshCss(explorerSpec.stops, explorerSpec.angles, k, coords);
+        setLocalPropsOnList(targets.explorerParts, "--prism-local-bg", bg);
+      }
+    }
+    if (splitMode || (chatSpec && chatSpec.hasCustom)) {
+      if (chatSpec) {
+        const bg = splitMode
+          ? buildSideCss(chatSpec.stops, chatSpec.angles, k)
+          : buildMeshCss(chatSpec.stops, chatSpec.angles, k, coords);
+        setLocalPropsOnList(targets.chatParts, "--prism-local-bg", bg);
+      }
+    }
+    if (splitMode || (terminalSpec && terminalSpec.hasCustom)) {
+      if (terminalSpec) {
+        const bg = splitMode
+          ? buildTerminalPanelCss(terminalSpec.stops, terminalSpec.angles, k, coords)
+          : buildMeshCss(terminalSpec.stops, terminalSpec.angles, k, coords);
+        setLocalPropsOnList(targets.terminalParts, "--prism-local-bg", bg);
+        if (splitMode) {
+          setLocalPropsOnList(targets.terminalTitleParts, "--prism-local-bar", terminalSpec.barCss);
+        }
+      }
+    }
+    if (splitMode || (barsSpec && barsSpec.hasCustom)) {
+      if (barsSpec) {
+        if (splitMode) {
+          setLocalPropsOnList(targets.barsParts, "--prism-local-bar", barsSpec.barCss);
+        } else {
+          setLocalPropsOnList(
+            targets.barsParts,
+            "--prism-local-bg",
+            buildMeshCss(barsSpec.stops, barsSpec.angles, k, coords)
+          );
+        }
+      }
+    }
+
+    // 3. Update small UI chrome elements (sticky bars, active tabs, selected files, selection, statusbar swatch)
+    //    every 200ms (5 FPS) with non-inherited --prism-local-bar / --prism-local-border (0 subtree walks!)
+    if (tickCount % 2 !== 0) return;
+
+    const liveGrad = `linear-gradient(90deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
+      c2
+    )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`;
+    if (liveGrad !== lastSwatchGrad) {
+      lastSwatchGrad = liveGrad;
+      const swatchEl = document.getElementById("prism-randomizer-swatch");
+      if (swatchEl) {
+        swatchEl.style.backgroundImage = liveGrad;
+      }
+    }
+    setLocalPropsOnList(targets.statusPills, "--prism-local-bar", sharedBarCss);
+
+    if (editorSpec) {
+      setLocalPropsOnList(targets.editorBar, "--prism-local-bar", editorSpec.barCss);
+      setLocalPropsOnList(
+        targets.editorSticky,
+        "--prism-local-bar",
+        editorSpec.barCss,
+        "--prism-local-frame",
+        editorSpec.frameCss
+      );
+    }
+    if (explorerSpec) {
+      setLocalPropsOnList(
+        targets.explorerBar,
+        "--prism-local-bar",
+        explorerSpec.barCss,
+        "--prism-local-border",
+        explorerSpec.frameCss
+      );
+      setLocalPropsOnList(
+        targets.explorerSticky,
+        "--prism-local-bar",
+        explorerSpec.barCss,
+        "--prism-local-frame",
+        explorerSpec.frameCss
+      );
+    }
+    if (chatSpec) {
+      setLocalPropsOnList(
+        targets.chatBar,
+        "--prism-local-bar",
+        chatSpec.barCss,
+        "--prism-local-border",
+        chatSpec.frameCss
+      );
+      setLocalPropsOnList(
+        targets.chatSticky,
+        "--prism-local-bar",
+        chatSpec.barCss,
+        "--prism-local-frame",
+        chatSpec.frameCss
+      );
+    }
+    if (terminalSpec) {
+      setLocalPropsOnList(
+        targets.terminalBar,
+        "--prism-local-bar",
+        terminalSpec.barCss,
+        "--prism-local-border",
+        terminalSpec.frameCss
+      );
+      setLocalPropsOnList(
+        targets.terminalSticky,
+        "--prism-local-bar",
+        terminalSpec.barCss,
+        "--prism-local-frame",
+        terminalSpec.frameCss
+      );
+    }
+    if (barsSpec) {
+      setLocalPropsOnList(
+        targets.barsBar,
+        "--prism-local-bar",
+        barsSpec.barCss,
+        "--prism-local-border",
+        barsSpec.frameCss
+      );
+      setLocalPropsOnList(
+        targets.barsSticky,
+        "--prism-local-bar",
+        barsSpec.barCss,
+        "--prism-local-frame",
+        barsSpec.frameCss
+      );
+    }
+    if (selectionSpec) {
+      const selCss = buildSelectionCss(selectionSpec.stops, selectionSpec.angles, k);
+      setLocalPropsOnList(targets.selectionBar, "--prism-local-bar", selCss);
+    }
+
+    if (isPopoverOpen()) {
+      const activeTargetStops =
+        activeComponent && activeComponent !== "all"
+          ? getActiveTargetPalette(activeComponent).stops
+          : stops;
+      const [tc1, tc2, tc3, tc4] = activeTargetStops;
+      const targetGrad = `linear-gradient(90deg, ${rgbToHex(tc1)} 0%, ${rgbToHex(
+        tc2
+      )} 33%, ${rgbToHex(tc3)} 66%, ${rgbToHex(tc4)} 100%)`;
+      const previewBar = document.getElementById("pp-builder-preview-bar");
+      if (previewBar) {
+        previewBar.style.backgroundImage = targetGrad;
+      }
+    }
+  }
+
   function startOrStopBreathingAurora() {
     if (breatheTimer) {
       clearInterval(breatheTimer);
       breatheTimer = null;
     }
-    if (!isBreathingEnabled() || !isWindowActive()) {
-      // Freeze smoothly in place when disabled or when window is unfocused (0% background CPU/heap churn)
+    if (!isBreathingEnabled()) {
+      clearLocalBreathingProps();
+      return;
+    }
+    if (!isWindowActive()) {
+      // Freeze smoothly in place when window is unfocused (0% background CPU/heap churn)
       return;
     }
 
@@ -1599,6 +1987,7 @@
 
       // 100ms tick interval (10 FPS)
       breathePhase += 0.036 * speedMult;
+      breatheTickCount = (breatheTickCount + 1) % 1000000;
 
       const activePalette =
         saved && saved.stops && saved.stops.length === 4
@@ -1712,11 +2101,23 @@
         };
       }
 
-      // Smoothly update backdrop, all component & UI chrome CSS variables (sticky bars, active tabs,
-      // selected files, selected text, borders), and the statusbar swatch on every 100ms tick in both modes.
-      writeGradientCssVars(targetWb, animatedStops, liveAngles, effectiveK, waveCoords, {
-        fromBreatheTick: !morphCompleted,
-      });
+      if (morphCompleted) {
+        writeGradientCssVars(targetWb, animatedStops, liveAngles, effectiveK, waveCoords);
+        return;
+      }
+
+      // Zero-.monaco-workbench-walk fast path:
+      // Updates leaf #prism-aurora-backdrop and non-inherited --prism-local-* properties on
+      // the ~10 cached chrome elements without invalidating the 10,000-node workbench DOM tree
+      // or re-parsing #prism-syntax-style!
+      updateBreathingTargets(
+        targetWb,
+        animatedStops,
+        liveAngles,
+        effectiveK,
+        waveCoords,
+        breatheTickCount
+      );
     }, 100);
   }
 
@@ -3167,6 +3568,27 @@
     capture: true,
     passive: true,
   });
+  window.addEventListener(
+    "mousedown",
+    () => {
+      cachedBreathingTargetsTs = 0;
+    },
+    { capture: true, passive: true }
+  );
+  window.addEventListener(
+    "mouseup",
+    () => {
+      cachedBreathingTargetsTs = 0;
+    },
+    { capture: true, passive: true }
+  );
+  window.addEventListener(
+    "keydown",
+    () => {
+      cachedBreathingTargetsTs = 0;
+    },
+    { capture: true, passive: true }
+  );
 
   // Pause Breathing Aurora in unfocused / background VS Code windows so only the active
   // window animates (0% background CPU and 0 MB/hr Oilpan CSSValue heap growth).
