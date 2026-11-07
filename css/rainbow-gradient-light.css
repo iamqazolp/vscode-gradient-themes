@@ -269,6 +269,75 @@
   background-attachment: fixed !important;
 }
 
+/* 6. SPLIT / PER-COMPONENT GRADIENT MODE (When Seamless Mode is turned OFF: .prism-split-panels)
+ *    Each component renders its own full 4-color gradient scaled to its own container box,
+ *    and a 4-color gradient separator strip sits between the Terminal and Editor! */
+.monaco-workbench.prism-split-panels .part.editor,
+.monaco-workbench.prism-split-panels.modern-ui .monaco-grid-view .part.editor:not(.modal-editor-part),
+.monaco-workbench.prism-split-panels.floating-panels.modern-ui-compact .part.editor {
+  background-image: var(--g-editor-mesh, none) !important;
+  background-attachment: scroll !important;
+  background-size: 100% 100% !important;
+}
+.monaco-workbench.prism-split-panels .part.activitybar,
+.monaco-workbench.prism-split-panels.floating-panels .part.activitybar,
+.monaco-workbench.prism-split-panels.modern-ui.floating-panels .part.activitybar,
+.monaco-workbench.prism-split-panels .part.sidebar,
+.monaco-workbench.prism-split-panels.floating-panels .part.sidebar,
+.monaco-workbench.prism-split-panels.modern-ui.floating-panels .part.sidebar {
+  background-image: var(--g-explorer-bar, none), var(--g-explorer-mesh, none) !important;
+  background-attachment: scroll !important;
+  background-size: 100% 100% !important;
+}
+.monaco-workbench.prism-split-panels .part.auxiliarybar,
+.monaco-workbench.prism-split-panels.floating-panels .part.auxiliarybar,
+.monaco-workbench.prism-split-panels.modern-ui.floating-panels .part.auxiliarybar,
+.monaco-workbench.prism-split-panels .part.sessionspart {
+  background-image: var(--g-chat-bar, none), var(--g-chat-mesh, none) !important;
+  background-attachment: scroll !important;
+  background-size: 100% 100% !important;
+}
+.monaco-workbench.prism-split-panels .part.panel,
+.monaco-workbench.prism-split-panels.floating-panels .part.panel,
+.monaco-workbench.prism-split-panels.modern-ui.floating-panels .part.panel,
+.monaco-workbench.prism-split-panels .part.editor .editor-instance .terminal-outer-container {
+  background-image: var(--g-terminal-mesh, none) !important;
+  background-attachment: scroll !important;
+  background-size: 100% 100% !important;
+}
+.monaco-workbench.prism-split-panels .part.panel > .composite.title,
+.monaco-workbench.prism-split-panels .part.panel > .header-or-footer {
+  background-color: var(--g-canvas-bg, #ffffff) !important;
+  background-image: var(--g-terminal-bar, none) !important;
+  background-attachment: scroll !important;
+  background-size: 100% 100% !important;
+  border-top: 2px solid transparent !important;
+  border-image: var(--g-terminal-frame, var(--g-border)) 1 !important;
+}
+.monaco-workbench.prism-split-panels .part.panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: var(--g-terminal-frame, var(--g-border)) !important;
+  z-index: 40;
+  pointer-events: none;
+}
+.monaco-workbench.prism-split-panels .part.titlebar,
+.monaco-workbench.prism-split-panels .part.banner,
+.monaco-workbench.prism-split-panels .part.statusbar,
+.monaco-workbench.prism-split-panels .editor-group-container > .title,
+.monaco-workbench.prism-split-panels .editor-group-container > .title.tabs,
+.monaco-workbench.prism-split-panels.modern-ui-tabs .editor-group-container > .title,
+.monaco-workbench.prism-split-panels.modern-ui.modern-ui-tabs .part.editor .editor-group-container > .title,
+.monaco-workbench.prism-split-panels .editor-group-container > .breadcrumbs-below-tabs {
+  background-image: var(--g-bars-bar, none), var(--g-bars-mesh, none) !important;
+  background-attachment: scroll !important;
+  background-size: 100% 100% !important;
+}
+
 /* Blend Minimap & Scrollbar Overview Ruler <canvas> bitmaps transparently into the Editor Gradient */
 .monaco-workbench:not(.vs-dark):not(.hc-black) .monaco-editor .minimap,
 .monaco-workbench:not(.vs-dark):not(.hc-black) .monaco-editor .decorationsOverviewRuler {

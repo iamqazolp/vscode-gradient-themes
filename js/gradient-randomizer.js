@@ -27,6 +27,7 @@
   const STORAGE_KEY_BREATHE_CFG = "gradientThemes.randomizer.breatheCfg.v1";
   const STORAGE_KEY_SCOPE = "gradientThemes.randomizer.scope.v1";
   const STORAGE_KEY_COMPONENTS = "gradientThemes.randomizer.components.v1";
+  const STORAGE_KEY_SEAMLESS = "gradientThemes.randomizer.seamless.v1";
   const STORAGE_KEY_HISTORY = "gradientThemes.randomizer.history.v1";
 
   const COMPONENT_DEFS = [
@@ -424,6 +425,26 @@
     try {
       localStorage.setItem(STORAGE_KEY_FAV_ONLY, String(next));
     } catch (_) {}
+    refreshPopoverHeaderAndIntensity();
+    renderPaletteGrid();
+  }
+
+  function isSeamlessEnabled() {
+    return localStorage.getItem(STORAGE_KEY_SEAMLESS) !== "false";
+  }
+
+  function syncSeamlessClass(wb) {
+    if (!wb) return;
+    wb.classList.toggle("prism-split-panels", !isSeamlessEnabled());
+  }
+
+  function toggleSeamlessMode() {
+    const next = !isSeamlessEnabled();
+    try {
+      localStorage.setItem(STORAGE_KEY_SEAMLESS, String(next));
+    } catch (_) {}
+    const wb = document.querySelector(".monaco-workbench");
+    syncSeamlessClass(wb);
     refreshPopoverHeaderAndIntensity();
     renderPaletteGrid();
   }
@@ -1030,6 +1051,7 @@
     // Keep .monaco-workbench mesh synced with the global gradient so floating-panel gaps
     // never show a white separator, while each component's opaque --g-canvas-bg isolates its own surface
     wb.style.setProperty("--g-workbench-mesh", sharedMeshCss);
+    syncSeamlessClass(wb);
 
     lastLiveStops = stops.map((s) => [...s]);
     lastLiveAngles = { ...angles };
@@ -1256,6 +1278,7 @@
   function applyPaletteToWorkbench(palette, opts) {
     const wb = document.querySelector(".monaco-workbench");
     if (!wb) return;
+    syncSeamlessClass(wb);
     const k = getIntensity();
 
     if (!opts || !opts.skipHistory) {
@@ -1480,6 +1503,13 @@
       breatheBtn.classList.toggle("active", breatheOn);
     }
 
+    const seamlessOn = isSeamlessEnabled();
+    const seamlessBtn = document.getElementById("pp-btn-seamless");
+    if (seamlessBtn) {
+      seamlessBtn.classList.toggle("active", seamlessOn);
+      seamlessBtn.textContent = seamlessOn ? "Seamless: ON" : "Seamless: OFF";
+    }
+
     const breatheStatus = document.getElementById("pp-breathe-status");
     if (breatheStatus) {
       breatheStatus.textContent = breatheOn ? "ACTIVE" : "PAUSED";
@@ -1501,8 +1531,17 @@
     const globalHexes = (globalPal.stops || CURATED_PALETTES[0].stops).map(rgbToHex);
 
     const allPill = document.getElementById("pp-comp-all");
+    const allDot = document.getElementById("pp-comp-dot-all");
     if (allPill) {
       allPill.classList.toggle("active", activeComponent === "all");
+    }
+    if (allDot) {
+      allDot.classList.toggle("off", !seamlessOn);
+      if (seamlessOn) {
+        allDot.style.background = `linear-gradient(135deg, ${globalHexes[0]} 0%, ${globalHexes[1]} 33%, ${globalHexes[2]} 66%, ${globalHexes[3]} 100%)`;
+      } else {
+        allDot.style.background = "transparent";
+      }
     }
 
     COMPONENT_DEFS.forEach((def) => {
@@ -1561,6 +1600,35 @@
     });
 
     grid.textContent = "";
+
+    // When "All" is selected, show a quick Seamless Mode ON/OFF card at the top of the grid
+    if (activeComponent === "all") {
+      const seamlessOn = isSeamlessEnabled();
+      const sCard = document.createElement("div");
+      sCard.className = `pp-card${!seamlessOn ? " selected" : ""}`;
+      sCard.style.gridColumn = "1 / -1";
+      const sSwatch = document.createElement("div");
+      sSwatch.className = "pp-swatch";
+      const gHexes = (targetPal && targetPal.stops ? targetPal.stops : CURATED_PALETTES[0].stops).map(rgbToHex);
+      sSwatch.style.background = seamlessOn
+        ? `linear-gradient(90deg, ${gHexes[0]} 0%, ${gHexes[1]} 33%, ${gHexes[2]} 66%, ${gHexes[3]} 100%)`
+        : `repeating-linear-gradient(90deg, ${gHexes[0]} 0%, ${gHexes[1]} 16%, ${gHexes[2]} 33%, ${gHexes[3]} 50%)`;
+      const sRow = document.createElement("div");
+      sRow.className = "pp-card-row";
+      const sName = document.createElement("span");
+      sName.className = "pp-card-name";
+      sName.textContent = seamlessOn
+        ? "● Seamless Mode: ON (Click for Per-Component Split Gradients)"
+        : "○ Seamless Mode: OFF — Each Component Has Own Gradient (Click for Seamless)";
+      sRow.appendChild(sName);
+      sCard.appendChild(sSwatch);
+      sCard.appendChild(sRow);
+      sCard.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleSeamlessMode();
+      });
+      grid.appendChild(sCard);
+    }
 
     // When a specific component is selected, show quick On/Off and "Same as All" cards at the top of the grid
     if (activeComponent !== "all") {
@@ -1847,6 +1915,7 @@
     }
     const wb = document.querySelector(".monaco-workbench");
     if (!wb) return;
+    syncSeamlessClass(wb);
 
     const pop = document.createElement("div");
     pop.id = "prism-palette-popover";
@@ -1952,9 +2021,18 @@
       setIntensity(parseInt(slider.value, 10) / 100);
     });
 
+    const seamlessBtn = document.createElement("button");
+    seamlessBtn.id = "pp-btn-seamless";
+    seamlessBtn.className = `pp-btn${isSeamlessEnabled() ? " active" : ""}`;
+    seamlessBtn.textContent = isSeamlessEnabled() ? "Seamless: ON" : "Seamless: OFF";
+    seamlessBtn.title =
+      "Toggle Seamless Full-Window Gradient vs Per-Component Individual Gradients with Terminal Separator Strip (Alt+Shift+S)";
+    seamlessBtn.addEventListener("click", () => toggleSeamlessMode());
+
     intRow.appendChild(intLabel);
     intRow.appendChild(slider);
     intRow.appendChild(valSpan);
+    intRow.appendChild(seamlessBtn);
     intSec.appendChild(intRow);
 
     // 2B. Breathing Aurora Multi-Mode Studio Drawer
@@ -2068,12 +2146,28 @@
     const allPill = document.createElement("button");
     allPill.id = "pp-comp-all";
     allPill.className = `pp-comp-pill${activeComponent === "all" ? " active" : ""}`;
-    allPill.textContent = "All";
-    allPill.title = "Apply chosen gradient seamlessly across all enabled components";
+    allPill.title =
+      "All Components\n• Click to select All\n• Click dot (or click All again) to toggle Seamless Full-Window Gradient vs Per-Component Individual Gradients";
+    const allDot = document.createElement("span");
+    allDot.id = "pp-comp-dot-all";
+    allDot.className = `pp-comp-dot${isSeamlessEnabled() ? "" : " off"}`;
+    allDot.title = "Click to toggle Seamless Mode ON / OFF";
+    allDot.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleSeamlessMode();
+    });
+    const allLbl = document.createElement("span");
+    allLbl.textContent = "All";
+    allPill.appendChild(allDot);
+    allPill.appendChild(allLbl);
     allPill.addEventListener("click", () => {
-      activeComponent = "all";
-      renderPaletteGrid();
-      refreshPopoverHeaderAndIntensity();
+      if (activeComponent === "all") {
+        toggleSeamlessMode();
+      } else {
+        activeComponent = "all";
+        renderPaletteGrid();
+        refreshPopoverHeaderAndIntensity();
+      }
     });
     compBar.appendChild(allPill);
 
@@ -2525,6 +2619,9 @@
       } else if (e.code === "KeyB" || e.key === "B" || e.key === "b") {
         e.preventDefault();
         toggleBreathing();
+      } else if (e.code === "KeyS" || e.key === "S" || e.key === "s") {
+        e.preventDefault();
+        toggleSeamlessMode();
       } else if (e.code === "ArrowUp" || e.key === "ArrowUp") {
         e.preventDefault();
         setIntensity(getIntensity() + 0.15);
@@ -2547,6 +2644,7 @@
     }
     const wb = document.querySelector(".monaco-workbench");
     if (!wb) return;
+    syncSeamlessClass(wb);
     const saved = getSavedPalette();
     if (saved) {
       if (saved.isNativeOff && wb.style.getPropertyValue("--g-base") !== "none") {
