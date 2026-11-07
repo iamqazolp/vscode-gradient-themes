@@ -2,13 +2,16 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
-## [69.67.67] - 2026-11-08
+## [6767.6767.6767] - 2026-11-08
+
+![6767.6767.6767](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-6767.6767.6767.png)
 
 ### Changed & Fixed
 - **Zero-Subtree-Walk `Breathing Aurora` Engine (`js/gradient-randomizer.js`, `css/rainbow-gradient-dark.css`, `css/rainbow-gradient-light.css`)**:
   - Registered `--prism-local-bg`, `--prism-local-bar`, and `--prism-local-border` via `CSS.registerProperty` with `inherits: false` so live breathing updates on Split-Panel containers (`.part.editor`, `.part.sidebar`, `.part.panel`, etc.) and UI chrome elements (`.sticky-widget`, `.terminal-sticky-scroll`, `.tab.active`, `.monaco-list-row.selected`, `.current-line`, `.selected-text`, `#prism-randomizer-swatch`) trigger `kLocalStyleChange` on only the target element (`0` child nodes traversed) without mutating `.monaco-workbench` custom properties during 100ms ticks.
   - Eliminated `#prism-syntax-style.textContent` stylesheet re-parsing during breathing ticks and scoped `::selection` to `:is(input, textarea)::selection`, removing 10,000-node `SubtreeStyleChange` walks and Oilpan `CSSGradientValue` GC sawtooth churn.
-- **Single-Source-of-Truth Versioning (`package.json`, `extension.js`, `install.py`, `build_themes.py`)**:
+- **Upgrade Reload Prompt & Single-Source-of-Truth Versioning (`extension.js`, `package.json`, `install.py`, `build_themes.py`)**:
+  - Updated `autoSyncWorkbenchOnStartup` so upgrading from a previous version always displays the status bar reload pill and `"Reload Window"` prompt when `workbench.html` is updated to a new CSS/JS hash.
   - Consolidated version lookup to `package.json` across all scripts and added one-command version bumping and VSIX packaging (`python3 install.py -v <version> -p` / `npm run bump -- <version>`).
 
 ## [67.420.69] - 2026-11-08
