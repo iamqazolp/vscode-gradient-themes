@@ -4,7 +4,7 @@ All notable changes to **VSCode Gradient Themes** will be documented in this fil
 
 ## [676767.676767.676767] - 2026-11-08
 
-![676767.676767.676767](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-6767.6767.6767.png)
+![676767.676767.676767](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-676767.676767.676767.png)
 
 ### Changed & Fixed
 - **Animated 6-Scene Gradient Logo & Light-Theme Living Aurora Overview GIFs (`media/icon-animated.gif`, `media/screenshots/rainbow-overview.gif`, `README.md`)**:
