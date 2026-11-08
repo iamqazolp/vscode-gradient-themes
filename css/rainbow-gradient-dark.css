@@ -1110,11 +1110,12 @@
   content: "" !important;
   pointer-events: none !important;
   position: absolute !important;
-  top: 0 !important;
+  top: var(--editor-group-tab-height, 35px) !important;
   bottom: 0 !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: 1.5px !important;
+  border-radius: 99px !important;
   background-image: var(--prism-local-frame, var(--prism-local-border-v, var(--g-border-v, var(--g-border)))) !important;
   opacity: 0.8 !important;
   transition: opacity 0.15s ease, width 0.15s ease, box-shadow 0.15s ease !important;
