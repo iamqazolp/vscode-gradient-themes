@@ -402,7 +402,7 @@
   opacity: 0.85 !important;
 }
 
-/* Gradient Terminal Cursor (Vertical 180deg Gradient) */
+/* Gradient Terminal Cursor (Vertical 180deg Gradient) & Transparent IME Composition Buffer (Vietnamese/CJK) */
 .monaco-workbench .xterm .xterm-cursor,
 .monaco-workbench .xterm .xterm-cursor-block,
 .monaco-workbench .xterm .xterm-cursor-bar,
@@ -410,6 +410,14 @@
   background: var(--prism-local-border-v, var(--g-border-v, var(--g-border))) !important;
   border-color: transparent !important;
   border-radius: 2px !important;
+}
+.monaco-workbench .xterm .composition-view,
+.monaco-workbench .xterm .composition-view.active {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--vscode-terminal-foreground, var(--vscode-editor-foreground, inherit)) !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 /* Universal Gradient Text Selection: Code Editor, Diff, Peek, Notebook, Output, Debug, Terminal & DOM */
