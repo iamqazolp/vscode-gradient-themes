@@ -578,13 +578,13 @@
 
   function registerNonInheritedCssProps() {
     if (typeof CSS === "undefined" || typeof CSS.registerProperty !== "function") return;
-    // Note: --prism-local-frame and --prism-local-border-v are intentionally NOT registered
-    // with inherits: false because pseudo-elements (::before / ::after on .monaco-sash.vertical
-    // and sticky containers) must inherit them from their originating leaf element.
+    // Note: only --prism-local-frame is left unregistered so pseudo-elements (::before / ::after
+    // on .monaco-sash.vertical and sticky containers) can inherit it from their originating element.
     const nonInherited = [
       "--prism-local-bg",
       "--prism-local-bar",
       "--prism-local-border",
+      "--prism-local-border-v",
     ];
     for (let i = 0; i < nonInherited.length; i++) {
       try {
@@ -656,6 +656,7 @@
         hoveredBreathingComp = "";
         return;
       }
+      if (hoveredBreathingTargets[0] === hit) return;
       let comp = "shared";
       if (hit.closest(".part.panel")) {
         comp = "terminal";
@@ -1992,7 +1993,7 @@
         "--prism-local-frame",
         editorSpec.frameCss
       );
-      setLocalPropsOnList(targets.editorSash, "--prism-local-border-v", editorBorderVCss);
+      setLocalPropsOnList(targets.editorSash, "--prism-local-frame", editorBorderVCss);
       setLocalPropsOnList(targets.verticalSliders, "--prism-local-border-v", editorBorderVCss);
       setLocalPropsOnList(targets.horizontalSliders, "--prism-local-border", editorSpec.frameCss);
       setLocalPropsOnList(targets.editorCursors, "--prism-local-border-v", editorBorderVCss);

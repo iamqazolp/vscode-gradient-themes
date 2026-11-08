@@ -964,8 +964,6 @@
     linear-gradient(0deg, color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 72%, transparent), color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 72%, transparent)),
     var(--prism-local-frame, var(--prism-local-border, var(--g-editor-frame, var(--g-border)))) !important;
   border-radius: 8px !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease !important;
 }
@@ -1006,8 +1004,6 @@
     var(--prism-local-frame, var(--prism-local-border, var(--g-explorer-frame, var(--g-border)))) !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
 }
 .monaco-workbench :is(.monaco-tree-type-filter, .monaco-list-type-filter) .monaco-inputbox {
   background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 55%, transparent) !important;
@@ -1119,7 +1115,7 @@
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: 1.5px !important;
-  background-image: var(--prism-local-border-v, var(--g-border-v, var(--g-border))) !important;
+  background-image: var(--prism-local-frame, var(--prism-local-border-v, var(--g-border-v, var(--g-border)))) !important;
   opacity: 0.8 !important;
   transition: opacity 0.15s ease, width 0.15s ease, box-shadow 0.15s ease !important;
 }
@@ -1160,8 +1156,8 @@
 }
 .monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item:not(.checked):hover > .active-item-indicator,
 .monaco-workbench.modern-ui-tabs .part.panel > :is(.title, .composite.title, .header-or-footer) > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:not(.checked):hover > .active-item-indicator,
-.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item:not(.checked):not(:has(.active-item-indicator)):hover,
-.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .composite-bar .action-item:not(.checked):not(:has(.active-item-indicator)):hover {
+.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item:not(.checked):not(:has(> .active-item-indicator)):hover,
+.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .composite-bar .action-item:not(.checked):not(:has(> .active-item-indicator)):hover {
   background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-panel-background, var(--vscode-editor-background, #ffffff))) 45%, transparent) !important;
   background-image: var(--prism-local-bar, var(--g-terminal-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
@@ -1190,14 +1186,14 @@
 }
 
 /* 6. Status Bar Components on Hover (Single Pill - No Double Box) */
-.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item):has(a):hover {
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item):has(> a):hover {
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
 }
-.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item) a:hover:not(.disabled),
-.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item):not(:has(a)):hover {
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item) > a:hover:not(.disabled),
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item):not(:has(> a)):hover {
   background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 50%, transparent) !important;
   background-image: var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
@@ -1205,14 +1201,14 @@
 }
 
 /* 7. Activity Bar & Sidebar Title Header Actions on Hover (Single Pill - No Double Circle) */
-.monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):has(.active-item-indicator):hover {
+.monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):has(> .active-item-indicator):hover {
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
 }
 .monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):hover > .active-item-indicator,
-.monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):not(:has(.active-item-indicator)):hover {
+.monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):not(:has(> .active-item-indicator)):hover {
   background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 45%, transparent) !important;
   background-image: var(--prism-local-bar, var(--g-explorer-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
