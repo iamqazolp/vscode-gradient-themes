@@ -623,7 +623,70 @@
     }
   }
 
+  let hoverListenerAttached = false;
+
+  // Zero-Subtree-Walk Hover Tracker: attached ONLY while Breathing Aurora is active.
+  // Sets non-inherited --prism-local-bar directly on the single hovered row/tab/action element
+  // (kLocalStyleChange on 1-2 nodes, 0 subtree walk).
+  function onBreathingMouseOver(e) {
+    if (!lastBreathingBarByComp || !breatheTimer) return;
+    const t = e.target;
+    if (!t || typeof t.closest !== "function") return;
+    if (
+      hoveredBreathingTargets.length > 0 &&
+      hoveredBreathingTargets[0] &&
+      hoveredBreathingTargets[0].contains(t)
+    ) {
+      return;
+    }
+    const hit = t.closest(
+      ".monaco-list-row, .terminal-tabs-entry, .monaco-action-bar .action-item, .tabs-container > .tab, .statusbar-item"
+    );
+    if (!hit) {
+      hoveredBreathingTargets = [];
+      hoveredBreathingComp = "";
+      return;
+    }
+    if (hoveredBreathingTargets[0] === hit) return;
+    let comp = "shared";
+    if (hit.closest(".part.panel")) {
+      comp = "terminal";
+    } else if (hit.closest(".part.sidebar, .part.activitybar")) {
+      comp = "explorer";
+    } else if (hit.closest(".part.auxiliarybar, .part.sessionspart")) {
+      comp = "chat";
+    } else if (
+      hit.closest(".part.statusbar, .part.titlebar, .editor-group-container > .title")
+    ) {
+      comp = "bars";
+    }
+    const nextTargets = [hit];
+    const inner = hit.querySelector(
+      ":scope > .active-item-indicator, :scope > .tab-fill, :scope > a.statusbar-item-label"
+    );
+    if (inner) nextTargets.push(inner);
+    hoveredBreathingTargets = nextTargets;
+    hoveredBreathingComp = comp;
+    const barCss = lastBreathingBarByComp[comp] || lastBreathingBarByComp.shared;
+    if (barCss) {
+      setLocalPropsOnList(nextTargets, "--prism-local-bar", barCss);
+    }
+  }
+
+  function attachBreathingHoverListener() {
+    if (hoverListenerAttached) return;
+    hoverListenerAttached = true;
+    document.addEventListener("mouseover", onBreathingMouseOver, { passive: true });
+  }
+
+  function detachBreathingHoverListener() {
+    if (!hoverListenerAttached) return;
+    hoverListenerAttached = false;
+    document.removeEventListener("mouseover", onBreathingMouseOver);
+  }
+
   function clearLocalBreathingProps() {
+    detachBreathingHoverListener();
     lastBreathingBarByComp = null;
     hoveredBreathingTargets = [];
     hoveredBreathingComp = "";
@@ -639,50 +702,6 @@
     localStyledElements.clear();
     lastLocalVars = new WeakMap();
   }
-
-  // Zero-Subtree-Walk Hover Tracker: sets non-inherited --prism-local-bar directly on the
-  // single hovered row/tab/action element (kLocalStyleChange on 1-2 nodes, 0 subtree walk)
-  document.addEventListener(
-    "mouseover",
-    (e) => {
-      if (!lastBreathingBarByComp || !breatheTimer) return;
-      const t = e.target;
-      if (!t || typeof t.closest !== "function") return;
-      const hit = t.closest(
-        ".monaco-list-row, .terminal-tabs-entry, .monaco-action-bar .action-item, .tabs-container > .tab, .statusbar-item"
-      );
-      if (!hit) {
-        hoveredBreathingTargets = [];
-        hoveredBreathingComp = "";
-        return;
-      }
-      if (hoveredBreathingTargets[0] === hit) return;
-      let comp = "shared";
-      if (hit.closest(".part.panel")) {
-        comp = "terminal";
-      } else if (hit.closest(".part.sidebar, .part.activitybar")) {
-        comp = "explorer";
-      } else if (hit.closest(".part.auxiliarybar, .part.sessionspart")) {
-        comp = "chat";
-      } else if (
-        hit.closest(".part.statusbar, .part.titlebar, .editor-group-container > .title")
-      ) {
-        comp = "bars";
-      }
-      const nextTargets = [hit];
-      const inner = hit.querySelector(
-        ":scope > .active-item-indicator, :scope > .tab-fill, :scope > a"
-      );
-      if (inner) nextTargets.push(inner);
-      hoveredBreathingTargets = nextTargets;
-      hoveredBreathingComp = comp;
-      const barCss = lastBreathingBarByComp[comp] || lastBreathingBarByComp.shared;
-      if (barCss) {
-        setLocalPropsOnList(nextTargets, "--prism-local-bar", barCss);
-      }
-    },
-    { passive: true }
-  );
 
   function ensureAuroraBackdrop(wb) {
     if (!wb) return null;
@@ -1775,10 +1794,10 @@
         ".part.editor :is(.monaco-grid-view, .monaco-split-view2) .monaco-sash.vertical"
       ),
       verticalSliders: q(
-        ".monaco-scrollable-element > .scrollbar.vertical > .slider, .monaco-scrollable-element > .scrollbar:not(.horizontal) > .slider"
+        ".monaco-scrollable-element > .scrollbar.visible.vertical > .slider, .monaco-scrollable-element > .scrollbar.visible:not(.horizontal) > .slider"
       ),
       horizontalSliders: q(
-        ".monaco-scrollable-element > .scrollbar.horizontal > .slider"
+        ".monaco-scrollable-element > .scrollbar.visible.horizontal > .slider"
       ),
       editorCursors: q(".monaco-editor .cursors-layer .cursor, .xterm .xterm-cursor"),
     };
@@ -2094,9 +2113,11 @@
     }
     if (!isWindowActive()) {
       // Freeze smoothly in place when window is unfocused (0% background CPU/heap churn)
+      detachBreathingHoverListener();
       return;
     }
 
+    attachBreathingHoverListener();
     breatheTimer = setInterval(() => {
       if (!isWindowActive()) return;
       const targetWb = document.querySelector(".monaco-workbench");

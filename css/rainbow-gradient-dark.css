@@ -1081,7 +1081,7 @@
   filter: brightness(1.05) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14) !important;
 }
-.monaco-workbench .part.titlebar :is(.command-center-center, .command-center .action-item.command-center-center) :is(.search-icon, .search-label, .command-center-label, .action-label, span) {
+.monaco-workbench .part.titlebar :is(.command-center-center, .command-center .action-item.command-center-center) :is(.search-icon, .search-label, .command-center-label, .action-label) {
   color: var(--vscode-commandCenter-foreground, var(--vscode-foreground)) !important;
   background: transparent !important;
 }
@@ -1146,7 +1146,7 @@
   outline: none !important;
 }
 
-/* 3. Panel Header Tabs on Hover (Problems, Output, Debug Console, Terminal) - Single Pill (No Double Circle) */
+/* 3. Panel Header Tabs on Hover (Problems, Output, Debug Console, Terminal) - Single Pill (Zero :has() Invalidation) */
 .monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item:not(.checked):hover {
   background: transparent !important;
   background-color: transparent !important;
@@ -1155,9 +1155,7 @@
   border: none !important;
 }
 .monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item:not(.checked):hover > .active-item-indicator,
-.monaco-workbench.modern-ui-tabs .part.panel > :is(.title, .composite.title, .header-or-footer) > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:not(.checked):hover > .active-item-indicator,
-.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item:not(.checked):not(:has(> .active-item-indicator)):hover,
-.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .composite-bar .action-item:not(.checked):not(:has(> .active-item-indicator)):hover {
+.monaco-workbench.modern-ui-tabs .part.panel > :is(.title, .composite.title, .header-or-footer) > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:not(.checked):hover > .active-item-indicator {
   background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-panel-background, var(--vscode-editor-background, #ffffff))) 45%, transparent) !important;
   background-image: var(--prism-local-bar, var(--g-terminal-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
@@ -1172,43 +1170,41 @@
   border-radius: 6px !important;
 }
 
-/* 5. Editor Tabs on Hover (Single Pill - No Double Layer in .modern-ui-tabs) */
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active):not(.sticky):has(> .tab-fill):hover {
+/* 5. Editor Tabs on Hover (Single Pill - Zero :has() Invalidation) */
+.monaco-workbench.modern-ui-tabs .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active):not(.sticky):hover {
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
 }
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active):not(.sticky):not(:has(> .tab-fill)):hover,
+.monaco-workbench:not(.modern-ui-tabs) .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active):not(.sticky):hover,
 .monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active):not(.sticky):hover > .tab-fill {
   background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 45%, transparent) !important;
   background-image: var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
 }
 
-/* 6. Status Bar Components on Hover (Single Pill - No Double Box) */
-.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item):has(> a):hover {
+/* 6. Status Bar Components on Hover (Single Pill - Zero :has() Invalidation) */
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item):hover {
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
 }
-.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item) > a:hover:not(.disabled),
-.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item):not(:has(> a)):hover {
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item) > a.statusbar-item-label:hover:not(.disabled) {
   background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 50%, transparent) !important;
   background-image: var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* 7. Activity Bar & Sidebar Title Header Actions on Hover (Single Pill - No Double Circle) */
-.monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):has(> .active-item-indicator):hover {
+/* 7. Activity Bar & Sidebar Title Header Actions on Hover (Single Pill - Zero :has() Invalidation) */
+.monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):hover {
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
 }
-.monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):hover > .active-item-indicator,
-.monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):not(:has(> .active-item-indicator)):hover {
+.monaco-workbench :is(.part.activitybar, .part.sidebar :is(.title, .composite.title, .header-or-footer)) .monaco-action-bar .action-item:not(.checked):hover > .active-item-indicator {
   background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 45%, transparent) !important;
   background-image: var(--prism-local-bar, var(--g-explorer-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
