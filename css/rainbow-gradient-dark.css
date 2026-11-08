@@ -209,7 +209,6 @@
 .monaco-workbench .notebookOverlay .notebook-sticky-scroll-container .notebook-sticky-scroll-element,
 .monaco-workbench .notebookOverlay .notebook-sticky-scroll-container .notebook-sticky-scroll-element:hover,
 .monaco-workbench .part.titlebar > .titlebar-container,
-.monaco-workbench:not(.prism-split-panels) .part.titlebar .command-center-center,
 .monaco-workbench .part.activitybar > .content,
 .monaco-workbench:not(.prism-split-panels) .part.panel > .title,
 .monaco-workbench:not(.prism-split-panels) .part.panel > .composite.title,
@@ -382,7 +381,6 @@
 }
 /* Title Bar, Command Center, Editor Tab Strip & Status Bar (90deg horizontal ribbon) */
 .monaco-workbench.prism-split-panels .part.titlebar,
-.monaco-workbench.prism-split-panels .part.titlebar .command-center-center,
 .monaco-workbench.prism-split-panels .part.banner,
 .monaco-workbench.prism-split-panels .part.statusbar,
 .monaco-workbench.prism-split-panels .editor-group-container > .title > .tabs-and-actions-container,
@@ -1046,7 +1044,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10) !important;
 }
 
-/* I. Titlebar Update Button & Activity Bar Notification Badges */
+/* I. Titlebar Components (Update Button & Command Center Search Box) & Activity Bar Notification Badges */
 .monaco-workbench .part.titlebar .update-indicator.prominent {
   border: 1px solid transparent !important;
   border-radius: var(--vscode-cornerRadius-small) !important;
@@ -1069,6 +1067,28 @@
   color: var(--vscode-foreground) !important;
   font-weight: 500 !important;
 }
+.monaco-workbench .part.titlebar :is(.command-center-center, .command-center .action-item.command-center-center) {
+  border: 1.5px solid transparent !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) !important;
+  background-image:
+    var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))),
+    linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))),
+    var(--prism-local-border, var(--g-bars-frame, var(--g-border))) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10) !important;
+  color: var(--vscode-commandCenter-foreground, var(--vscode-foreground)) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease !important;
+}
+.monaco-workbench .part.titlebar :is(.command-center-center, .command-center .action-item.command-center-center):hover {
+  filter: brightness(1.05) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14) !important;
+}
+.monaco-workbench .part.titlebar :is(.command-center-center, .command-center .action-item.command-center-center) :is(.search-icon, .search-label, .command-center-label, .action-label, span) {
+  color: var(--vscode-commandCenter-foreground, var(--vscode-foreground)) !important;
+  background: transparent !important;
+}
 .monaco-workbench :is(.activitybar, .part.activitybar) .badge .badge-content,
 .monaco-workbench .profile-badge .profile-text-overlay {
   background-image: var(--prism-local-border, var(--g-border)) !important;
@@ -1079,20 +1099,18 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22) !important;
 }
 
-/* J. Editor Vertical Split Tabs Separator & Vertical Split Sashes */
-.monaco-workbench .part.editor :is(.monaco-split-view2.horizontal, .monaco-split-view2:not(.vertical)) > .monaco-scrollable-element > .split-view-container > .split-view-view:not(:first-child) .editor-group-container > .title::before {
-  content: "" !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: 0 !important;
-  width: 2px !important;
-  background-image: var(--g-border-v, var(--prism-local-border, var(--g-bars-frame, var(--g-border)))) !important;
-  z-index: 15 !important;
-  pointer-events: none !important;
-  box-shadow: 0 0 6px rgba(66, 133, 244, 0.35) !important;
+/* J. Editor Vertical Split Long Bar (Uniform Thickness) & Suppress Tab Separators */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab > .tab-divider,
+.monaco-workbench .tab .tab-divider {
+  display: none !important;
 }
-.monaco-workbench .part.editor .monaco-grid-view .monaco-sash.vertical:before {
+.monaco-workbench .editor-group-container > .title::before,
+.monaco-workbench .editor-group-container > .title::after,
+.monaco-workbench .part.editor .monaco-split-view2.separator-border.horizontal > .monaco-scrollable-element > .split-view-container > .split-view-view:not(:first-child):before {
+  content: none !important;
+  display: none !important;
+}
+.monaco-workbench .part.editor :is(.monaco-grid-view, .monaco-split-view2) .monaco-sash.vertical:before {
   content: "" !important;
   pointer-events: none !important;
   position: absolute !important;
@@ -1102,26 +1120,14 @@
   transform: translateX(-50%) !important;
   width: 1.5px !important;
   background-image: var(--g-border-v, var(--prism-local-border, var(--g-editor-frame, var(--g-border)))) !important;
-  opacity: 0.65 !important;
+  opacity: 0.8 !important;
   transition: opacity 0.15s ease, width 0.15s ease, box-shadow 0.15s ease !important;
 }
-.monaco-workbench .part.editor .monaco-grid-view .monaco-sash.vertical:hover:before,
-.monaco-workbench .part.editor .monaco-grid-view .monaco-sash.vertical.active:before {
+.monaco-workbench .part.editor :is(.monaco-grid-view, .monaco-split-view2) .monaco-sash.vertical:hover:before,
+.monaco-workbench .part.editor :is(.monaco-grid-view, .monaco-split-view2) .monaco-sash.vertical.active:before {
   opacity: 1 !important;
-  width: 2.5px !important;
+  width: 2px !important;
   box-shadow: 0 0 8px rgba(66, 133, 244, 0.45) !important;
-}
-.monaco-workbench .part.editor .monaco-split-view2.separator-border.horizontal > .monaco-scrollable-element > .split-view-container > .split-view-view:not(:first-child):before {
-  background-image: var(--g-border-v, var(--prism-local-border, var(--g-editor-frame, var(--g-border)))) !important;
-  background-color: transparent !important;
-  width: 1.5px !important;
-  opacity: 0.75 !important;
-}
-.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab > .tab-divider {
-  background-image: var(--g-border-v, var(--prism-local-border, var(--g-bars-frame, var(--g-border)))) !important;
-  background-color: transparent !important;
-  opacity: 0.65 !important;
-  width: 1px !important;
 }
 
 /* K. Universal Gradient Hover Effects (Files, Terminal Tabs, Panel Tabs, Problems, Output, Status Bar) */

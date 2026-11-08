@@ -1680,7 +1680,7 @@
         ".part.panel > .title, .part.panel > .composite.title, .part.panel > .header-or-footer"
       ),
       barsParts: q(
-        ".part.titlebar, .part.titlebar .command-center-center, .part.banner, .part.statusbar, .editor-group-container > .title > .tabs-and-actions-container"
+        ".part.titlebar, .part.banner, .part.statusbar, .editor-group-container > .title > .tabs-and-actions-container"
       ),
       // Active UI Chrome Elements (~8-12 nodes total across the window)
       statusPills: q("#prism-randomizer-breathe, #prism-randomizer-chevron"),
@@ -1709,7 +1709,7 @@
         ".part.panel .terminal-sticky-scroll, .part.panel > .content .pane-body.output-view .sticky-widget, .part.panel .monaco-tree-sticky-container:not(.empty)"
       ),
       barsBar: q(
-        ".editor-group-container > .title .sticky-tabs-background, .editor-group-container > .title .tabs-container > .tab.sticky, .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill, .editor-group-container > .title .tabs-container > .tab.active:not(.sticky), .editor-group-container > .title .tabs-container > .tab.active:not(.sticky) > .tab-fill, .part.titlebar .update-indicator"
+        ".editor-group-container > .title .sticky-tabs-background, .editor-group-container > .title .tabs-container > .tab.sticky, .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill, .editor-group-container > .title .tabs-container > .tab.active:not(.sticky), .editor-group-container > .title .tabs-container > .tab.active:not(.sticky) > .tab-fill, .part.titlebar .update-indicator, .part.titlebar :is(.command-center-center, .command-center .action-item.command-center-center)"
       ),
       barsSticky: q(".quick-input-widget .monaco-tree-sticky-container:not(.empty)"),
       selectionBar: q(
