@@ -90,6 +90,22 @@ def make_ombre_theme(name: str, ui_type: str, p: dict) -> dict:
 
     indent_guide = lerp_hex(p["fg_dim"], c_step4, 0.72)
     indent_guide_active = lerp_hex(p["fg_muted"], c_step4, 0.40)
+    list_active_sel = lerp_hex(c_step1, p["blue_accent"], 0.16)
+    list_inactive_sel = lerp_hex(c_step1, p["blue_accent"], 0.10)
+    list_hover_bg = "#F5F7FA" if p.get("pure_white_canvas") else lerp_hex(c_step1, c_step4, 0.45)
+    sticky_hover_bg = "#F5F7FA" if p.get("pure_white_canvas") else lerp_hex(c_step3_opaque, c_step1, 0.35)
+    line_highlight_bg = "#F0F4F266" if p.get("pure_white_canvas") else lerp_hex(c_step4, c_step1, 0.35, "66")
+
+    if p.get("pure_white_canvas"):
+        c_step0 = "#FFFFFFE6"
+        c_step1 = "#FFFFFFE6"
+        c_step2 = "#FFFFFFEE"
+        c_step3_opaque = "#FFFFFF"
+        c_step3 = "#FFFFFFEE"
+        c_step4 = "#FFFFFF"
+        c_step5 = "#FFFFFFE6"
+        c_step6 = "#FFFFFF"
+        c_step7 = "#FFFFFFE6"
 
     return {
         "name": name,
@@ -149,12 +165,12 @@ def make_ombre_theme(name: str, ui_type: str, p: dict) -> dict:
             "sideBarSectionHeader.border": "#00000000",
 
             # Lists & Trees
-            "list.activeSelectionBackground": lerp_hex(c_step1, p["blue_accent"], 0.16),
+            "list.activeSelectionBackground": list_active_sel,
             "list.activeSelectionForeground": p["fg"],
             "list.activeSelectionIconForeground": p["blue_accent"],
-            "list.inactiveSelectionBackground": lerp_hex(c_step1, p["blue_accent"], 0.10),
+            "list.inactiveSelectionBackground": list_inactive_sel,
             "list.inactiveSelectionForeground": p["fg"],
-            "list.hoverBackground": lerp_hex(c_step1, c_step4, 0.45),
+            "list.hoverBackground": list_hover_bg,
             "list.hoverForeground": p["fg"],
             "list.focusBackground": c_step2,
             "list.highlightForeground": p["blue_accent"],
@@ -183,7 +199,7 @@ def make_ombre_theme(name: str, ui_type: str, p: dict) -> dict:
 
             # Sticky Scroll & Gutter (Opaque Sticky Scroll so code underneath never overlaps!)
             "editorStickyScroll.background": c_step3_opaque,
-            "editorStickyScrollHover.background": lerp_hex(c_step3_opaque, c_step1, 0.35),
+            "editorStickyScrollHover.background": sticky_hover_bg,
             "editorStickyScroll.border": "#00000000",
             "editorGutter.background": c_step3,
             "editorGutter.modifiedBackground": "#2563EB" if ui_type == "light" else "#60A5FA",
@@ -205,7 +221,7 @@ def make_ombre_theme(name: str, ui_type: str, p: dict) -> dict:
             "editor.findMatchBackground": p["find_match"],
             "editor.findMatchHighlightBackground": p["find_match_highlight"],
             "editor.findMatchBorder": p["blue_accent"],
-            "editor.lineHighlightBackground": lerp_hex(c_step4, c_step1, 0.35, "66"),
+            "editor.lineHighlightBackground": line_highlight_bg,
             "editor.lineHighlightBorder": "#00000000",
             "editorWhitespace.foreground": indent_guide,
             "editorRuler.foreground": indent_guide,
@@ -963,6 +979,7 @@ PRISM_RAINBOW_DARK = {
 }
 
 PRISM_RAINBOW_LIGHT = {
+    "pure_white_canvas": True,
     "gradient_stops": [
         "#F9F3DF",
         "#EAF7EE",

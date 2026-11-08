@@ -572,43 +572,19 @@
   let cachedBreathingTargetsWb = null;
   let cachedBreathingTargetsTs = 0;
   let breatheTickCount = 0;
-  let liveVarsStyleEl = null;
-
-  function updateLiveVars(vars) {
-    if (!liveVarsStyleEl) {
-      liveVarsStyleEl = document.getElementById("prism-live-vars");
-      if (!liveVarsStyleEl) {
-        liveVarsStyleEl = document.createElement("style");
-        liveVarsStyleEl.id = "prism-live-vars";
-        (document.head || document.documentElement).appendChild(liveVarsStyleEl);
-      }
-    }
-    const lines = [];
-    for (const [k, v] of Object.entries(vars)) {
-      if (v) lines.push(`  ${k}: ${v};`);
-    }
-    const css = `:root {\n${lines.join("\n")}\n}`;
-    if (liveVarsStyleEl.textContent !== css) {
-      liveVarsStyleEl.textContent = css;
-    }
-  }
-
-  function clearLiveVars() {
-    if (liveVarsStyleEl) {
-      liveVarsStyleEl.textContent = "";
-    } else {
-      const el = document.getElementById("prism-live-vars");
-      if (el) el.textContent = "";
-    }
-  }
+  let lastBreathingBarByComp = null;
+  let hoveredBreathingTargets = [];
+  let hoveredBreathingComp = "";
 
   function registerNonInheritedCssProps() {
     if (typeof CSS === "undefined" || typeof CSS.registerProperty !== "function") return;
+    // Note: --prism-local-frame and --prism-local-border-v are intentionally NOT registered
+    // with inherits: false because pseudo-elements (::before / ::after on .monaco-sash.vertical
+    // and sticky containers) must inherit them from their originating leaf element.
     const nonInherited = [
       "--prism-local-bg",
       "--prism-local-bar",
       "--prism-local-border",
-      "--prism-local-border-v",
     ];
     for (let i = 0; i < nonInherited.length; i++) {
       try {
@@ -648,7 +624,11 @@
   }
 
   function clearLocalBreathingProps() {
-    clearLiveVars();
+    lastBreathingBarByComp = null;
+    hoveredBreathingTargets = [];
+    hoveredBreathingComp = "";
+    const legacyLiveStyle = document.getElementById("prism-live-vars");
+    if (legacyLiveStyle) legacyLiveStyle.remove();
     if (localStyledElements.size === 0) return;
     localStyledElements.forEach((el) => {
       if (!el) return;
@@ -659,6 +639,49 @@
     localStyledElements.clear();
     lastLocalVars = new WeakMap();
   }
+
+  // Zero-Subtree-Walk Hover Tracker: sets non-inherited --prism-local-bar directly on the
+  // single hovered row/tab/action element (kLocalStyleChange on 1-2 nodes, 0 subtree walk)
+  document.addEventListener(
+    "mouseover",
+    (e) => {
+      if (!lastBreathingBarByComp || !breatheTimer) return;
+      const t = e.target;
+      if (!t || typeof t.closest !== "function") return;
+      const hit = t.closest(
+        ".monaco-list-row, .terminal-tabs-entry, .monaco-action-bar .action-item, .tabs-container > .tab, .statusbar-item"
+      );
+      if (!hit) {
+        hoveredBreathingTargets = [];
+        hoveredBreathingComp = "";
+        return;
+      }
+      let comp = "shared";
+      if (hit.closest(".part.panel")) {
+        comp = "terminal";
+      } else if (hit.closest(".part.sidebar, .part.activitybar")) {
+        comp = "explorer";
+      } else if (hit.closest(".part.auxiliarybar, .part.sessionspart")) {
+        comp = "chat";
+      } else if (
+        hit.closest(".part.statusbar, .part.titlebar, .editor-group-container > .title")
+      ) {
+        comp = "bars";
+      }
+      const nextTargets = [hit];
+      const inner = hit.querySelector(
+        ":scope > .active-item-indicator, :scope > .tab-fill, :scope > a"
+      );
+      if (inner) nextTargets.push(inner);
+      hoveredBreathingTargets = nextTargets;
+      hoveredBreathingComp = comp;
+      const barCss = lastBreathingBarByComp[comp] || lastBreathingBarByComp.shared;
+      if (barCss) {
+        setLocalPropsOnList(nextTargets, "--prism-local-bar", barCss);
+      }
+    },
+    { passive: true }
+  );
 
   function ensureAuroraBackdrop(wb) {
     if (!wb) return null;
@@ -1720,10 +1743,10 @@
         ".monaco-editor .view-overlays .current-line, .monaco-editor .margin-view-overlays .current-line-margin"
       ),
       editorSticky: q(
-        ".monaco-editor .sticky-widget, .notebookOverlay .notebook-sticky-scroll-container, .coverage-summary-widget, .editor-instance .terminal-sticky-scroll, .part.editor .monaco-tree-sticky-container:not(.empty), .part.editor .gettingStartedContainer :is(button.getting-started-category, .getting-started-category)"
+        ".monaco-editor .sticky-widget, .notebookOverlay .notebook-sticky-scroll-container, .coverage-summary-widget, .editor-instance .terminal-sticky-scroll, .part.editor .monaco-tree-sticky-container:not(.empty), .part.editor .gettingStartedContainer :is(button.getting-started-category, .getting-started-category), .part.editor .gettingStartedContainer .getting-started-category :is(.featured, .new-badge)"
       ),
       explorerBar: q(
-        ".part.activitybar .monaco-action-bar .action-item.checked .active-item-indicator, .part.sidebar :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator"
+        ".part.activitybar .monaco-action-bar .action-item.checked .active-item-indicator, .part.sidebar :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator, :is(.activitybar, .part.activitybar) .badge .badge-content, .profile-badge .profile-text-overlay"
       ),
       explorerSticky: q(
         ".part.sidebar .monaco-tree-sticky-container:not(.empty), .part.sidebar .terminal-sticky-scroll, .part.sidebar .output-view .sticky-widget, .part.sidebar .monaco-list .monaco-list-row.selected, .part.sidebar .monaco-list .monaco-list-row.focused, .monaco-tree-type-filter, .monaco-list-type-filter, .part.sidebar .monaco-list-row .monaco-inputbox"
@@ -1748,14 +1771,15 @@
         ".monaco-editor .selected-text, .monaco-editor .selectionHighlight, .xterm .xterm-selection div, #prism-dom-selection-layer .prism-dom-sel-rect"
       ),
       editorSash: q(
-        ".monaco-workbench .part.editor :is(.monaco-grid-view, .monaco-split-view2) .monaco-sash.vertical"
+        ".part.editor :is(.monaco-grid-view, .monaco-split-view2) .monaco-sash.vertical"
       ),
       verticalSliders: q(
-        ".monaco-workbench .monaco-scrollable-element > .scrollbar.vertical > .slider, .monaco-workbench .monaco-scrollable-element > .scrollbar:not(.horizontal) > .slider"
+        ".monaco-scrollable-element > .scrollbar.vertical > .slider, .monaco-scrollable-element > .scrollbar:not(.horizontal) > .slider"
       ),
       horizontalSliders: q(
-        ".monaco-workbench .monaco-scrollable-element > .scrollbar.horizontal > .slider"
+        ".monaco-scrollable-element > .scrollbar.horizontal > .slider"
       ),
+      editorCursors: q(".monaco-editor .cursors-layer .cursor"),
     };
 
     // Prune any element that is no longer active/selected so it reverts cleanly to workbench CSS
@@ -1763,6 +1787,16 @@
     Object.values(targets).forEach((arr) => {
       for (let i = 0; i < arr.length; i++) activeSet.add(arr[i]);
     });
+    if (
+      hoveredBreathingTargets.length > 0 &&
+      hoveredBreathingTargets[0] &&
+      hoveredBreathingTargets[0].isConnected &&
+      hoveredBreathingTargets[0].matches(":hover")
+    ) {
+      for (let i = 0; i < hoveredBreathingTargets.length; i++) {
+        activeSet.add(hoveredBreathingTargets[i]);
+      }
+    }
     localStyledElements.forEach((el) => {
       if (!activeSet.has(el)) {
         for (let i = 0; i < LOCAL_BREATHING_PROPS.length; i++) {
@@ -1909,20 +1943,29 @@
         )} 33%, ${rgbToHex(editorSpec.stops[2])} 66%, ${rgbToHex(editorSpec.stops[3])} 100%)`
       : sharedBorderVCss;
 
-    updateLiveVars({
-      "--prism-live-bar": sharedBarCss,
-      "--prism-live-border": sharedFrameCss,
-      "--prism-live-border-v": sharedBorderVCss,
-      "--prism-live-editor-bar": editorSpec ? editorSpec.barCss : sharedBarCss,
-      "--prism-live-editor-frame": editorSpec ? editorSpec.frameCss : sharedFrameCss,
-      "--prism-live-editor-border-v": editorBorderVCss,
-      "--prism-live-explorer-bar": explorerSpec ? explorerSpec.barCss : sharedBarCss,
-      "--prism-live-explorer-frame": explorerSpec ? explorerSpec.frameCss : sharedFrameCss,
-      "--prism-live-terminal-bar": terminalSpec ? terminalSpec.barCss : sharedBarCss,
-      "--prism-live-terminal-frame": terminalSpec ? terminalSpec.frameCss : sharedFrameCss,
-      "--prism-live-bars-bar": barsSpec ? barsSpec.barCss : sharedBarCss,
-      "--prism-live-bars-frame": barsSpec ? barsSpec.frameCss : sharedFrameCss,
-    });
+    lastBreathingBarByComp = {
+      shared: sharedBarCss,
+      editor: editorSpec ? editorSpec.barCss : sharedBarCss,
+      explorer: explorerSpec ? explorerSpec.barCss : sharedBarCss,
+      chat: chatSpec ? chatSpec.barCss : sharedBarCss,
+      terminal: terminalSpec ? terminalSpec.barCss : sharedBarCss,
+      bars: barsSpec ? barsSpec.barCss : sharedBarCss,
+    };
+
+    if (hoveredBreathingTargets.length > 0) {
+      if (
+        hoveredBreathingTargets[0] &&
+        hoveredBreathingTargets[0].isConnected &&
+        hoveredBreathingTargets[0].matches(":hover")
+      ) {
+        const hoverBarCss =
+          lastBreathingBarByComp[hoveredBreathingComp] || sharedBarCss;
+        setLocalPropsOnList(hoveredBreathingTargets, "--prism-local-bar", hoverBarCss);
+      } else {
+        hoveredBreathingTargets = [];
+        hoveredBreathingComp = "";
+      }
+    }
 
     // 3. Update small UI chrome elements (sticky bars, active tabs, selected files, selection, statusbar swatch)
     //    every 200ms (5 FPS) with non-inherited --prism-local-bar / --prism-local-border (0 subtree walks!)
@@ -1952,6 +1995,7 @@
       setLocalPropsOnList(targets.editorSash, "--prism-local-border-v", editorBorderVCss);
       setLocalPropsOnList(targets.verticalSliders, "--prism-local-border-v", editorBorderVCss);
       setLocalPropsOnList(targets.horizontalSliders, "--prism-local-border", editorSpec.frameCss);
+      setLocalPropsOnList(targets.editorCursors, "--prism-local-border-v", editorBorderVCss);
     }
     if (explorerSpec) {
       setLocalPropsOnList(
@@ -2316,6 +2360,7 @@
 
     if (palette && palette.isNativeOff) {
       // Turn off the 4-color overlay so the pure single-color theme shines through natively
+      clearLocalBreathingProps();
       setBackdropMesh(wb, "none");
       ["--g-r1", "--g-r2", "--g-r3", "--g-r4"].forEach((prop) =>
         setWbProp(wb, prop, "transparent")
@@ -2351,8 +2396,16 @@
         "--g-sel-tint",
         "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
       );
-      setWbProp(wb, "--g-border", "var(--vscode-focusBorder, #3B82F6)");
-      setWbProp(wb, "--g-border-v", "var(--vscode-focusBorder, #3B82F6)");
+      setWbProp(
+        wb,
+        "--g-border",
+        "linear-gradient(90deg, var(--vscode-focusBorder, #3B82F6), var(--vscode-focusBorder, #3B82F6))"
+      );
+      setWbProp(
+        wb,
+        "--g-border-v",
+        "linear-gradient(180deg, var(--vscode-focusBorder, #3B82F6), var(--vscode-focusBorder, #3B82F6))"
+      );
       disableSyntaxCssVars(wb);
       clearDomSelectionOverlay();
       try {
