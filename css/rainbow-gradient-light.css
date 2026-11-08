@@ -1124,6 +1124,68 @@
   width: 1px !important;
 }
 
+/* K. Universal Gradient Hover Effects (Files, Terminal Tabs, Panel Tabs, Problems, Output, Status Bar) */
+
+/* 1. File Explorer & Sidebar Tree Rows on Hover */
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart) .monaco-list .monaco-list-row:not(.selected):not(.focused):hover,
+.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart) .monaco-list:not(.drop-target) .monaco-list-row:hover:not(.selected):not(.focused) {
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 50%, transparent) !important;
+  background-image: var(--prism-local-bar, var(--g-explorer-bar, var(--g-bar))) !important;
+  border-radius: 6px !important;
+  outline: none !important;
+}
+
+/* 2. Terminal Tabs on Hover */
+.monaco-workbench .pane-body.integrated-terminal .tabs-list .monaco-list-row:not(.selected):not(.focused):hover,
+.monaco-workbench .terminal-tabs-entry:not(.is-active):hover {
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-panel-background, var(--vscode-editor-background, #ffffff))) 50%, transparent) !important;
+  background-image: var(--prism-local-bar, var(--g-terminal-bar, var(--g-bar))) !important;
+  border-radius: 6px !important;
+  outline: none !important;
+}
+
+/* 3. Panel Header Tabs on Hover (Problems, Output, Debug Console, Terminal) */
+.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item:not(.checked):hover,
+.monaco-workbench.modern-ui-tabs .part.panel > :is(.title, .composite.title, .header-or-footer) > .composite-bar-container > .composite-bar > .monaco-action-bar .action-item:not(.checked):hover > .active-item-indicator,
+.monaco-workbench .part.panel :is(.title, .composite.title, .header-or-footer) .composite-bar .action-item:not(.checked):hover {
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-panel-background, var(--vscode-editor-background, #ffffff))) 45%, transparent) !important;
+  background-image: var(--prism-local-bar, var(--g-terminal-bar, var(--g-bar))) !important;
+  border-radius: 6px !important;
+}
+
+/* 4. Panel List Rows on Hover (Problems, Output Channels, Debug Console Rows) */
+.monaco-workbench .part.panel .monaco-list .monaco-list-row:not(.selected):not(.focused):hover,
+.monaco-workbench .part.panel .monaco-list:not(.drop-target) .monaco-list-row:hover:not(.selected):not(.focused) {
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-panel-background, var(--vscode-editor-background, #ffffff))) 50%, transparent) !important;
+  background-image: var(--prism-local-bar, var(--g-terminal-bar, var(--g-bar))) !important;
+  border-radius: 6px !important;
+}
+
+/* 5. Editor Tabs on Hover */
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active):not(.sticky):hover,
+.monaco-workbench .part.editor > .content .editor-group-container > .title .tabs-container > .tab:not(.active):not(.sticky):hover > .tab-fill {
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 45%, transparent) !important;
+  background-image: var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))) !important;
+  border-radius: 6px !important;
+}
+
+/* 6. Status Bar Components on Hover */
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item) a:hover:not(.disabled),
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:not(#prism-randomizer-item):hover {
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 50%, transparent) !important;
+  background-image: var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 7. Activity Bar & Sidebar Title Header Actions on Hover */
+.monaco-workbench .part.activitybar .monaco-action-bar .action-item:not(.checked):hover,
+.monaco-workbench .part.sidebar :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item:not(.checked):hover {
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 45%, transparent) !important;
+  background-image: var(--prism-local-bar, var(--g-explorer-bar, var(--g-bar))) !important;
+  border-radius: 6px !important;
+}
+
 /* Scrollbar Slider & Editor Cursor */
 .monaco-workbench .monaco-scrollable-element > .scrollbar > .slider {
   background: var(--g-border) !important;
