@@ -27,7 +27,9 @@ COPY_ITEMS = (
 
 WORKBENCH_CANDIDATES = (
     Path("/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/code/electron-browser/workbench/workbench.html"),
+    Path("/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/code/electron-browser/workbench/workbench.esm.html"),
     Path("/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/code/electron-sandbox/workbench/workbench.html"),
+    Path("/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/code/electron-sandbox/workbench/workbench.esm.html"),
     Path("/Applications/Cursor.app/Contents/Resources/app/out/vs/code/electron-browser/workbench/workbench.html"),
     Path("/Applications/Windsurf.app/Contents/Resources/app/out/vs/code/electron-browser/workbench/workbench.html"),
 )
