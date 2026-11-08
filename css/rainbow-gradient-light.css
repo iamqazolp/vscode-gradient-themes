@@ -1046,28 +1046,19 @@
 }
 
 /* I. Titlebar Update Button & Activity Bar Notification Badges */
-.monaco-workbench .part.titlebar .update-indicator,
 .monaco-workbench .part.titlebar .update-indicator.prominent {
-  border: 1.5px solid transparent !important;
-  background-origin: padding-box, padding-box, border-box !important;
-  background-clip: padding-box, padding-box, border-box !important;
-  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 50%, transparent) !important;
-  background-image:
-    var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))),
-    linear-gradient(0deg, color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 50%, transparent), color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 50%, transparent)),
-    var(--prism-local-border, var(--g-bars-frame, var(--g-border))) !important;
-  border-radius: 999px !important;
-  color: var(--vscode-foreground) !important;
-  font-weight: 600 !important;
-  padding: 0 10px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease !important;
+  background-image: var(--prism-local-border, var(--g-border)) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  transition: filter 0.15s ease, opacity 0.15s ease !important;
 }
-.monaco-workbench .part.titlebar .update-indicator:hover,
 .monaco-workbench .part.titlebar .update-indicator.prominent:hover {
-  transform: translateY(-1px) scale(1.03) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
-  filter: brightness(1.05) !important;
+  filter: brightness(1.12) !important;
+  opacity: 0.94 !important;
+}
+.monaco-workbench .part.titlebar .update-indicator.prominent .indicator-label {
+  color: #ffffff !important;
 }
 .monaco-workbench :is(.activitybar, .part.activitybar) .badge .badge-content,
 .monaco-workbench .profile-badge .profile-text-overlay {
