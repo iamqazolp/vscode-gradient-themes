@@ -563,6 +563,7 @@
     "--prism-local-bg",
     "--prism-local-bar",
     "--prism-local-border",
+    "--prism-local-border-v",
     "--prism-local-frame",
   ];
   const localStyledElements = new Set();
@@ -571,6 +572,35 @@
   let cachedBreathingTargetsWb = null;
   let cachedBreathingTargetsTs = 0;
   let breatheTickCount = 0;
+  let liveVarsStyleEl = null;
+
+  function updateLiveVars(vars) {
+    if (!liveVarsStyleEl) {
+      liveVarsStyleEl = document.getElementById("prism-live-vars");
+      if (!liveVarsStyleEl) {
+        liveVarsStyleEl = document.createElement("style");
+        liveVarsStyleEl.id = "prism-live-vars";
+        (document.head || document.documentElement).appendChild(liveVarsStyleEl);
+      }
+    }
+    const lines = [];
+    for (const [k, v] of Object.entries(vars)) {
+      if (v) lines.push(`  ${k}: ${v};`);
+    }
+    const css = `:root {\n${lines.join("\n")}\n}`;
+    if (liveVarsStyleEl.textContent !== css) {
+      liveVarsStyleEl.textContent = css;
+    }
+  }
+
+  function clearLiveVars() {
+    if (liveVarsStyleEl) {
+      liveVarsStyleEl.textContent = "";
+    } else {
+      const el = document.getElementById("prism-live-vars");
+      if (el) el.textContent = "";
+    }
+  }
 
   function registerNonInheritedCssProps() {
     if (typeof CSS === "undefined" || typeof CSS.registerProperty !== "function") return;
@@ -578,6 +608,7 @@
       "--prism-local-bg",
       "--prism-local-bar",
       "--prism-local-border",
+      "--prism-local-border-v",
     ];
     for (let i = 0; i < nonInherited.length; i++) {
       try {
@@ -617,6 +648,7 @@
   }
 
   function clearLocalBreathingProps() {
+    clearLiveVars();
     if (localStyledElements.size === 0) return;
     localStyledElements.forEach((el) => {
       if (!el) return;
@@ -1715,6 +1747,15 @@
       selectionBar: q(
         ".monaco-editor .selected-text, .monaco-editor .selectionHighlight, .xterm .xterm-selection div, #prism-dom-selection-layer .prism-dom-sel-rect"
       ),
+      editorSash: q(
+        ".monaco-workbench .part.editor :is(.monaco-grid-view, .monaco-split-view2) .monaco-sash.vertical"
+      ),
+      verticalSliders: q(
+        ".monaco-workbench .monaco-scrollable-element > .scrollbar.vertical > .slider, .monaco-workbench .monaco-scrollable-element > .scrollbar:not(.horizontal) > .slider"
+      ),
+      horizontalSliders: q(
+        ".monaco-workbench .monaco-scrollable-element > .scrollbar.horizontal > .slider"
+      ),
     };
 
     // Prune any element that is no longer active/selected so it reverts cleanly to workbench CSS
@@ -1858,6 +1899,31 @@
       }
     }
 
+    const sharedBorderVCss = `linear-gradient(180deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
+      c2
+    )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`;
+
+    const editorBorderVCss = editorSpec
+      ? `linear-gradient(180deg, ${rgbToHex(editorSpec.stops[0])} 0%, ${rgbToHex(
+          editorSpec.stops[1]
+        )} 33%, ${rgbToHex(editorSpec.stops[2])} 66%, ${rgbToHex(editorSpec.stops[3])} 100%)`
+      : sharedBorderVCss;
+
+    updateLiveVars({
+      "--prism-live-bar": sharedBarCss,
+      "--prism-live-border": sharedFrameCss,
+      "--prism-live-border-v": sharedBorderVCss,
+      "--prism-live-editor-bar": editorSpec ? editorSpec.barCss : sharedBarCss,
+      "--prism-live-editor-frame": editorSpec ? editorSpec.frameCss : sharedFrameCss,
+      "--prism-live-editor-border-v": editorBorderVCss,
+      "--prism-live-explorer-bar": explorerSpec ? explorerSpec.barCss : sharedBarCss,
+      "--prism-live-explorer-frame": explorerSpec ? explorerSpec.frameCss : sharedFrameCss,
+      "--prism-live-terminal-bar": terminalSpec ? terminalSpec.barCss : sharedBarCss,
+      "--prism-live-terminal-frame": terminalSpec ? terminalSpec.frameCss : sharedFrameCss,
+      "--prism-live-bars-bar": barsSpec ? barsSpec.barCss : sharedBarCss,
+      "--prism-live-bars-frame": barsSpec ? barsSpec.frameCss : sharedFrameCss,
+    });
+
     // 3. Update small UI chrome elements (sticky bars, active tabs, selected files, selection, statusbar swatch)
     //    every 200ms (5 FPS) with non-inherited --prism-local-bar / --prism-local-border (0 subtree walks!)
     if (tickCount % 2 !== 0) return;
@@ -1883,6 +1949,9 @@
         "--prism-local-frame",
         editorSpec.frameCss
       );
+      setLocalPropsOnList(targets.editorSash, "--prism-local-border-v", editorBorderVCss);
+      setLocalPropsOnList(targets.verticalSliders, "--prism-local-border-v", editorBorderVCss);
+      setLocalPropsOnList(targets.horizontalSliders, "--prism-local-border", editorSpec.frameCss);
     }
     if (explorerSpec) {
       setLocalPropsOnList(
