@@ -3756,6 +3756,193 @@
     startOrStopBreathingAurora();
   });
 
+  // Direct-Stream Terminal IME Handler (Disables xterm's composition-view buffer for Vietnamese IME):
+  // Intercepts IME composition events on .xterm-helper-textarea before xterm's CompositionHelper
+  // can buffer the word in .composition-view, and streams character/tone updates (\x7f + chars)
+  // directly to xterm's PTY in real time as each key is pressed.
+  const xtermImeMap = new WeakMap();
+
+  function isXtermTextarea(el) {
+    return Boolean(
+      el &&
+        el.tagName === "TEXTAREA" &&
+        el.classList &&
+        el.classList.contains("xterm-helper-textarea")
+    );
+  }
+
+  function computeImeDiffPayload(prevStr, nextStr) {
+    const prevChars = Array.from(prevStr || "");
+    const nextChars = Array.from(nextStr || "");
+    let common = 0;
+    const minLen = Math.min(prevChars.length, nextChars.length);
+    while (common < minLen && prevChars[common] === nextChars[common]) {
+      common++;
+    }
+    const delCount = prevChars.length - common;
+    const insStr = nextChars.slice(common).join("");
+    return (delCount > 0 ? "\x7f".repeat(delCount) : "") + insStr;
+  }
+
+  function sendDirectToXterm(textarea, payload) {
+    if (!textarea || !payload) return;
+    const ev = new InputEvent("input", {
+      data: payload,
+      inputType: "insertText",
+      bubbles: false,
+      cancelable: false,
+      composed: false,
+    });
+    ev._prismDirect = true;
+    textarea.dispatchEvent(ev);
+  }
+
+  window.addEventListener(
+    "compositionstart",
+    (e) => {
+      const ta = e.target;
+      if (!isXtermTextarea(ta)) return;
+      e.stopImmediatePropagation();
+      const start = ta.selectionStart ?? ta.value.length;
+      const end = ta.selectionEnd ?? start;
+      const s = Math.min(start, end);
+      const en = Math.max(start, end);
+      xtermImeMap.set(ta, {
+        composing: true,
+        prev: "",
+        start: s,
+        suffix: ta.value.substring(en),
+        handled: true,
+      });
+    },
+    true
+  );
+
+  window.addEventListener(
+    "compositionupdate",
+    (e) => {
+      const ta = e.target;
+      if (!isXtermTextarea(ta)) return;
+      e.stopImmediatePropagation();
+      let st = xtermImeMap.get(ta);
+      if (!st || !st.composing) {
+        st = {
+          composing: true,
+          prev: "",
+          start: ta.selectionStart ?? ta.value.length,
+          suffix: "",
+          handled: true,
+        };
+        xtermImeMap.set(ta, st);
+      }
+      st.handled = true;
+      const next = e.data || "";
+      const payload = computeImeDiffPayload(st.prev, next);
+      st.prev = next;
+      if (payload) {
+        sendDirectToXterm(ta, payload);
+      }
+    },
+    true
+  );
+
+  window.addEventListener(
+    "compositionend",
+    (e) => {
+      const ta = e.target;
+      if (!isXtermTextarea(ta)) return;
+      e.stopImmediatePropagation();
+      const st = xtermImeMap.get(ta);
+      if (!st) return;
+      st.composing = false;
+      const endData = typeof e.data === "string" ? e.data : st.prev;
+      const immediatePayload = computeImeDiffPayload(st.prev, endData);
+      if (immediatePayload) {
+        sendDirectToXterm(ta, immediatePayload);
+      }
+      st.prev = endData;
+      const snapStart = st.start;
+      const snapSuffix = st.suffix;
+      const snapPrev = st.prev;
+      setTimeout(() => {
+        const cur = xtermImeMap.get(ta);
+        if (cur && cur.composing) return;
+        const val = ta.value || "";
+        const valEnd =
+          snapSuffix.length > 0 && val.endsWith(snapSuffix)
+            ? val.length - snapSuffix.length
+            : val.length;
+        const actual = val.substring(snapStart, Math.max(snapStart, valEnd));
+        if (actual.length > snapPrev.length && actual.startsWith(snapPrev)) {
+          const trailing = actual.substring(snapPrev.length);
+          if (trailing) sendDirectToXterm(ta, trailing);
+        }
+        ta.value = "";
+        xtermImeMap.delete(ta);
+      }, 0);
+    },
+    true
+  );
+
+  window.addEventListener(
+    "keydown",
+    (e) => {
+      const ta = e.target;
+      if (!isXtermTextarea(ta)) return;
+      const st = xtermImeMap.get(ta);
+      if (st && st.composing) {
+        if (
+          e.keyCode === 229 ||
+          e.keyCode === 20 ||
+          e.keyCode === 16 ||
+          e.keyCode === 17 ||
+          e.keyCode === 18
+        ) {
+          e.stopImmediatePropagation();
+          return;
+        }
+        st.composing = false;
+        ta.value = "";
+        xtermImeMap.delete(ta);
+        return;
+      }
+      if (e.keyCode === 229) {
+        e.stopImmediatePropagation();
+        const oldVal = ta.value || "";
+        setTimeout(() => {
+          const cur = xtermImeMap.get(ta);
+          if (cur && (cur.composing || cur.handled)) return;
+          const newVal = ta.value || "";
+          if (newVal.length > oldVal.length) {
+            const diff = newVal.slice(oldVal.length);
+            if (diff) sendDirectToXterm(ta, diff);
+            ta.value = "";
+          } else if (newVal.length < oldVal.length) {
+            sendDirectToXterm(ta, "\x7f");
+          }
+        }, 0);
+      }
+    },
+    true
+  );
+
+  window.addEventListener(
+    "input",
+    (e) => {
+      const ta = e.target;
+      if (!isXtermTextarea(ta)) return;
+      if (e._prismDirect) return;
+      if (
+        e.isComposing ||
+        xtermImeMap.has(ta) ||
+        (e.inputType && e.inputType.indexOf("Composition") !== -1)
+      ) {
+        e.stopImmediatePropagation();
+      }
+    },
+    true
+  );
+
   // Global keyboard shortcuts:
   //   Alt + Shift + G -> Roll new random gradient
   //   Alt + Shift + Z -> Undo / Previous rolled gradient

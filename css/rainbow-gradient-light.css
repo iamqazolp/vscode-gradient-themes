@@ -413,11 +413,10 @@
 }
 .monaco-workbench .xterm .composition-view,
 .monaco-workbench .xterm .composition-view.active {
-  background: transparent !important;
-  background-color: transparent !important;
-  color: var(--vscode-terminal-foreground, var(--vscode-editor-foreground, inherit)) !important;
-  box-shadow: none !important;
-  border: none !important;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* Universal Gradient Text Selection: Code Editor, Diff, Peek, Notebook, Output, Debug, Terminal & DOM */
