@@ -1047,18 +1047,26 @@
 
 /* I. Titlebar Update Button & Activity Bar Notification Badges */
 .monaco-workbench .part.titlebar .update-indicator.prominent {
-  background-image: var(--prism-local-border, var(--g-border)) !important;
-  background-color: transparent !important;
-  border-color: transparent !important;
-  color: #ffffff !important;
-  transition: filter 0.15s ease, opacity 0.15s ease !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--vscode-cornerRadius-small) !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-color: var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) !important;
+  background-image:
+    var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))),
+    linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))),
+    var(--prism-local-border, var(--g-bars-frame, var(--g-border))) !important;
+  color: var(--vscode-foreground) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  transition: filter 0.15s ease, box-shadow 0.15s ease !important;
 }
 .monaco-workbench .part.titlebar .update-indicator.prominent:hover {
-  filter: brightness(1.12) !important;
-  opacity: 0.94 !important;
+  filter: brightness(1.06) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
 }
 .monaco-workbench .part.titlebar .update-indicator.prominent .indicator-label {
-  color: #ffffff !important;
+  color: var(--vscode-foreground) !important;
+  font-weight: 500 !important;
 }
 .monaco-workbench :is(.activitybar, .part.activitybar) .badge .badge-content,
 .monaco-workbench .profile-badge .profile-text-overlay {
