@@ -1507,6 +1507,14 @@
       )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`
     );
 
+    setWbProp(
+      wb,
+      "--g-border-v",
+      `linear-gradient(180deg, ${rgbToHex(c1)} 0%, ${rgbToHex(
+        c2
+      )} 33%, ${rgbToHex(c3)} 66%, ${rgbToHex(c4)} 100%)`
+    );
+
     const compMap = getComponentsConfig();
     const breatheOn = isBreathingEnabled();
     const breatheCfg = getBreatheConfig();
@@ -2275,6 +2283,7 @@
         "var(--vscode-selection-background, var(--vscode-editor-selectionBackground))"
       );
       setWbProp(wb, "--g-border", "var(--vscode-focusBorder, #3B82F6)");
+      setWbProp(wb, "--g-border-v", "var(--vscode-focusBorder, #3B82F6)");
       disableSyntaxCssVars(wb);
       clearDomSelectionOverlay();
       try {
