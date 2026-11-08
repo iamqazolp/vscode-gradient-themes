@@ -950,6 +950,135 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
 }
 
+/* G. Getting Started / Welcome Walkthrough Cards & Badges */
+.monaco-workbench .part.editor > .content .gettingStartedContainer {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+.monaco-workbench .part.editor > .content .gettingStartedContainer :is(button.getting-started-category, .getting-started-category) {
+  border: 1.5px solid transparent !important;
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 72%, transparent) !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-image:
+    var(--prism-local-bar, var(--g-editor-bar, var(--g-bar))),
+    linear-gradient(0deg, color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 72%, transparent), color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 72%, transparent)),
+    var(--prism-local-border, var(--g-editor-frame, var(--g-border))) !important;
+  border-radius: 8px !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease !important;
+}
+.monaco-workbench .part.editor > .content .gettingStartedContainer :is(button.getting-started-category, .getting-started-category):hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+  filter: brightness(1.03) !important;
+}
+.monaco-workbench .part.editor > .content .gettingStartedContainer .getting-started-category .featured {
+  background-image: var(--prism-local-border, var(--g-editor-frame, var(--g-border))) !important;
+  background-color: transparent !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+}
+.monaco-workbench .part.editor > .content .gettingStartedContainer .getting-started-category .new-badge {
+  background-image: var(--prism-local-border, var(--g-editor-frame, var(--g-border))) !important;
+  background-color: transparent !important;
+  border-radius: 999px !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  padding: 2px 7px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16) !important;
+}
+.monaco-workbench .part.editor > .content .gettingStartedContainer .gettingStartedSlideDetails .getting-started-step:not(.expanded):hover {
+  background: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 60%, transparent) !important;
+  border-radius: 6px !important;
+}
+
+/* H. Tree & List Filter Widgets (Explorer Type-to-Filter & Inline Inputs) */
+.monaco-workbench :is(.monaco-tree-type-filter, .monaco-list-type-filter) {
+  border: 1.5px solid transparent !important;
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 75%, transparent) !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-image:
+    var(--prism-local-bar, var(--g-explorer-bar, var(--g-bar))),
+    linear-gradient(0deg, color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 75%, transparent), color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 75%, transparent)),
+    var(--prism-local-border, var(--g-explorer-frame, var(--g-border))) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+.monaco-workbench :is(.monaco-tree-type-filter, .monaco-list-type-filter) .monaco-inputbox {
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 55%, transparent) !important;
+  background-image: none !important;
+  border: 1px solid rgba(128, 128, 128, 0.28) !important;
+  border-radius: 6px !important;
+  color: var(--vscode-input-foreground, inherit) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+.monaco-workbench :is(.monaco-tree-type-filter, .monaco-list-type-filter) .monaco-inputbox > .ibwrapper > .input {
+  background-color: transparent !important;
+  color: var(--vscode-input-foreground, inherit) !important;
+}
+.monaco-workbench :is(.monaco-tree-type-filter, .monaco-list-type-filter) .monaco-inputbox.synthetic-focus {
+  border-color: rgba(59, 130, 246, 0.8) !important;
+  box-shadow: 0 0 0 1.5px rgba(59, 130, 246, 0.30) !important;
+}
+.monaco-workbench :is(.monaco-tree-type-filter, .monaco-list-type-filter) .monaco-action-bar .action-label {
+  border-radius: 4px !important;
+}
+.monaco-workbench :is(.monaco-tree-type-filter, .monaco-list-type-filter) .monaco-action-bar .action-label:hover {
+  background-color: rgba(128, 128, 128, 0.18) !important;
+}
+.monaco-workbench .part.sidebar .monaco-list-row .monaco-inputbox {
+  border: 1.5px solid transparent !important;
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 75%, transparent) !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-image:
+    var(--prism-local-bar, var(--g-explorer-bar, var(--g-bar))),
+    linear-gradient(0deg, color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 75%, transparent), color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 75%, transparent)),
+    var(--prism-local-border, var(--g-explorer-frame, var(--g-border))) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10) !important;
+}
+
+/* I. Titlebar Update Button & Activity Bar Notification Badges */
+.monaco-workbench .part.titlebar .update-indicator,
+.monaco-workbench .part.titlebar .update-indicator.prominent {
+  border: 1.5px solid transparent !important;
+  background-origin: padding-box, padding-box, border-box !important;
+  background-clip: padding-box, padding-box, border-box !important;
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 50%, transparent) !important;
+  background-image:
+    var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))),
+    linear-gradient(0deg, color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 50%, transparent), color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 50%, transparent)),
+    var(--prism-local-border, var(--g-bars-frame, var(--g-border))) !important;
+  border-radius: 999px !important;
+  color: var(--vscode-foreground) !important;
+  font-weight: 600 !important;
+  padding: 0 10px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease !important;
+}
+.monaco-workbench .part.titlebar .update-indicator:hover,
+.monaco-workbench .part.titlebar .update-indicator.prominent:hover {
+  transform: translateY(-1px) scale(1.03) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18) !important;
+  filter: brightness(1.05) !important;
+}
+.monaco-workbench :is(.activitybar, .part.activitybar) .badge .badge-content,
+.monaco-workbench .profile-badge .profile-text-overlay {
+  background-image: var(--prism-local-border, var(--g-border)) !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  border: none !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22) !important;
+}
+
 /* Scrollbar Slider & Editor Cursor */
 .monaco-workbench .monaco-scrollable-element > .scrollbar > .slider {
   background: var(--g-border) !important;

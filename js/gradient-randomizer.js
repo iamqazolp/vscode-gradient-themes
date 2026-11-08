@@ -1680,13 +1680,13 @@
         ".monaco-editor .view-overlays .current-line, .monaco-editor .margin-view-overlays .current-line-margin"
       ),
       editorSticky: q(
-        ".monaco-editor .sticky-widget, .notebookOverlay .notebook-sticky-scroll-container, .coverage-summary-widget, .editor-instance .terminal-sticky-scroll, .part.editor .monaco-tree-sticky-container:not(.empty)"
+        ".monaco-editor .sticky-widget, .notebookOverlay .notebook-sticky-scroll-container, .coverage-summary-widget, .editor-instance .terminal-sticky-scroll, .part.editor .monaco-tree-sticky-container:not(.empty), .part.editor .gettingStartedContainer :is(button.getting-started-category, .getting-started-category)"
       ),
       explorerBar: q(
         ".part.activitybar .monaco-action-bar .action-item.checked .active-item-indicator, .part.sidebar :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator"
       ),
       explorerSticky: q(
-        ".part.sidebar .monaco-tree-sticky-container:not(.empty), .part.sidebar .terminal-sticky-scroll, .part.sidebar .output-view .sticky-widget, .part.sidebar .monaco-list .monaco-list-row.selected, .part.sidebar .monaco-list .monaco-list-row.focused"
+        ".part.sidebar .monaco-tree-sticky-container:not(.empty), .part.sidebar .terminal-sticky-scroll, .part.sidebar .output-view .sticky-widget, .part.sidebar .monaco-list .monaco-list-row.selected, .part.sidebar .monaco-list .monaco-list-row.focused, .monaco-tree-type-filter, .monaco-list-type-filter, .part.sidebar .monaco-list-row .monaco-inputbox"
       ),
       chatBar: q(
         ".interactive-session .chat-input-container, .interactive-item-container.interactive-request .value .rendered-markdown, .prompt-timeline-sticky-band, .interactive-session .interactive-item-container.chat-sticky-progress:not(:empty), .interactive-session .chat-editing-session .chat-editing-session-container, .interactive-session .interactive-input-part .chat-todo-list-widget-container .chat-todo-list-widget, :is(.part.auxiliarybar, .part.sessionspart) :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator, :is(.part.auxiliarybar, .part.sessionspart) .monaco-list .monaco-list-row.selected, :is(.part.auxiliarybar, .part.sessionspart) .monaco-list .monaco-list-row.focused"
@@ -1701,7 +1701,7 @@
         ".part.panel .terminal-sticky-scroll, .part.panel > .content .pane-body.output-view .sticky-widget, .part.panel .monaco-tree-sticky-container:not(.empty)"
       ),
       barsBar: q(
-        ".editor-group-container > .title .sticky-tabs-background, .editor-group-container > .title .tabs-container > .tab.sticky, .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill, .editor-group-container > .title .tabs-container > .tab.active:not(.sticky), .editor-group-container > .title .tabs-container > .tab.active:not(.sticky) > .tab-fill"
+        ".editor-group-container > .title .sticky-tabs-background, .editor-group-container > .title .tabs-container > .tab.sticky, .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill, .editor-group-container > .title .tabs-container > .tab.active:not(.sticky), .editor-group-container > .title .tabs-container > .tab.active:not(.sticky) > .tab-fill, .part.titlebar .update-indicator"
       ),
       barsSticky: q(".quick-input-widget .monaco-tree-sticky-container:not(.empty)"),
       selectionBar: q(

@@ -340,6 +340,20 @@ def make_ombre_theme(name: str, ui_type: str, p: dict) -> dict:
             "badge.background": p["blue_accent"],
             "badge.foreground": p["badge_fg"],
 
+            # Welcome Page & Walkthroughs
+            "welcomePage.background": "#00000000",
+            "welcomePage.tileBackground": lerp_hex(c_step4, c_step1, 0.30, "40"),
+            "welcomePage.tileHoverBackground": lerp_hex(c_step4, p["blue_accent"], 0.20, "55"),
+            "welcomePage.tileBorder": "#00000000",
+            "welcomePage.progress.background": c_step1,
+            "welcomePage.progress.foreground": p["blue_accent"],
+
+            # Tree & List Filter Widget (Explorer type-to-filter)
+            "listFilterWidget.background": c_step2,
+            "listFilterWidget.outline": "#00000000",
+            "listFilterWidget.noMatchesOutline": "#DC2626" if ui_type == "light" else "#F87171",
+            "listFilterWidget.shadow": "#00000000",
+
             "scrollbar.shadow": "#00000000",
             "scrollbarSlider.background": p["scrollbar"],
             "scrollbarSlider.hoverBackground": p["scrollbar_hover"],
