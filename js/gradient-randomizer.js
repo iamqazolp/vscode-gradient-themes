@@ -625,6 +625,44 @@
 
   let hoverListenerAttached = false;
 
+  const HOVER_TARGET_SELECTOR =
+    ".monaco-list-row, .terminal-tabs-entry, .monaco-action-bar .action-item, .tabs-container > .tab, .statusbar-item, .getting-started-step";
+
+  function assignHoveredBreathingTarget(hit) {
+    if (!hit) {
+      hoveredBreathingTargets = [];
+      hoveredBreathingComp = "";
+      return;
+    }
+    let comp = "shared";
+    if (hit.closest(".part.panel")) {
+      comp = "terminal";
+    } else if (hit.closest(".part.sidebar, .part.activitybar")) {
+      comp = "explorer";
+    } else if (hit.closest(".part.auxiliarybar, .part.sessionspart")) {
+      comp = "chat";
+    } else if (
+      hit.closest(".part.statusbar, .part.titlebar, .editor-group-container > .title")
+    ) {
+      comp = "bars";
+    } else if (hit.closest(".part.editor")) {
+      comp = "editor";
+    }
+    const nextTargets = [hit];
+    const inner = hit.querySelector(
+      ":scope > .active-item-indicator, :scope > .tab-fill, :scope > a.statusbar-item-label"
+    );
+    if (inner) nextTargets.push(inner);
+    hoveredBreathingTargets = nextTargets;
+    hoveredBreathingComp = comp;
+    if (lastBreathingBarByComp) {
+      const barCss = lastBreathingBarByComp[comp] || lastBreathingBarByComp.shared;
+      if (barCss) {
+        setLocalPropsOnList(nextTargets, "--prism-local-bar", barCss);
+      }
+    }
+  }
+
   // Zero-Subtree-Walk Hover Tracker: attached ONLY while Breathing Aurora is active.
   // Sets non-inherited --prism-local-bar directly on the single hovered row/tab/action element
   // (kLocalStyleChange on 1-2 nodes, 0 subtree walk).
@@ -639,38 +677,14 @@
     ) {
       return;
     }
-    const hit = t.closest(
-      ".monaco-list-row, .terminal-tabs-entry, .monaco-action-bar .action-item, .tabs-container > .tab, .statusbar-item"
-    );
+    const hit = t.closest(HOVER_TARGET_SELECTOR);
     if (!hit) {
       hoveredBreathingTargets = [];
       hoveredBreathingComp = "";
       return;
     }
     if (hoveredBreathingTargets[0] === hit) return;
-    let comp = "shared";
-    if (hit.closest(".part.panel")) {
-      comp = "terminal";
-    } else if (hit.closest(".part.sidebar, .part.activitybar")) {
-      comp = "explorer";
-    } else if (hit.closest(".part.auxiliarybar, .part.sessionspart")) {
-      comp = "chat";
-    } else if (
-      hit.closest(".part.statusbar, .part.titlebar, .editor-group-container > .title")
-    ) {
-      comp = "bars";
-    }
-    const nextTargets = [hit];
-    const inner = hit.querySelector(
-      ":scope > .active-item-indicator, :scope > .tab-fill, :scope > a.statusbar-item-label"
-    );
-    if (inner) nextTargets.push(inner);
-    hoveredBreathingTargets = nextTargets;
-    hoveredBreathingComp = comp;
-    const barCss = lastBreathingBarByComp[comp] || lastBreathingBarByComp.shared;
-    if (barCss) {
-      setLocalPropsOnList(nextTargets, "--prism-local-bar", barCss);
-    }
+    assignHoveredBreathingTarget(hit);
   }
 
   function attachBreathingHoverListener() {
@@ -1763,7 +1777,7 @@
         ".monaco-editor .view-overlays .current-line, .monaco-editor .margin-view-overlays .current-line-margin"
       ),
       editorSticky: q(
-        ".monaco-editor .sticky-widget, .notebookOverlay .notebook-sticky-scroll-container, .coverage-summary-widget, .editor-instance .terminal-sticky-scroll, .part.editor .monaco-tree-sticky-container:not(.empty), .part.editor .gettingStartedContainer :is(button.getting-started-category, .getting-started-category), .part.editor .gettingStartedContainer .getting-started-category :is(.featured, .new-badge)"
+        ".monaco-editor .sticky-widget, .notebookOverlay .notebook-sticky-scroll-container, .coverage-summary-widget, .editor-instance .terminal-sticky-scroll, .part.editor .monaco-tree-sticky-container:not(.empty), .part.editor .gettingStartedContainer :is(button.getting-started-category, .getting-started-category), .part.editor .gettingStartedContainer .getting-started-category :is(.featured, .new-badge), .monaco-editor .find-widget.visible, .monaco-editor .parameter-hints-widget.visible, .editor-widget.suggest-widget.visible, .monaco-hover:not(.hidden)"
       ),
       explorerBar: q(
         ".part.activitybar .monaco-action-bar .action-item.checked .active-item-indicator, .part.sidebar :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator, :is(.activitybar, .part.activitybar) .badge .badge-content, .profile-badge .profile-text-overlay"
@@ -1781,12 +1795,14 @@
         ".part.panel :is(.title, .composite.title, .header-or-footer) .monaco-action-bar .action-item.checked > .active-item-indicator, .part.panel .monaco-list .monaco-list-row.selected, .part.panel .monaco-list .monaco-list-row.focused, .pane-body.integrated-terminal .tabs-list .monaco-list-row.selected, .pane-body.integrated-terminal .tabs-list .monaco-list-row.focused"
       ),
       terminalSticky: q(
-        ".part.panel .terminal-sticky-scroll, .part.panel > .content .pane-body.output-view .sticky-widget, .part.panel .monaco-tree-sticky-container:not(.empty)"
+        ".part.panel .terminal-sticky-scroll, .part.panel > .content .pane-body.output-view .sticky-widget, .part.panel .monaco-tree-sticky-container:not(.empty), .pane-body.integrated-terminal .terminal-tabs-entry.is-active"
       ),
       barsBar: q(
-        ".editor-group-container > .title .sticky-tabs-background, .editor-group-container > .title .tabs-container > .tab.sticky, .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill, .editor-group-container > .title .tabs-container > .tab.active:not(.sticky), .editor-group-container > .title .tabs-container > .tab.active:not(.sticky) > .tab-fill, .part.titlebar .update-indicator, .part.titlebar :is(.command-center-center, .command-center .action-item.command-center-center)"
+        '.editor-group-container > .title .sticky-tabs-background, .editor-group-container > .title .tabs-container > .tab.sticky, .editor-group-container > .title .tabs-container > .tab.sticky > .tab-fill, .editor-group-container > .title .tabs-container > .tab.active:not(.sticky), .editor-group-container > .title .tabs-container > .tab.active:not(.sticky) > .tab-fill, .part.titlebar .update-indicator, .part.titlebar :is(.command-center-center, .command-center .action-item.command-center-center), .quick-input-widget:not([style*="display: none"]), .context-view .monaco-menu, .notifications-toasts .notification-toast'
       ),
-      barsSticky: q(".quick-input-widget .monaco-tree-sticky-container:not(.empty)"),
+      barsSticky: q(
+        '.quick-input-widget .monaco-tree-sticky-container:not(.empty), .part.statusbar > .items-container > .statusbar-item:is([id="iamqazolp.vscode-gradient-themes"], [id^="iamqazolp.vscode-gradient-themes."], [aria-label*="Reload for Gradient"]) > a.statusbar-item-label'
+      ),
       selectionBar: q(
         ".monaco-editor .selected-text, .monaco-editor .selectionHighlight, .xterm .xterm-selection div, #prism-dom-selection-layer .prism-dom-sel-rect"
       ),
@@ -1799,8 +1815,23 @@
       horizontalSliders: q(
         ".monaco-scrollable-element > .scrollbar.visible.horizontal > .slider"
       ),
-      editorCursors: q(".monaco-editor .cursors-layer .cursor, .xterm .xterm-cursor"),
+      editorCursors: q(".monaco-editor .cursors-layer .cursor"),
+      terminalCursors: q(".xterm .xterm-cursor"),
     };
+
+    if (
+      hoveredBreathingTargets.length === 0 ||
+      !hoveredBreathingTargets[0] ||
+      !hoveredBreathingTargets[0].isConnected ||
+      !hoveredBreathingTargets[0].matches(":hover")
+    ) {
+      const initialHover = wb.querySelector(
+        ".monaco-list-row:hover, .terminal-tabs-entry:hover, .monaco-action-bar .action-item:hover, .tabs-container > .tab:hover, .statusbar-item:hover, .getting-started-step:hover"
+      );
+      if (initialHover) {
+        assignHoveredBreathingTarget(initialHover);
+      }
+    }
 
     // Prune any element that is no longer active/selected so it reverts cleanly to workbench CSS
     const activeSet = new Set();
@@ -2050,6 +2081,11 @@
       );
     }
     if (terminalSpec) {
+      const terminalBorderVCss = `linear-gradient(180deg, ${rgbToHex(
+        terminalSpec.stops[0]
+      )} 0%, ${rgbToHex(terminalSpec.stops[1])} 33%, ${rgbToHex(
+        terminalSpec.stops[2]
+      )} 66%, ${rgbToHex(terminalSpec.stops[3])} 100%)`;
       setLocalPropsOnList(
         targets.terminalBar,
         "--prism-local-bar",
@@ -2063,6 +2099,11 @@
         terminalSpec.barCss,
         "--prism-local-frame",
         terminalSpec.frameCss
+      );
+      setLocalPropsOnList(
+        targets.terminalCursors,
+        "--prism-local-border-v",
+        terminalBorderVCss
       );
     }
     if (barsSpec) {

@@ -925,7 +925,7 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
 }
 .monaco-workbench .pane-body.integrated-terminal .terminal-tabs-entry.is-active:before {
-  background: var(--g-terminal-frame, var(--g-border)) !important;
+  background: var(--prism-local-frame, var(--prism-local-border, var(--g-terminal-frame, var(--g-border)))) !important;
   width: 2.5px !important;
   border-radius: 2px !important;
 }
@@ -939,9 +939,9 @@
   background-origin: padding-box, padding-box, border-box !important;
   background-clip: padding-box, padding-box, border-box !important;
   background-image:
-    var(--g-editor-bar, none),
+    var(--prism-local-bar, var(--g-editor-bar, none)),
     linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))),
-    var(--g-editor-frame, var(--g-border)) !important;
+    var(--prism-local-frame, var(--prism-local-border, var(--g-editor-frame, var(--g-border)))) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
 }
 .monaco-workbench :is(.quick-input-widget, .context-view .monaco-menu, .notifications-toasts .notification-toast) {
@@ -950,9 +950,9 @@
   background-origin: padding-box, padding-box, border-box !important;
   background-clip: padding-box, padding-box, border-box !important;
   background-image:
-    var(--g-bars-bar, none),
+    var(--prism-local-bar, var(--g-bars-bar, none)),
     linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))),
-    var(--g-bars-frame, var(--g-border)) !important;
+    var(--prism-local-frame, var(--prism-local-border, var(--g-bars-frame, var(--g-border)))) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16) !important;
 }
 
@@ -995,7 +995,8 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16) !important;
 }
 .monaco-workbench .part.editor > .content .gettingStartedContainer .gettingStartedSlideDetails .getting-started-step:not(.expanded):hover {
-  background: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 60%, transparent) !important;
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)) 60%, transparent) !important;
+  background-image: var(--prism-local-bar, var(--g-editor-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
 }
 
@@ -1136,11 +1137,18 @@
 
 /* K. Universal Gradient Hover Effects (Files, Terminal Tabs, Panel Tabs, Problems, Output, Status Bar) */
 
-/* 1. File Explorer & Sidebar Tree Rows on Hover */
-.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart) .monaco-list .monaco-list-row:not(.selected):not(.focused):hover,
-.monaco-workbench :is(.part.sidebar, .part.auxiliarybar, .part.sessionspart) .monaco-list:not(.drop-target) .monaco-list-row:hover:not(.selected):not(.focused) {
+/* 1. File Explorer, Sidebar & Chat/Sessions Tree Rows on Hover */
+.monaco-workbench .part.sidebar .monaco-list .monaco-list-row:not(.selected):not(.focused):hover,
+.monaco-workbench .part.sidebar .monaco-list:not(.drop-target) .monaco-list-row:hover:not(.selected):not(.focused) {
   background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 50%, transparent) !important;
   background-image: var(--prism-local-bar, var(--g-explorer-bar, var(--g-bar))) !important;
+  border-radius: 6px !important;
+  outline: none !important;
+}
+.monaco-workbench :is(.part.auxiliarybar, .part.sessionspart) .monaco-list .monaco-list-row:not(.selected):not(.focused):hover,
+.monaco-workbench :is(.part.auxiliarybar, .part.sessionspart) .monaco-list:not(.drop-target) .monaco-list-row:hover:not(.selected):not(.focused) {
+  background-color: color-mix(in srgb, var(--g-canvas-bg, var(--vscode-sideBar-background, var(--vscode-editor-background, #ffffff))) 50%, transparent) !important;
+  background-image: var(--prism-local-bar, var(--g-chat-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
   outline: none !important;
 }
@@ -1203,6 +1211,48 @@
   background-image: var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))) !important;
   border-radius: 6px !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Status Bar "Reload for Gradient" Button (Gradient Fill + 1.5px Frame like Selected File) */
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:is([id="iamqazolp.vscode-gradient-themes"], [id^="iamqazolp.vscode-gradient-themes."], [aria-label*="Reload for Gradient"]),
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:is([id="iamqazolp.vscode-gradient-themes"], [id^="iamqazolp.vscode-gradient-themes."], [aria-label*="Reload for Gradient"]):hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: var(--vscode-statusBar-foreground, var(--vscode-foreground)) !important;
+}
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:is([id="iamqazolp.vscode-gradient-themes"], [id^="iamqazolp.vscode-gradient-themes."], [aria-label*="Reload for Gradient"]) > a.statusbar-item-label,
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:is([id="iamqazolp.vscode-gradient-themes"], [id^="iamqazolp.vscode-gradient-themes."], [aria-label*="Reload for Gradient"]) > a.statusbar-item-label:hover:not(.disabled),
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:is([id="iamqazolp.vscode-gradient-themes"], [id^="iamqazolp.vscode-gradient-themes."], [aria-label*="Reload for Gradient"]) > a.statusbar-item-label:active:not(.disabled) {
+  position: relative !important;
+  outline: none !important;
+  margin-left: 3px !important;
+  margin-right: 3px !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  color: var(--vscode-statusBar-foreground, var(--vscode-foreground)) !important;
+  background-color: var(--g-canvas-bg, var(--vscode-statusBar-background, var(--vscode-editor-background, #ffffff))) !important;
+  background-image: var(--prism-local-bar, var(--g-bars-bar, var(--g-bar))) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:is([id="iamqazolp.vscode-gradient-themes"], [id^="iamqazolp.vscode-gradient-themes."], [aria-label*="Reload for Gradient"]) > a.statusbar-item-label:hover:not(.disabled) {
+  filter: brightness(1.05) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+.monaco-workbench .part.statusbar > .items-container > .statusbar-item:is([id="iamqazolp.vscode-gradient-themes"], [id^="iamqazolp.vscode-gradient-themes."], [aria-label*="Reload for Gradient"]) > a.statusbar-item-label::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none !important;
+  z-index: 20;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--prism-local-frame, var(--g-bars-frame, var(--g-border))) !important;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 }
 
 /* 7. Activity Bar & Sidebar Title Header Actions on Hover (Single Pill - Zero :has() Invalidation) */

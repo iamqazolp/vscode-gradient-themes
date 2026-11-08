@@ -421,11 +421,10 @@ async function disableGradientOverlay(context) {
 
 function showReloadStatusBarPrompt(context) {
   const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 10000);
-  item.text = "$(sparkle) Reload for Gradient & 🎲";
+  item.text = "$(sparkle) Reload for Gradient";
   item.tooltip =
     "VSCode Gradient Themes re-injected the 4-Color Gradient Mesh & 🎲 Randomizer after a VSCode update or install. Click to Reload Window!";
   item.command = "workbench.action.reloadWindow";
-  item.backgroundColor = new vscode.ThemeColor("statusBarItem.warningBackground");
   item.show();
   context.subscriptions.push(item);
 }
