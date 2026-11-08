@@ -402,12 +402,12 @@
   opacity: 0.85 !important;
 }
 
-/* Gradient Terminal Cursor */
+/* Gradient Terminal Cursor (Vertical 180deg Gradient) */
 .monaco-workbench .xterm .xterm-cursor,
 .monaco-workbench .xterm .xterm-cursor-block,
 .monaco-workbench .xterm .xterm-cursor-bar,
 .monaco-workbench .xterm .xterm-cursor-underline {
-  background: var(--g-border) !important;
+  background: var(--prism-local-border-v, var(--g-border-v, var(--g-border))) !important;
   border-color: transparent !important;
   border-radius: 2px !important;
 }

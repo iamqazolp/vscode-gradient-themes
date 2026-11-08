@@ -1779,7 +1779,7 @@
       horizontalSliders: q(
         ".monaco-scrollable-element > .scrollbar.horizontal > .slider"
       ),
-      editorCursors: q(".monaco-editor .cursors-layer .cursor"),
+      editorCursors: q(".monaco-editor .cursors-layer .cursor, .xterm .xterm-cursor"),
     };
 
     // Prune any element that is no longer active/selected so it reverts cleanly to workbench CSS
