@@ -537,6 +537,7 @@
     } catch (_) {}
     const wb = document.querySelector(".monaco-workbench");
     syncSyntaxModeClass(wb);
+    if (wb) ensureSyntaxStyleSheet(wb, true);
     refreshPopoverHeaderAndIntensity();
     renderPaletteGrid();
   }
@@ -859,16 +860,20 @@
 
     const prepared = [];
     const sigParts = [];
-    tokenMap.forEach((rgb, n) => {
+    const sortedEntries = Array.from(tokenMap.entries()).sort((a, b) => a[0] - b[0]);
+    let colorIdx = 0;
+    for (let i = 0; i < sortedEntries.length; i++) {
+      const [n, rgb] = sortedEntries[i];
       sigParts.push(`${n}:${rgb[0]},${rgb[1]},${rgb[2]}`);
-      if (n <= 1) return; // Keep .mtk1 (plain variables, identifiers, brackets & punctuation) 100% solid native text
+      if (n <= 1) continue; // Keep .mtk1 (plain variables, identifiers, brackets & punctuation) 100% solid native text
       const [h, s, l] = rgbToHsl(rgb);
-      if (s < 28) return; // Keep muted comments & slate operators 100% solid native CoreText-antialiased text
+      if (s < 28) continue; // Keep muted comments & slate operators 100% solid native CoreText-antialiased text
 
-      // Deterministic hue-quadrant slot assignment: immune to .mtk* insertion order changes
-      // when scrolling raw Markdown with lazily tokenized fenced code blocks or links
-      const slot1 = h < 22 || h >= 315 ? 0 : h < 95 ? 1 : h < 190 ? 2 : 3;
-      const slot2 = (slot1 + 1) % 4;
+      // Sorted by Monaco's append-only ColorMap ID `n` so existing tokens 1..K never shift
+      // when K+1 is appended while scrolling, and monochromatic palettes still cycle all 4 stops
+      const slot1 = colorIdx % 4;
+      const slot2 = (colorIdx + 1) % 4;
+      colorIdx += 1;
 
       const rgbA = hslToRgb(
         h - 18,
@@ -881,7 +886,7 @@
         isDark ? Math.max(71, Math.min(83, l + 6)) : Math.min(36, Math.max(24, l - 5))
       );
       prepared.push({ n, rgbA, rgbB, slot1, slot2 });
-    });
+    }
 
     const tokenSig = `${isDark ? "d" : "l"}|${fastStyle ? fastStyle.textContent?.length || 0 : sigParts.join(";")}`;
     cachedMonacoTokenSig = tokenSig;
@@ -932,11 +937,11 @@
     const mixRatio = Math.max(0.24, Math.min(0.76, 0.44 * effectiveK));
     const mixRatioB = Math.min(0.82, mixRatio + 0.08);
     const mixKey = Math.round(mixRatio * 100);
-    const barAngle = Math.round(angles.bar || 90);
+    const isPaletteMode = getSyntaxMode() === "palette";
 
     let styleEl = document.getElementById("prism-syntax-style");
     const { prepared, sig: tokenSig } = extractMonacoTokenColors(isDark);
-    const sig = `${isDark ? "d" : "l"}|${synHexes.join(",")}|${mixKey}|${barAngle}|${tokenSig}`;
+    const sig = `${isDark ? "d" : "l"}|${isPaletteMode ? "p" : "s"}|${synHexes.join(",")}|${mixKey}|${tokenSig}`;
     if (!force && styleEl && styleEl.isConnected && sig === lastSyntaxSheetSig) {
       lastSyntaxThemeDark = isDark;
       return;
@@ -960,21 +965,16 @@
       const tok = prepared[i];
       // Bake static hex colors directly into #prism-syntax-style (zero var() / color-mix() on span.mtk*
       // so Blink caches 1 CSSLinearGradientValue per rule and skips all 2,000 token spans during style recalc)
-      const semHexA = rgbToHex(lerpRgb(tok.rgbA, synRgbs[tok.slot1], mixRatio));
-      const semHexB = rgbToHex(lerpRgb(tok.rgbB, synRgbs[tok.slot2], mixRatioB));
-      const palHexA = synHexes[tok.slot1];
-      const palHexB = synHexes[tok.slot2];
+      const hexA = isPaletteMode
+        ? synHexes[tok.slot1]
+        : rgbToHex(lerpRgb(tok.rgbA, synRgbs[tok.slot1], mixRatio));
+      const hexB = isPaletteMode
+        ? synHexes[tok.slot2]
+        : rgbToHex(lerpRgb(tok.rgbB, synRgbs[tok.slot2], mixRatioB));
 
       rules.push(
-        `.monaco-workbench:not(.prism-no-syntax):not(.prism-syntax-palette) ${scopeSel} span.mtk${tok.n} {` +
-          `background-image: linear-gradient(95deg, ${semHexA} 0%, ${semHexB} 100%) !important;` +
-          `-webkit-background-clip: text !important; background-clip: text !important;` +
-          `-webkit-text-fill-color: transparent !important; ${strokeRule}` +
-        `}`
-      );
-      rules.push(
-        `.monaco-workbench:not(.prism-no-syntax).prism-syntax-palette ${scopeSel} span.mtk${tok.n} {` +
-          `background-image: linear-gradient(95deg, ${palHexA} 0%, ${palHexB} 100%) !important;` +
+        `.monaco-workbench:not(.prism-no-syntax) ${scopeSel} span.mtk${tok.n} {` +
+          `background-image: linear-gradient(95deg, ${hexA} 0%, ${hexB} 100%) !important;` +
           `-webkit-background-clip: text !important; background-clip: text !important;` +
           `-webkit-text-fill-color: transparent !important; ${strokeRule}` +
         `}`
@@ -982,19 +982,12 @@
     }
 
     const [h1, h2, h3, h4] = synHexes;
-    const synBarCss = buildBarCss(stops, angles, effectiveK * 0.72);
-    const synStrongCss = buildSelectionCss(stops, angles, effectiveK * 0.85);
-    const synFrameCss = buildFrameCss(stops);
     rules.push(
       `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-keyword, .hljs-selector-tag, .hljs-meta, .hljs-doctag) { background-image: linear-gradient(95deg, ${h1} 0%, ${h2} 100%) !important; }`,
       `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-string, .hljs-regexp, .hljs-addition) { background-image: linear-gradient(95deg, ${h3} 0%, ${h4} 100%) !important; }`,
       `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-title, .hljs-function, .hljs-section, .hljs-built_in) { background-image: linear-gradient(95deg, ${h4} 0%, ${h1} 100%) !important; }`,
       `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-type, .hljs-class, .hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-params) { background-image: linear-gradient(95deg, ${h2} 0%, ${h3} 100%) !important; }`,
-      `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-number, .hljs-literal, .hljs-symbol, .hljs-bullet) { background-image: linear-gradient(95deg, ${h1} 0%, ${h4} 100%) !important; }`,
-      `.monaco-workbench:not(.prism-no-syntax) .monaco-editor .view-overlays :is(.wordHighlight, .wordHighlightText, .rangeHighlight, .symbolHighlight, .findMatch) { background-image: ${synBarCss} !important; }`,
-      `.monaco-workbench:not(.prism-no-syntax) .monaco-editor .view-overlays :is(.wordHighlightStrong, .currentFindMatch) { background-image: ${synStrongCss} !important; }`,
-      `.monaco-workbench:not(.prism-no-syntax) .monaco-editor .view-overlays .bracket-match { background-image: ${synBarCss}, ${synFrameCss} !important; }`,
-      `.monaco-workbench:not(.prism-no-syntax) :is(.rendered-markdown, .monaco-hover .hover-contents) :not(pre) > code { background-image: ${synBarCss}, linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))), ${synFrameCss} !important; }`
+      `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-number, .hljs-literal, .hljs-symbol, .hljs-bullet) { background-image: linear-gradient(95deg, ${h1} 0%, ${h4} 100%) !important; }`
     );
 
     styleEl.textContent = rules.join("\n");
@@ -1876,6 +1869,12 @@
       selectionBar: q(
         ".monaco-editor .selected-text, .monaco-editor .selectionHighlight, .xterm .xterm-selection div, #prism-dom-selection-layer .prism-dom-sel-rect"
       ),
+      syntaxBar: q(
+        ".monaco-editor .view-overlays :is(.wordHighlight, .wordHighlightText, .rangeHighlight, .symbolHighlight, .findMatch, .bracket-match)"
+      ),
+      syntaxStrong: q(
+        ".monaco-editor .view-overlays :is(.wordHighlightStrong, .currentFindMatch)"
+      ),
       editorSash: q(
         ".part.editor :is(.monaco-grid-view, .monaco-split-view2) .monaco-sash.vertical"
       ),
@@ -2208,6 +2207,16 @@
           ? getShiftedStops(customBaseSyn, phaseDelta * 0.16)
           : customBaseSyn;
       }
+      const synBarCss = buildBarCss(syntaxSpec.stops, syntaxSpec.angles, k * 0.72);
+      const synStrongCss = buildSelectionCss(syntaxSpec.stops, syntaxSpec.angles, k * 0.85);
+      setLocalPropsOnList(
+        targets.syntaxBar,
+        "--prism-local-bar",
+        synBarCss,
+        "--prism-local-border",
+        syntaxSpec.frameCss
+      );
+      setLocalPropsOnList(targets.syntaxStrong, "--prism-local-bar", synStrongCss);
       ensureSyntaxStyleSheet(
         wb,
         false,
@@ -2243,20 +2252,7 @@
       const hadActiveBreathing = localStyledElements.size > 0;
       clearLocalBreathingProps();
       if (hadActiveBreathing) {
-        const wb = document.querySelector(".monaco-workbench");
-        if (wb && lastLiveStops && lastLiveStops.length === 4) {
-          const saved = getSavedPalette();
-          if (!saved || !saved.isNativeOff) {
-            writeGradientCssVars(
-              wb,
-              lastLiveStops,
-              lastLiveAngles || { base: 135, bar: 90, side: 165, panel: 105 },
-              getIntensity(),
-              null,
-              { synRgbs: lastSyntaxRgbs }
-            );
-          }
-        }
+        reapplyCurrentWorkbench();
       }
       return;
     }
