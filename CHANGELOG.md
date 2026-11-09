@@ -4,6 +4,20 @@
 
 All notable changes to **VSCode Gradient Themes** will be documented in this file.
 
+## [67676767.67676767.67676767] - 2026-11-09
+
+### Added, Changed & Fixed
+- **Universal Gradient UI Chrome & Single-Pill Hover Effects (`css/rainbow-gradient-light.css`, `css/rainbow-gradient-dark.css`, `js/gradient-randomizer.js`)**:
+  - Styled Walkthrough cards & steps, Tree/List Filter boxes, Titlebar Update button, Command Center search box, Activity Bar & Profile badges, and Status Bar `"Reload for Gradient"` pills with frosted aurora fills and `1.5px` 4-color gradient frames.
+  - Added single-pill gradient hover highlights across File Explorer rows, Chat/Sessions rows, Terminal tabs, Panel header tabs, Editor tabs, Activity Bar actions, and Status Bar items with zero `:has()` ancestor invalidation.
+  - Added a vertical `180deg` gradient editor split sash (`.monaco-sash.vertical:before` starting cleanly below the editor tab strip), vertical `180deg` scrollbar sliders (`.scrollbar.vertical > .slider`), and vertical `180deg` Editor & Terminal text cursors.
+- **Full-Workbench Breathing Aurora Sync & Smooth Syntax Breathing (`js/gradient-randomizer.js`, `css/`)**:
+  - Synced 100% of floating widgets (`.find-widget`, `.parameter-hints-widget`, `.suggest-widget`, `.monaco-hover`, `.quick-input-widget`, `.monaco-menu`, `.notification-toast`), active terminal tab indicators, terminal cursors, editor highlight overlays, and hovered elements (including stationary cursor hovers) with `Breathing Aurora` via `inherits: false` `--prism-local-*` custom properties.
+  - Added smooth 5 FPS syntax highlighting breathing (`#prism-syntax-style`) with pre-interpolated readable stops and append-only sorted `.mtk*` slot assignment to eliminate color jumps on palette morph completion or raw Markdown scrolling.
+- **Direct Vietnamese / CJK IME Terminal Streamer (`js/gradient-randomizer.js`, `css/`, `extension.js`, `install.py`)**:
+  - Disabled xterm.js's black `.composition-view` buffer box in the integrated terminal and added a capture-phase IME streamer on `.xterm-helper-textarea` that diffs and forwards composed characters directly to the PTY keystroke-by-keystroke.
+  - Added automatic `workbench.esm.html` patching alongside `workbench.html` across `install.py` and `extension.js` so all CSS and JS fixes survive VS Code updates automatically.
+
 ## [676767.676767.676767] - 2026-11-08
 
 ![676767.676767.676767](https://raw.githubusercontent.com/iamqazolp/vscode-gradient-themes/main/media/screenshots/changelog-676767.676767.676767.png)
