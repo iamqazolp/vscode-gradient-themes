@@ -544,11 +544,14 @@
   let lastSyntaxSheetSig = "";
   let lastSyntaxThemeDark = null;
   let lastSyntaxStops = null;
+  let lastSyntaxRgbs = null;
+  let lastSyntaxAngles = null;
   let lastSyntaxK = 1.0;
   let monacoColorsObserver = null;
   let observedMonacoStyleEl = null;
   let cachedMonacoTokenSig = "";
   let cachedMonacoTokenMap = null;
+  let cachedPreparedTokens = null;
   let lastSyntaxHexSig = "";
   let cachedComponentsConfig = null;
   let lastAppliedWbElement = null;
@@ -773,14 +776,19 @@
   }
 
   function extractMonacoTokenColors(isDark) {
-    const fastStyle = document.querySelector("style.vscode-tokens-styles, style.monaco-colors");
+    const tokenStyle = document.querySelector("style.vscode-tokens-styles");
+    const fastStyle =
+      tokenStyle && (tokenStyle.textContent || "").includes(".mtk")
+        ? tokenStyle
+        : null;
     if (
       fastStyle &&
       fastStyle === observedMonacoStyleEl &&
       cachedMonacoTokenMap &&
+      cachedPreparedTokens &&
       cachedMonacoTokenSig === `${isDark ? "d" : "l"}|${fastStyle.textContent?.length || 0}`
     ) {
-      return cachedMonacoTokenMap;
+      return { tokenMap: cachedMonacoTokenMap, prepared: cachedPreparedTokens, sig: cachedMonacoTokenSig };
     }
     const tokenMap = new Map();
     const styles = fastStyle
@@ -791,11 +799,7 @@
       const st = styles[i];
       const txt = st.textContent || "";
       if (!txt.includes(".mtk")) continue;
-      if (
-        st.classList &&
-        (st.classList.contains("vscode-tokens-styles") || st.classList.contains("monaco-colors")) &&
-        observedMonacoStyleEl !== st
-      ) {
+      if (observedMonacoStyleEl !== st) {
         observedMonacoStyleEl = st;
         if (monacoColorsObserver) {
           monacoColorsObserver.disconnect();
@@ -803,6 +807,7 @@
         monacoColorsObserver = new MutationObserver(() => {
           cachedMonacoTokenSig = "";
           cachedMonacoTokenMap = null;
+          cachedPreparedTokens = null;
           const wb = document.querySelector(".monaco-workbench");
           if (wb) ensureSyntaxStyleSheet(wb, true);
         });
@@ -851,15 +856,52 @@
         if (!tokenMap.has(idx)) tokenMap.set(idx, rgb);
       });
     }
-    if (fastStyle) {
-      cachedMonacoTokenSig = `${isDark ? "d" : "l"}|${fastStyle.textContent?.length || 0}`;
-      cachedMonacoTokenMap = tokenMap;
-    }
-    return tokenMap;
+
+    const prepared = [];
+    const sigParts = [];
+    tokenMap.forEach((rgb, n) => {
+      sigParts.push(`${n}:${rgb[0]},${rgb[1]},${rgb[2]}`);
+      if (n <= 1) return; // Keep .mtk1 (plain variables, identifiers, brackets & punctuation) 100% solid native text
+      const [h, s, l] = rgbToHsl(rgb);
+      if (s < 28) return; // Keep muted comments & slate operators 100% solid native CoreText-antialiased text
+
+      // Deterministic hue-quadrant slot assignment: immune to .mtk* insertion order changes
+      // when scrolling raw Markdown with lazily tokenized fenced code blocks or links
+      const slot1 = h < 22 || h >= 315 ? 0 : h < 95 ? 1 : h < 190 ? 2 : 3;
+      const slot2 = (slot1 + 1) % 4;
+
+      const rgbA = hslToRgb(
+        h - 18,
+        Math.max(86, Math.min(98, s + 16)),
+        isDark ? Math.min(86, Math.max(75, l + 12)) : Math.max(20, Math.min(32, l - 10))
+      );
+      const rgbB = hslToRgb(
+        h + 24,
+        Math.max(86, Math.min(98, s + 16)),
+        isDark ? Math.max(71, Math.min(83, l + 6)) : Math.min(36, Math.max(24, l - 5))
+      );
+      prepared.push({ n, rgbA, rgbB, slot1, slot2 });
+    });
+
+    const tokenSig = `${isDark ? "d" : "l"}|${fastStyle ? fastStyle.textContent?.length || 0 : sigParts.join(";")}`;
+    cachedMonacoTokenSig = tokenSig;
+    cachedMonacoTokenMap = tokenMap;
+    cachedPreparedTokens = prepared;
+    return { tokenMap, prepared, sig: tokenSig };
   }
 
-  function ensureSyntaxStyleSheet(wb, force = false, cStops = null, kVal = null) {
+  function ensureSyntaxStyleSheet(
+    wb,
+    force = false,
+    cStops = null,
+    kVal = null,
+    cSynRgbs = null,
+    cAngles = null
+  ) {
     if (!wb) return;
+    const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
+    const themeFlipped = lastSyntaxThemeDark !== null && lastSyntaxThemeDark !== isDark;
+
     const stops =
       cStops && cStops.length === 4
         ? cStops
@@ -869,22 +911,32 @@
         ? lastLiveStops
         : CURATED_PALETTES[0].stops;
     const effectiveK = typeof kVal === "number" ? kVal : lastSyntaxK;
+    const angles =
+      cAngles ||
+      lastSyntaxAngles ||
+      lastLiveAngles || { base: 135, bar: 90, side: 165, panel: 105 };
+
+    const synRgbs =
+      cSynRgbs && cSynRgbs.length === 4
+        ? cSynRgbs
+        : !cStops && !themeFlipped && lastSyntaxRgbs && lastSyntaxRgbs.length === 4
+        ? lastSyntaxRgbs
+        : stops.map((s) => toReadableSyntaxRgb(s, isDark));
+
     lastSyntaxStops = stops.map((s) => [...s]);
+    lastSyntaxRgbs = synRgbs.map((s) => [...s]);
+    lastSyntaxAngles = { ...angles };
     lastSyntaxK = effectiveK;
 
-    const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
-    const synRgbs = stops.map((s) => toReadableSyntaxRgb(s, isDark));
     const synHexes = synRgbs.map(rgbToHex);
     const mixRatio = Math.max(0.24, Math.min(0.76, 0.44 * effectiveK));
+    const mixRatioB = Math.min(0.82, mixRatio + 0.08);
     const mixKey = Math.round(mixRatio * 100);
+    const barAngle = Math.round(angles.bar || 90);
 
     let styleEl = document.getElementById("prism-syntax-style");
-    const tokenMap = extractMonacoTokenColors(isDark);
-    const sigParts = [];
-    tokenMap.forEach((rgb, idx) => {
-      sigParts.push(`${idx}:${rgb[0]},${rgb[1]},${rgb[2]}`);
-    });
-    const sig = `${isDark ? "d" : "l"}|${synHexes.join(",")}|${mixKey}|${sigParts.join(";")}`;
+    const { prepared, sig: tokenSig } = extractMonacoTokenColors(isDark);
+    const sig = `${isDark ? "d" : "l"}|${synHexes.join(",")}|${mixKey}|${barAngle}|${tokenSig}`;
     if (!force && styleEl && styleEl.isConnected && sig === lastSyntaxSheetSig) {
       lastSyntaxThemeDark = isDark;
       return;
@@ -904,57 +956,45 @@
       ? "-webkit-text-stroke: 0.2px rgba(255, 255, 255, 0.14);"
       : "-webkit-text-stroke: 0.15px rgba(0, 0, 0, 0.10);";
 
-    let colorIdx = 0;
-    tokenMap.forEach((rgb, n) => {
-      if (n <= 1) return; // Keep .mtk1 (plain variables, identifiers, brackets & punctuation) 100% solid native text
-      const [h, s, l] = rgbToHsl(rgb);
-      if (s < 28) return; // Keep muted comments & slate operators 100% solid native CoreText-antialiased text
-
-      const slot1 = colorIdx % 4;
-      const slot2 = (colorIdx + 1) % 4;
-      colorIdx += 1;
-
-      const rgbA = hslToRgb(
-        h - 18,
-        Math.max(86, Math.min(98, s + 16)),
-        isDark ? Math.min(86, Math.max(75, l + 12)) : Math.max(20, Math.min(32, l - 10))
-      );
-      const rgbB = hslToRgb(
-        h + 24,
-        Math.max(86, Math.min(98, s + 16)),
-        isDark ? Math.max(71, Math.min(83, l + 6)) : Math.min(36, Math.max(24, l - 5))
-      );
-
+    for (let i = 0; i < prepared.length; i++) {
+      const tok = prepared[i];
       // Bake static hex colors directly into #prism-syntax-style (zero var() / color-mix() on span.mtk*
       // so Blink caches 1 CSSLinearGradientValue per rule and skips all 2,000 token spans during style recalc)
-      const semHexA = rgbToHex(lerpRgb(rgbA, synRgbs[slot1], mixRatio));
-      const semHexB = rgbToHex(lerpRgb(rgbB, synRgbs[slot2], Math.min(0.82, mixRatio + 0.08)));
-      const palHexA = synHexes[slot1];
-      const palHexB = synHexes[slot2];
+      const semHexA = rgbToHex(lerpRgb(tok.rgbA, synRgbs[tok.slot1], mixRatio));
+      const semHexB = rgbToHex(lerpRgb(tok.rgbB, synRgbs[tok.slot2], mixRatioB));
+      const palHexA = synHexes[tok.slot1];
+      const palHexB = synHexes[tok.slot2];
 
       rules.push(
-        `.monaco-workbench:not(.prism-no-syntax):not(.prism-syntax-palette) ${scopeSel} span.mtk${n} {` +
+        `.monaco-workbench:not(.prism-no-syntax):not(.prism-syntax-palette) ${scopeSel} span.mtk${tok.n} {` +
           `background-image: linear-gradient(95deg, ${semHexA} 0%, ${semHexB} 100%) !important;` +
           `-webkit-background-clip: text !important; background-clip: text !important;` +
           `-webkit-text-fill-color: transparent !important; ${strokeRule}` +
         `}`
       );
       rules.push(
-        `.monaco-workbench:not(.prism-no-syntax).prism-syntax-palette ${scopeSel} span.mtk${n} {` +
+        `.monaco-workbench:not(.prism-no-syntax).prism-syntax-palette ${scopeSel} span.mtk${tok.n} {` +
           `background-image: linear-gradient(95deg, ${palHexA} 0%, ${palHexB} 100%) !important;` +
           `-webkit-background-clip: text !important; background-clip: text !important;` +
           `-webkit-text-fill-color: transparent !important; ${strokeRule}` +
         `}`
       );
-    });
+    }
 
     const [h1, h2, h3, h4] = synHexes;
+    const synBarCss = buildBarCss(stops, angles, effectiveK * 0.72);
+    const synStrongCss = buildSelectionCss(stops, angles, effectiveK * 0.85);
+    const synFrameCss = buildFrameCss(stops);
     rules.push(
       `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-keyword, .hljs-selector-tag, .hljs-meta, .hljs-doctag) { background-image: linear-gradient(95deg, ${h1} 0%, ${h2} 100%) !important; }`,
       `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-string, .hljs-regexp, .hljs-addition) { background-image: linear-gradient(95deg, ${h3} 0%, ${h4} 100%) !important; }`,
       `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-title, .hljs-function, .hljs-section, .hljs-built_in) { background-image: linear-gradient(95deg, ${h4} 0%, ${h1} 100%) !important; }`,
       `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-type, .hljs-class, .hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-params) { background-image: linear-gradient(95deg, ${h2} 0%, ${h3} 100%) !important; }`,
-      `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-number, .hljs-literal, .hljs-symbol, .hljs-bullet) { background-image: linear-gradient(95deg, ${h1} 0%, ${h4} 100%) !important; }`
+      `.monaco-workbench:not(.prism-no-syntax) .rendered-markdown pre code :is(.hljs-number, .hljs-literal, .hljs-symbol, .hljs-bullet) { background-image: linear-gradient(95deg, ${h1} 0%, ${h4} 100%) !important; }`,
+      `.monaco-workbench:not(.prism-no-syntax) .monaco-editor .view-overlays :is(.wordHighlight, .wordHighlightText, .rangeHighlight, .symbolHighlight, .findMatch) { background-image: ${synBarCss} !important; }`,
+      `.monaco-workbench:not(.prism-no-syntax) .monaco-editor .view-overlays :is(.wordHighlightStrong, .currentFindMatch) { background-image: ${synStrongCss} !important; }`,
+      `.monaco-workbench:not(.prism-no-syntax) .monaco-editor .view-overlays .bracket-match { background-image: ${synBarCss}, ${synFrameCss} !important; }`,
+      `.monaco-workbench:not(.prism-no-syntax) :is(.rendered-markdown, .monaco-hover .hover-contents) :not(pre) > code { background-image: ${synBarCss}, linear-gradient(0deg, var(--g-canvas-bg, var(--vscode-editor-background, #ffffff)), var(--g-canvas-bg, var(--vscode-editor-background, #ffffff))), ${synFrameCss} !important; }`
     );
 
     styleEl.textContent = rules.join("\n");
@@ -968,16 +1008,23 @@
     setWbProp(wb, "--g-syntax-frame", "none");
   }
 
-  function applySyntaxCssVars(wb, compStops, compAngles, effectiveK, fromBreatheTick = false) {
+  function applySyntaxCssVars(
+    wb,
+    compStops,
+    compAngles,
+    effectiveK,
+    fromBreatheTick = false,
+    cSynRgbs = null
+  ) {
     if (!wb) return;
     wb.classList.remove("prism-no-syntax");
     syncSyntaxModeClass(wb);
     const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
-    const [s1, s2, s3, s4] = compStops;
-    const h1 = rgbToHex(toReadableSyntaxRgb(s1, isDark));
-    const h2 = rgbToHex(toReadableSyntaxRgb(s2, isDark));
-    const h3 = rgbToHex(toReadableSyntaxRgb(s3, isDark));
-    const h4 = rgbToHex(toReadableSyntaxRgb(s4, isDark));
+    const synRgbs =
+      cSynRgbs && cSynRgbs.length === 4
+        ? cSynRgbs
+        : compStops.map((s) => toReadableSyntaxRgb(s, isDark));
+    const [h1, h2, h3, h4] = synRgbs.map(rgbToHex);
     const mixPct = `${Math.round(Math.max(24, Math.min(76, 44 * effectiveK)))}%`;
     const hexSig = `${h1}|${h2}|${h3}|${h4}|${mixPct}`;
     if (hexSig !== lastSyntaxHexSig) {
@@ -987,7 +1034,7 @@
       setWbProp(wb, "--g-syntax-frame", buildFrameCss(compStops));
     }
     if (!fromBreatheTick) {
-      ensureSyntaxStyleSheet(wb, false, compStops, effectiveK);
+      ensureSyntaxStyleSheet(wb, false, compStops, effectiveK, synRgbs, compAngles);
     }
   }
 
@@ -1143,7 +1190,18 @@
       setWbProp(wb, "--g-selection", buildSelectionCss(compStops, compAngles, effectiveK));
       setWbProp(wb, "--g-sel-tint", rgba(compStops[0], 0.28 * effectiveK));
     } else if (compKey === "syntax") {
-      applySyntaxCssVars(wb, compStops, compAngles, effectiveK);
+      const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
+      let synRgbs = null;
+      if (hasCustom) {
+        const phaseDelta = Math.max(0, breathePhase - (Number(cfg.customPalette.phaseOffset) || 0));
+        const customBaseSyn = cfg.customPalette.stops.map((s) => toReadableSyntaxRgb(s, isDark));
+        synRgbs = shimmerOn
+          ? getShiftedStops(customBaseSyn, phaseDelta * 0.16)
+          : customBaseSyn;
+      } else if (breatheOn && lastSyntaxRgbs && lastSyntaxRgbs.length === 4) {
+        synRgbs = lastSyntaxRgbs;
+      }
+      applySyntaxCssVars(wb, compStops, compAngles, effectiveK, false, synRgbs);
     } else if (!hasCustom) {
       setWbProp(wb, `--g-${compKey}-mesh`, "var(--g-default-mesh)");
       setWbProp(wb, `--g-${compKey}-bar`, "var(--g-bar)");
@@ -1657,7 +1715,14 @@
           setWbProp(wb, "--g-selection", buildSelectionCss(stops, angles, k));
           setWbProp(wb, "--g-sel-tint", rgba(stops[0], 0.28 * k));
         } else if (key === "syntax") {
-          applySyntaxCssVars(wb, stops, angles, k, fromBreatheTick);
+          applySyntaxCssVars(
+            wb,
+            stops,
+            angles,
+            k,
+            fromBreatheTick,
+            opts && opts.synRgbs ? opts.synRgbs : null
+          );
         } else {
           setWbProp(wb, `--g-${key}-mesh`, "var(--g-default-mesh)");
           setWbProp(wb, `--g-${key}-bar`, "var(--g-bar)");
@@ -1695,7 +1760,12 @@
         setWbProp(wb, "--g-selection", buildSelectionCss(compStops, compAngles, k));
         setWbProp(wb, "--g-sel-tint", rgba(compStops[0], 0.28 * k));
       } else if (key === "syntax") {
-        applySyntaxCssVars(wb, compStops, compAngles, k, fromBreatheTick);
+        const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
+        const customBaseSyn = cfg.customPalette.stops.map((s) => toReadableSyntaxRgb(s, isDark));
+        const customSynRgbs = shimmerOn
+          ? getShiftedStops(customBaseSyn, phaseDelta * 0.16)
+          : customBaseSyn;
+        applySyntaxCssVars(wb, compStops, compAngles, k, fromBreatheTick, customSynRgbs);
       } else {
         setWbProp(wb, `--g-${key}-mesh`, buildMeshCss(compStops, compAngles, k, coords));
         setWbProp(wb, `--g-${key}-bar`, buildBarCss(compStops, compAngles, k));
@@ -1862,7 +1932,7 @@
     return targets;
   }
 
-  function updateBreathingTargets(wb, stops, angles, k, coords, tickCount) {
+  function updateBreathingTargets(wb, stops, angles, k, coords, tickCount, syntaxRgbs) {
     const [c1, c2, c3, c4] = stops;
     const splitMode = !isSeamlessEnabled();
     const defaultMeshCss = buildMeshCss(stops, angles, k, coords);
@@ -1933,6 +2003,7 @@
     const terminalSpec = resolveCompSpec("terminal", sharedBarCss, sharedFrameCss);
     const barsSpec = resolveCompSpec("bars", sharedBarCss, sharedFrameCss);
     const selectionSpec = resolveCompSpec("selection", sharedBarCss, sharedFrameCss);
+    const syntaxSpec = resolveCompSpec("syntax", sharedBarCss, sharedFrameCss);
 
     // 2. Update Split-Panel / Custom Component Container Backgrounds at 100ms via non-inherited --prism-local-bg
     if (splitMode || (editorSpec && editorSpec.hasCustom)) {
@@ -2126,6 +2197,26 @@
       const selCss = buildSelectionCss(selectionSpec.stops, selectionSpec.angles, k);
       setLocalPropsOnList(targets.selectionBar, "--prism-local-bar", selCss);
     }
+    if (syntaxSpec) {
+      let targetSynRgbs = syntaxRgbs;
+      if (syntaxSpec.hasCustom) {
+        const isDark = wb.classList.contains("vs-dark") || wb.classList.contains("hc-black");
+        const cfg = compMap.syntax;
+        const phaseDelta = Math.max(0, breathePhase - (Number(cfg.customPalette.phaseOffset) || 0));
+        const customBaseSyn = cfg.customPalette.stops.map((s) => toReadableSyntaxRgb(s, isDark));
+        targetSynRgbs = shimmerOn
+          ? getShiftedStops(customBaseSyn, phaseDelta * 0.16)
+          : customBaseSyn;
+      }
+      ensureSyntaxStyleSheet(
+        wb,
+        false,
+        syntaxSpec.stops,
+        k,
+        targetSynRgbs,
+        syntaxSpec.angles
+      );
+    }
 
     if (isPopoverOpen()) {
       const activeTargetStops =
@@ -2149,7 +2240,24 @@
       breatheTimer = null;
     }
     if (!isBreathingEnabled()) {
+      const hadActiveBreathing = localStyledElements.size > 0;
       clearLocalBreathingProps();
+      if (hadActiveBreathing) {
+        const wb = document.querySelector(".monaco-workbench");
+        if (wb && lastLiveStops && lastLiveStops.length === 4) {
+          const saved = getSavedPalette();
+          if (!saved || !saved.isNativeOff) {
+            writeGradientCssVars(
+              wb,
+              lastLiveStops,
+              lastLiveAngles || { base: 135, bar: 90, side: 165, panel: 105 },
+              getIntensity(),
+              null,
+              { synRgbs: lastSyntaxRgbs }
+            );
+          }
+        }
+      }
       return;
     }
     if (!isWindowActive()) {
@@ -2178,7 +2286,11 @@
           ? saved
           : CURATED_PALETTES[0];
 
+      const isDark =
+        targetWb.classList.contains("vs-dark") || targetWb.classList.contains("hc-black");
+
       let baseStops = activePalette.stops.map((s) => [...s]);
+      let baseSyntaxRgbs = null;
       let baseAngles = {
         ...(activePalette.angles || {
           base: 135,
@@ -2187,8 +2299,6 @@
           panel: 105,
         }),
       };
-
-      let morphCompleted = false;
 
       // 1. Auto-Morph Between Palettes (Smooth RGB + Angle crossfade starting at 0.0)
       if (cfg.morph) {
@@ -2224,13 +2334,16 @@
           morphProgress = 0;
           baseStops = morphSourceStops.map((s) => [...s]);
           baseAngles = { ...morphSourceAngles };
-          morphCompleted = true;
+          baseSyntaxRgbs = baseStops.map((s) => toReadableSyntaxRgb(s, isDark));
         } else {
           const smoothT =
             morphProgress * morphProgress * (3 - 2 * morphProgress);
           baseStops = [0, 1, 2, 3].map((i) =>
             lerpRgb(morphSourceStops[i], morphTargetPalette.stops[i], smoothT)
           );
+          const srcSyn = morphSourceStops.map((s) => toReadableSyntaxRgb(s, isDark));
+          const tgtSyn = morphTargetPalette.stops.map((s) => toReadableSyntaxRgb(s, isDark));
+          baseSyntaxRgbs = [0, 1, 2, 3].map((i) => lerpRgb(srcSyn[i], tgtSyn[i], smoothT));
           const srcA = morphSourceAngles || baseAngles;
           const tgtA = morphTargetPalette.angles || {
             base: 135,
@@ -2250,12 +2363,16 @@
         morphSourceAngles = null;
         morphTargetPalette = null;
         morphProgress = 0;
+        baseSyntaxRgbs = baseStops.map((s) => toReadableSyntaxRgb(s, isDark));
       }
 
       // 2. Color Stop Rotation / Shimmer (Flow the 4 stops smoothly from 0 offset)
       const animatedStops = cfg.shimmer
         ? getShiftedStops(baseStops, breathePhase * 0.16)
         : baseStops;
+      const animatedSyntaxRgbs = cfg.shimmer
+        ? getShiftedStops(baseSyntaxRgbs, breathePhase * 0.16)
+        : baseSyntaxRgbs;
 
       // 3. Inhale / Exhale Opacity Pulse (Zero offset at breathePhase = 0)
       const baseK = getIntensity();
@@ -2285,22 +2402,18 @@
         };
       }
 
-      if (morphCompleted) {
-        writeGradientCssVars(targetWb, animatedStops, liveAngles, effectiveK, waveCoords);
-        return;
-      }
-
       // Zero-.monaco-workbench-walk fast path:
-      // Updates leaf #prism-aurora-backdrop and non-inherited --prism-local-* properties on
-      // the ~10 cached chrome elements without invalidating the 10,000-node workbench DOM tree
-      // or re-parsing #prism-syntax-style!
+      // Updates leaf #prism-aurora-backdrop, non-inherited --prism-local-* properties on
+      // cached chrome elements, and leaf #prism-syntax-style rules without invalidating
+      // the 10,000-node workbench DOM tree!
       updateBreathingTargets(
         targetWb,
         animatedStops,
         liveAngles,
         effectiveK,
         waveCoords,
-        breatheTickCount
+        breatheTickCount,
+        animatedSyntaxRgbs
       );
     }, 100);
   }
